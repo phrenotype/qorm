@@ -1,0 +1,9 @@
+vendor/
+.env
+/migrations/
+/models/
+*.code-workspace
+*.sqlite3
+qb
+main.php
+seed.php

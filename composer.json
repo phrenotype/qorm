@@ -1,0 +1,30 @@
+{
+    "name": "qorm/qorm",
+    "description": "The Best PHP ORM",
+    "type": "library",
+    "keywords": [
+        "q",
+        "php orm",
+        "migrations",
+        "automigration"
+    ],    
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Paul Robert"            
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Q\\": "Q/",
+            "Tests\\": "Tests/"
+        }
+    },
+    "require": {
+        "fakerphp/faker": "^1.15"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "bin": ["bin/qorm"]
+}
