@@ -115,7 +115,7 @@ class Querier
                     continue;
                 }
 
-                if ($fieldObject->column->type === 'one_to_one') {
+                if ($fieldObject->column->type === 'one_to_one' && $fieldObject->model === $parentClassName) {
 
                     //$parent_pk_field = TableModelFinder::findPk($parentClassName);
 
@@ -163,7 +163,7 @@ class Querier
 
         foreach ($relatedSchema as $childClass => $schema) {
             foreach ($schema as $fieldName => $fieldObject) {
-                if ($fieldObject->column->type === 'many_to_one') {
+                if ($fieldObject->column->type === 'many_to_one' && $fieldObject->model === $parentClassName) {
 
                     $childTableName = Helpers::modelNameToTableName(Helpers::getShortName($childClass));
                     if (strtolower($fieldName) === $parentTableName) {
@@ -179,7 +179,6 @@ class Querier
                     } else {
                         $value = clone $model;
                     }
-
                     $model->$attr = $childClass::items()->filter([
                         $fieldName => $value
                     ]);
