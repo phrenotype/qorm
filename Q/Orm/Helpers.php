@@ -59,15 +59,24 @@ class Helpers
 
     public static function isModelEmpty(Model $object)
     {
+
         //At least one defined attribute has to be set
         $class = Helpers::getClassName($object);
         $props = Helpers::getModelProperties($class);
         $empty = true;
-        foreach ($props as $p) {
-            if (!is_null($object->$p)) {
-                $empty = false;
+
+        $pk = TableModelFinder::findPk($class);
+
+        if ($object->$pk ?? false) {
+            return false;
+        } else {
+            foreach ($props as $p) {
+                if (!is_null($object->$p)) {
+                    $empty = false;
+                }
             }
         }
+
         return $empty;
     }
 
