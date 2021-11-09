@@ -203,7 +203,7 @@ SELECT ... FROM user WHERE NOT (firstname IS NULL)
 
 
 `in`  
-Checks if the field value exists in an array, or a subquery (Handler). If a string is passed, it is splitted into an array of characters. Note how a single column is projected in the Handler.
+Checks if the field value exists in an array, or a subquery (Handler). If a string is passed, it is splitted into an array of characters. Notice how a single column is `projected` in the Handler.
 
 ```php
 User::items()->filter(['firstname.in'=>['paul', 'peter']]);
@@ -217,7 +217,7 @@ SELECT ... FROM user WHERE id IN ( SELECT user_id FROM comment )
 
 
 `not_in`
-This performs the reverse of `in`.
+This performs the reverse of `in`. Again, notice how a single column is `projected` in the Handler.
 ```php
 User::items()->filter(['firstname.not_in'=>['paul', 'peter']]);
 User::items()->filter(['id.not_in' => Comment::items()->project('user')]);
