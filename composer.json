@@ -21,10 +21,11 @@
         }
     },
     "require": {
-        "fakerphp/faker": "^1.15"
+        "php": "7.1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "fakerphp/faker": "^1.15"
     },
     "bin": ["bin/qorm"]
 }

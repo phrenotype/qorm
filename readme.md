@@ -1,12 +1,15 @@
 # **Q Orm**
 
-![downloads](https://img.shields.io/github/stars/paulrobert00/q?style=social)
+![github stars](https://img.shields.io/github/stars/paulrobert00/q?style=social)
+![packagist stars](https://img.shields.io/packagist/stars/qorm/qorm)
 ![license](https://img.shields.io/github/license/paulrobert00/q)
 ![contributors](https://img.shields.io/github/contributors/paulrobert00/q)
 ![contributors](https://img.shields.io/github/languages/code-size/paulrobert00/q)
+![downloads](https://img.shields.io/packagist/dm/qorm/qorm)
 
 ```php
 <?php
+//Fetch all the users that have at least one comment
 $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
     ->order_by('id desc')
     ->limit(10);
