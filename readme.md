@@ -1,5 +1,13 @@
 # **Q Orm**
-
+```php
+<?php
+$users = User::items()->filter(['id.in' => Comment::items()->project('user')])
+    ->order_by('id desc')
+    ->limit(10);
+```
+```sql
+SELECT ... FROM user WHERE id IN ( SELECT user_id FROM comment ) ORDER BY id DESC LIMIT 10
+```
 This is a simple orm that makes data modelling and migrations **extremely easy**. It auto detects changes in models when the user decides to make migrations, hence removing the need to manually write migrations.
 
 Also, you can **actually re-use migration files**. That is, you can copy and zip your migrations folder and send it to another developer, and all they have to do is run one command and an entire copy of your schema is made. As a bonus, the migrations are written in php, so, no sql will be seen in your code.
