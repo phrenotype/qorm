@@ -50,7 +50,6 @@ Installation is done via composer.
 
 `composer require qorm/qorm`
 
----- 
 
 ## SETUP
 There are three short steps here.  
@@ -83,9 +82,6 @@ Q_MIGRATIONS=migrations
 **Q_MIGRATIONS** : **Relative path** from project root to the ***folder*** where your generated migration files will be kept. Only migration class files should be in this folder. Do not put dot files or configurations files.
 
 
----- 
-
-
 ### STEP TWO
 Then, setup your workspace somewhat like this :  
 
@@ -100,7 +96,6 @@ If you are using a framework, then create these folders wherever you please.
 
 **migrations** is the empty folder where our migrations will be housed. **models.php or models** is the file or folder I intend to define my models in. Both of these are currently empty.
 
-----
 
 ### STEP THREE
 
