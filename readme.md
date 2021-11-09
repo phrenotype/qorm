@@ -1,10 +1,18 @@
 # **Q Orm**
+
+![downloads](https://img.shields.io/github/stars/paulrobert00/q?style=social)
+![license](https://img.shields.io/github/license/paulrobert00/q)
+![contributors](https://img.shields.io/github/contributors/paulrobert00/q)
+![contributors](https://img.shields.io/github/languages/code-size/paulrobert00/q)
+
 ```php
 <?php
 $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
     ->order_by('id desc')
     ->limit(10);
 ```
+Will translate to  
+
 ```sql
 SELECT ... FROM user WHERE id IN ( SELECT user_id FROM comment ) ORDER BY id DESC LIMIT 10
 ```
