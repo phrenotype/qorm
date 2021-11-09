@@ -4,6 +4,7 @@ vendor/
 /models/
 *.code-workspace
 *.sqlite3
+composer.lock
 qb
 main.php
 seed.php
