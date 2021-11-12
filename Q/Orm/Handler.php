@@ -154,6 +154,7 @@ class Handler
     public function distinct()
     {
         $this->__distinct__ = true;
+        return $this;
     }
 
     public function filter(array $assoc)

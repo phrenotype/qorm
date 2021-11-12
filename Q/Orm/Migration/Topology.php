@@ -4,10 +4,19 @@ namespace Q\Orm\Migration;
 
 class Topology
 {
+
     public static function sortTablesToCreate(array $tablesToCreate): array
     {
 
-        $newTables = [];        
+        $newTables = [];
+
+        //First add those without parents
+        foreach ($tablesToCreate as $table) {
+            $parents = self::parents($table->name, $tablesToCreate);
+            if (empty($parents)) {
+                $newTables[] = $table->name;
+            }
+        }
 
         foreach ($tablesToCreate as $table) {
 
@@ -35,7 +44,7 @@ class Topology
                 }
 
                 if ($key === false) {
-                    array_push($newTables, $table->name);                    
+                    array_push($newTables, $table->name);
                 } else {
                     $newTables[$key] = $table->name;
                 }
@@ -43,10 +52,10 @@ class Topology
 
                 if (!in_array($table->name, $newTables)) {
 
-                   array_push($newTables, $table->name);
+                    array_push($newTables, $table->name);
                 }
             }
-        }        
+        }
 
         $finalTables = [];
 
@@ -57,10 +66,9 @@ class Topology
                 }
             }
         }
-                
+
         return $finalTables;
     }
-
 
     public static function parents(string $tableName, array $tablesToCreate): array
     {
@@ -69,9 +77,9 @@ class Topology
             if ($tableName === $table->name) {
                 if (!empty($table->foreignKeys)) {
                     foreach ($table->foreignKeys as $fk) {
-                        if($fk->refTable !== $table->name){
+                        if ($fk->refTable !== $table->name) {
                             $parents[] = $fk->refTable;
-                        }                        
+                        }
                     }
                 }
             }

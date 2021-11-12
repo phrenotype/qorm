@@ -52,7 +52,7 @@ class TableComparer
                 $text .= "\t\t\t\t\t\$tb->enum('$field->name', $definition);" . PHP_EOL;
             } else if ($field->type === Field::BOOL) {
                 $definition = str_replace("'type' => 'boolean'", "'type' => Field::BOOL", $definition);
-                $text .= "\t\t\t\t\t\$tb->enum('$field->name', $definition);" . PHP_EOL;
+                $text .= "\t\t\t\t\t\$tb->boolean('$field->name', $definition);" . PHP_EOL;
             }
         }
         foreach ($table->indexes as $index) {
@@ -145,7 +145,7 @@ class TableComparer
         /* Don't forget to add reverse */
         $reverseText = [];
 
-        $tablesToCreate = self::tablesToCreate($fromSchema, $fromModels);
+        $tablesToCreate = self::tablesToCreate($fromSchema, $fromModels);        
 
         $state = StateBuilder::safeMerge($fromSchema, $tablesToCreate);
 
