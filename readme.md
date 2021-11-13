@@ -101,7 +101,7 @@ Then, setup your workspace somewhat like this :
 - migrations
 - .env 
 
-Note though that the names above are arbitrary and you can keep your models and migrations anywhere in your project as far as you specify that path in the .env file.
+Note though, that the names above are arbitrary and you can keep your models and migrations anywhere in your project as far as you specify that path in the .env file.
 
 If you are using a framework, then create these folders wherever you please.
 
