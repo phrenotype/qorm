@@ -113,6 +113,7 @@ However, if A points to B through a field with a name that does not match 'b' or
 
 That is if Address had named the reference field `owner` instead of `user`, User would then have an attribute called owner, not user.
 
+**Note if a model name is made up of multiple words like - `OrderLine`, and you want to refer to it by name, name if `order_line`**.
 
 ----
 
@@ -232,6 +233,7 @@ If an object, A, points to another object, B, through a field called 'B' or 'b',
 
 However, if A points to B through a field with a name that does not match 'b' or 'B', the an attribute will be added to B called `fieldname_set`.
 
+**Note if a model name is made up of multiple words like - `OrderLine`, and you want to refer to it by name, name if `order_line`**.
 
 ----
 **[Previous Part : Query Filters](query_filters.md)** | **[Next Part : Migration Commands](cli.md)**

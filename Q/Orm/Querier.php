@@ -106,16 +106,17 @@ class Querier
         foreach ($relatedSchema as $childClass => $schema) {
 
             foreach ($schema as $fieldName => $fieldObject) {
-                if (!empty($project) && !in_array($fieldName, $project)) {
-                    continue;
-                }
 
-                /* If it's a self relationship, don't point back. continue. Related schema returns self as well. */
-                if ($fieldObject->model === $parentClassName) {
-                    continue;
-                }
 
                 if ($fieldObject->column->type === 'one_to_one' && $fieldObject->model === $parentClassName) {
+                    if (!empty($project) && !in_array($fieldName, $project)) {                        
+                        continue;
+                    }
+    
+                    /* If it's a self relationship, don't point back. continue. Related schema returns self as well. */
+                    if ($childClass === $parentClassName) {
+                        continue;
+                    }
 
                     //$parent_pk_field = TableModelFinder::findPk($parentClassName);
 
@@ -192,8 +193,8 @@ class Querier
     public static function makeRelations(Model $model, array $project = [])
     {
         $model = self::oneOne($model, $project);
-        $model = self::oneMany($model, $project);
-        $model = self::pointBackToDom($model, $project);
+        $model = self::oneMany($model, $project);        
+        $model = self::pointBackToDom($model, $project);        
         return $model;
     }
 
