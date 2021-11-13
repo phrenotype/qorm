@@ -74,7 +74,7 @@ Q_DB_NAME=q
 Q_DB_HOST=127.0.0.1
 Q_DB_USER=user
 Q_DB_PASS=secret
-Q_MODELS=models.php
+Q_MODELS=models
 Q_MIGRATIONS=migrations
 ```
 
@@ -88,7 +88,7 @@ Q_MIGRATIONS=migrations
 
 **Q_DB_PASS** : This is your ***database password***. For **SQLITE**, **This is can be omitted or left empty**.  
 
-**Q_MODELS** : **Relative path** from project root to the ***file or folder*** where your model classes will be defined. When using a folder, only model class files should be in the folder. Do not put dot files or configuration files in this folder.
+**Q_MODELS** : **Relative path** from project root to the ***file or folder*** where your model classes will be defined. If using a file, add the `.php` extension to it. When using a folder, only model class files should be in the folder. Do not put dot files or configuration files in this folder.
 
 **Q_MIGRATIONS** : **Relative path** from project root to the ***folder*** where your generated migration files will be kept. Only migration class files should be in this folder. Do not put dot files or configurations files.
 
