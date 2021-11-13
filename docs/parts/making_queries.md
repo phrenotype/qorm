@@ -6,11 +6,11 @@ Now, I will admit, I'm a thief, in fact a very cheap one. This orm was built wit
  
  Note though, that this is not a rewrite of the django orm in php. I'm building an orm that behaves like django in php. Different things are happening under the hood of both systems. Please take note. And leave me some dignity :).
 
- ## THE MODEL MANAGER
+ ## THE MODEL HANDLER
 
- This is the center of quering. Every model has a 'manager' that takes care of performing operations on all the objects (rows) of the model. You can think of the manager as a representation of the table itself.
+ This is the center of quering. Every model has a 'handler' or 'manager' that takes care of performing operations on all the objects (rows) of the model. You can think of the manager as a representation of the table itself.
 
- `User::items()` returns an instance of `Q\Orm\Handler`. This class uses a fluent interface, where all the methods can be chained. And this is the class that performs queries on models. `User::items()` represents all the rows or objects of the User model or table.
+ `Model::items()` returns an instance of `Q\Orm\Handler`. This class uses a fluent interface, where all the methods can be chained. And this is the class that performs queries on models. Based on the model we created previously, `User::items()` represents all the rows or objects of the User model or table.
 
  `User::items()->one()` will return a single user object based on default sorting.
 
@@ -18,9 +18,11 @@ Now, I will admit, I'm a thief, in fact a very cheap one. This orm was built wit
 
  `User::items()->exists()` will return a boolean value, indicating whether an object exists for the query.
 
- The second thing at the heart of querying is the `\Q\Orm\Handler::filter`. The chant is **always filter before you do anything, otherwise your operation will be applied to all the objects (rows) of the model (table)**. Filter is lazily evaluated. It stores the intended operation and and returns the model manager. **Filter always returns the same model manager you called it on**, so you can chain several filters and other methods that are available to the model manager like delete, update and create.
+ The second thing at the heart of querying is the `\Q\Orm\Handler::filter`. The chant is **always filter before you do anything, otherwise your operation will be applied to all the objects (rows) of the model (table)**.  
+ 
+ Filter is lazily evaluated. It stores the intended operation and and returns the model manager. **Filter always returns the same model manager you called it on**, so you can chain several filters and other methods that are available to the model manager like delete, update, create, and many others.
 
- For instance `User::items()->filter(['username.length.gt'=>5])->delete()` will delete only users whose usernames have greater than 5 characters. On the other hand `User::items()->delete()` will literally delete all the rows (users). ***Take note***.
+ For instance `User::items()->filter(['username.length.gt'=>5])->delete()` will delete only users whose usernames have greater than 5 characters. On the other hand `User::items()->delete()` will literally delete all the rows (users). **Take note**.
 
 -----   
 
@@ -75,10 +77,10 @@ An update is essentially fetching an object or collection of objects, making cha
     ```php 
     <?php
 
-    User::items()->filter(['email'=>'paulroberts004@gmail.com'])->update([
-        'firstname' => 'Paul',
-        'lastname' => 'Robert',
-        'email'=>'paulrobert@example.com',
+    User::items()->filter(['email'=>'andrea@gmail.com'])->update([
+        'firstname' => 'Andrea',
+        'lastname' => 'Brocelli',
+        'email'=>'a.b@example.com',
         'password'=>'secretpassword'
     ]); 
     ```
@@ -88,9 +90,9 @@ An update is essentially fetching an object or collection of objects, making cha
     <?php
 
     User::items()->update([
-        'firstname' => 'Paul',
-        'lastname' => 'Robert',
-        'email'=>'paulroberts004@gmail.com',
+        'firstname' => 'Andrea',
+        'lastname' => 'Brocelli',
+        'email'=>'a.b@gmail.com',
         'password'=>'secretpassword'
     ]); 
     ```
@@ -102,9 +104,9 @@ An update is essentially fetching an object or collection of objects, making cha
     ```php
     <?php
      $user = User::items()->one();
-     $user->firstname = 'Paul';
-     $user->lastname = 'Robert';
-     $user->email = 'paulroberts004@gmail.com';
+     $user->firstname = 'Andrea';
+     $user->lastname = 'Brocelli';
+     $user->email = 'a.b@gmail.com';
      $user->password = 'secretpassword';
      $user->save();
 
@@ -135,7 +137,7 @@ User::items()->delete();
 // This will only delete found rows (objects)
 User::items()->filter(['id'=>7])->delete(); 
 ```
-`\Q\Orm\Handler::delete()` returns the model manager
+`\Q\Orm\Handler::delete()` returns deletes the rows and returns the model manager
 
 **THE RULE IS ALWAYS FILTER BEFORE YOU DELETE OR UPDATE, EXCEPT YOU WANT BATCH UPDATES OR DELETIONS.**  
   
@@ -156,7 +158,7 @@ You get the idea.
 
 ----
 ## RELOADING AN OBJECT
-This is used to restore an object to it's original state, if no changes on the objects have been updated.
+This is used to restore an object to it's original state, if no changes on the objects have been `updated`.
 ```php
 <?php
 $user = User::items()->one();
