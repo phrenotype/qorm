@@ -18,8 +18,14 @@ trait CanJoin
             throw new \Error(sprintf("%s.%s cannot be joined does not exist on the model.", $this->model(), $reffieldname));
         }
 
-        if (!empty($this->__filters__) || !empty($this->__order_by__) || !empty($this->__limit__)) {
-            throw new \Error(sprintf("Cannot call filter, order, or limit before a join"));
+        if (
+            !empty($this->__filters__) ||
+             !empty($this->__order_by__) || 
+             !empty($this->__limit__) ||
+             !empty($this->__having__) ||
+             !empty($this->__group_by__)
+             ) {
+            throw new \Error(sprintf("Cannot call filter, group, having, order, or limit before a join"));
         }
 
         if (empty($this->__projected_fields__)) {
