@@ -1,13 +1,13 @@
-# JOINS 
+# GROUPING AGGREGATES
 **[ Table Of Contents](toc.md)**
 
-If you don't already know what joins are, or do not know (or have an idea on) how to write joins in sql, you may not be able to follow this section.
+If you don't already know what joins are, or do not know (or have an idea on) how to write joins in sql, just know that that knowledge is required.
 
 If you insist you want to write joins, maybe for performance gains or whatever reason you have, then we have you covered.
 
-Keep in mind though, alot of problems solved by joins can be solved with model relationships or subqueries in filters (in and not_id).
+Keep in mind though, alot of problems solved by joins can be solved with model relationships or subqueries (in and not_id).
 
-A way of introduction and summary, joins here are all about calling `Q\Orm\Handler::join()` and passing to it the Handler you with to join. Examples will explain this better.
+Now as a way of introduction and summary, joins in the Q orm are all about calling `Q\Orm\Handler::join()` and passing to it the Handler you with to join. Examples will explain this better.
 
 Another thing you need to know about is the `Q\Orm\Handler::as()` method. This method confers an alias on a Handler same way one would alias a table in sql.
 
@@ -15,12 +15,7 @@ The `Q\Orm\Handler::join` method takes three parameters, all required. The first
 
 For left and right joins, simply use `Q\Orm\Handler::leftJoin` and `Q\Orm\Handler::rightJoin` respectively. The parameters remain the same.
 
-```php
-<?php
-
-Comment::items()->as('comment')
-            ->join(User::items()->as('user'), 'id', 'user');
-``` 
+`Comment::items()->as('comment')->join(User::items()->as('user'), 'id', 'user')`.  
 
 I hope it makes sense now.
 
@@ -182,4 +177,4 @@ $all = Comment::items()->as('comment')
 Yes. You can perform self joins. Simply give the handlers different aliases. If you don't know what self joins are, well... ;)
 
 ---
-**[Previous Part : UUIDs](uuid.md)**  | **[Next Part : GROUPING AGGREGATES](grouping.md)**
+**[Previous Part : UUIDs](uuid.md)** 
