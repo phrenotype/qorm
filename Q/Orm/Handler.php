@@ -6,13 +6,18 @@ use Q\Orm\Migration\TableModelFinder;
 use Q\Orm\Traits\CanAggregate;
 use Q\Orm\Traits\CanBeASet;
 use Q\Orm\Traits\CanCrud;
+use Q\Orm\Traits\CanGroup;
 use Q\Orm\Traits\CanJoin;
 use Q\Orm\Traits\CanRace;
 
 class Handler
 {
 
-    use CanCrud, CanAggregate, CanRace, CanJoin, CanBeASet;
+    use CanCrud, CanAggregate, CanRace, CanJoin, CanBeASet, CanGroup;
+
+    const AGGRT_WITH_AS = '/^(\w+)\((\*|\w+)\)(\s*AS\s*(\w+))$/i';
+    const AGGRT_WITH_AS_AND_TICKS = '/^(\w+)\((\*|`\w+`)\)(\s*AS\s*(`\w+`))$/i';
+    const PLAIN_ALIASED_FIELD = "/(\w+)((?:\.)(\w+))?(\s*AS\s*(\w+))?/i";
 
     private $__table_name__ = '';
     private $__model__;
@@ -36,6 +41,14 @@ class Handler
     private $__table_alias__;
 
     private $__distinct__ = false;
+
+    /**
+     * Whether this handler it to be grouped
+     */
+    private $__group_by__ = [];
+    private $__having__ = [];
+    private $__after_join_having__ = [];
+    private $__after_set_having__ = [];
 
     /**
      * Aggregate holders
@@ -95,26 +108,36 @@ class Handler
 
     public function order_by(...$fields)
     {
-        foreach ($fields as $f) {
-            if (!preg_match("#^\w+(\s+(?:desc|asc))?$#", strtolower($f))) {
+        foreach ($fields as $k => $f) {
+            if (!preg_match("#^(\w+|\w+\((\*|\w+)\))(\s+(?:desc|asc))?$#", strtolower($f))) {
                 throw new \Error(sprintf("Invalid syntax for order by."));
             }
         }
 
         foreach ($fields as $index => $field) {
             /* Add backticks to identifiers */
-            $field = str_replace(',', '', $field);
 
-            $items = explode(' ', $field);
+            if (preg_match("/^[\w\s]+$/", $field)) {
+                $items = explode(' ', $field);
 
-            if (!empty($items)) {
-                foreach ($items as $i => $v) {
-                    /* Ignore asc, desc or anything that ends with ')', most likely a function */
-                    if (!in_array(strtolower($v), ['desc', 'asc']) && strpos($v, ')') !== mb_strlen($v) - 1) {
-                        $v = trim($v);
-                        $fields[$index] = str_replace($v, Helpers::ticks($v), $fields[$index]);
+                if (!empty($items)) {
+                    foreach ($items as $i => $v) {
+                        /* Ignore asc, desc or anything that ends with ')', most likely a function */
+                        if (!in_array(strtolower($v), ['desc', 'asc']) && strpos($v, ')') !== mb_strlen($v) - 1) {
+                            $v = trim($v);
+                            $fields[$index] = str_replace($v, Helpers::ticks($v), $fields[$index]);
+                        }
                     }
                 }
+            } else if (preg_match("/^(\w+)\((\*|\w+)\)/", $field)) {
+                $fields[$index] = preg_replace_callback("/^(\w+)\((\*|\w+)\)/", function ($groups) {
+                    $func = $groups[1];
+                    $param = $groups[2];
+                    if ($param !== '*') {
+                        $param = Helpers::ticks($param);
+                    }
+                    return $func . '(' . $param . ')';
+                }, $field);
             }
         }
 
@@ -187,6 +210,49 @@ class Handler
 
     public function project(...$fields)
     {
+
+        foreach ($fields as $k => $field) {
+            if (
+                !preg_match('/^\w+$/', $field) &&
+                (!preg_match(self::AGGRT_WITH_AS, strtolower($field)) && !preg_match(self::PLAIN_ALIASED_FIELD, strtolower($field)))
+            ) {
+                throw new \Error(sprintf("'%s' is an invalid field projection format", $field));
+            }
+            if (preg_match("/^\w+$/", $field)) {
+                continue;
+            } else if (preg_match(self::AGGRT_WITH_AS, $field)) {
+                $fields[$k] = preg_replace_callback(self::AGGRT_WITH_AS, function ($groups) {
+                    $func = $groups[1];
+                    $fld = $groups[2];
+                    $alias = ($groups[4] ?? '');
+
+                    if (trim($fld) !== '*') {
+                        $fld = Helpers::ticks($fld);
+                    }
+                    if ($alias !== '') {
+                        $alias = ' AS ' . Helpers::ticks($alias);
+                    }
+
+                    return $func . '(' . $fld . ')' . $alias;
+                }, $field);
+            } else if (preg_match(self::PLAIN_ALIASED_FIELD, $field)) {
+                $fields[$k] = preg_replace_callback(self::PLAIN_ALIASED_FIELD, function ($groups) {
+                    $fld = $groups[1];
+                    $dot = ($groups[3] ?? '');
+                    $alias = ($groups[5] ?? '');
+                    if ($dot !== '') {
+                        $dot = Helpers::ticks($dot);
+                    }
+                    if ($alias !== '') {
+                        $alias =  Helpers::ticks($alias);
+                    } else {
+                        $alias  = null;
+                    }
+
+                    return Helpers::ticks($fld) . '.' . $dot . ($alias ? ' AS ' . $alias : '');
+                }, $field);
+            }
+        }        
         $this->__projected_fields__ = array_merge($this->__projected_fields__, $fields);
         return $this;
     }
@@ -208,7 +274,7 @@ class Handler
 
                 /* If we are in a join and it does not follow a pattern, throw error */
                 if (!empty($this->__joined__)) {
-                    if (!preg_match('|(\w+\.\w+)(\s+as\s+\w+)?|i', $p)) {
+                    if (!preg_match('|(`\w+`\.`\w+`)(\s+as\s+`\w+`)?|i', $p)) {
                         throw new \Error(sprintf("Projected fields in joins must always be prefixed with Handler alias. Prefix '%s' with an alias.", $p));
                     }
                 }
@@ -221,8 +287,14 @@ class Handler
                 $onlyProps = $inProps && !$inCols;
                 $inBoth = $inProps && $inCols;
 
-                if (preg_match("|(\w+)((?:\.)(\w+))? as (\w+)|i", $p)) {
-                    //$l = preg_replace("|(\w+)((?<=\.)\w+) as (\w+)|i", "`\\1`.`\\3` AS `\\4`", $p);                    
+                //Making an exception for join fields with alias
+                if (preg_match(self::PLAIN_ALIASED_FIELD, strtolower($p))) {
+                    $newProjected[] = $p;
+                    continue;
+                }
+
+                //Making an exception for group by
+                if (!empty($this->__group_by__) && preg_match(self::AGGRT_WITH_AS_AND_TICKS, strtolower($p))) {
                     $newProjected[] = $p;
                     continue;
                 }
@@ -270,18 +342,12 @@ class Handler
 
         if (empty($newProjected)) {
             $newProjected = $defaultFields;
-        } else {
-            /*
-            if (!in_array($pk, $newProjected) && $includePk) {
-                $newProjected = array_merge([$pk], $newProjected);
-            }
-            */
         }
 
 
         $ticked = array_map(function ($c) {
 
-            if (strpos(strtolower($c), ' as ') !== false) {
+            if (strpos(strtolower($c), ' as ') === false || preg_match(self::AGGRT_WITH_AS_AND_TICKS, $c)) {
                 return $c;
             } else {
                 return Helpers::ticks($c);
@@ -290,7 +356,9 @@ class Handler
 
         if ($prefixtable) {
             $tablenameAppended = array_map(function ($c) {
-                if (strpos($c, '.') === false) {
+                if (preg_match(self::AGGRT_WITH_AS_AND_TICKS, $c)) {
+                    return $c;
+                } else if (strpos($c, '.') === false) {
                     return Helpers::ticks($this->tablename()) . '.' . $c;
                 } else {
                     return $c;
@@ -301,7 +369,7 @@ class Handler
         }
 
 
-        $projected = join(',', $tablenameAppended);
+        $projected = join(', ', $tablenameAppended);
         return [$projected, $defered];
     }
 
@@ -361,6 +429,34 @@ class Handler
 
         return [$query, $placeholders];
     }
+
+    private function resolveHaving($afterSet = false, $afterJoin = false): array
+    {
+        if ($afterSet) {
+            $filters = $this->__after_set_having__;
+        } else if ($afterJoin) {
+            $filters = $this->__after_join_having__;
+        } else {
+            $filters = $this->__having__;
+        }
+        $query = '';
+        $placeholders = [];
+        if (!empty($filters)) {
+            $query .= ' HAVING ';
+            foreach ($filters as $filter) {
+                $query .= $filter['query'] . ' AND ';
+                $placeholders = array_merge($placeholders, $filter['placeholders']);
+            }
+            $query = rtrim($query, ' AND ');
+        }
+
+
+
+        //Will deal with after set when a viable set implementation is had
+
+
+        return [$query, $placeholders];
+    } 
 
     private function resolveJoin($afterSet = false)
     {
@@ -459,15 +555,20 @@ class Handler
         $placeholders = [];
 
 
-        /**
-         * Resolving filters
-         */
         list($q, $p) = $this->resolveFilters();
         if ($q) {
             $query .= $q;
             $placeholders = array_merge($placeholders, $p);
         }
 
+        if (!empty($this->__group_by__)) {
+            $query .= ' GROUP BY ' . implode(', ', $this->__group_by__);
+            list($q, $p) = $this->resolveHaving();
+            if ($q) {
+                $query .= $q;
+                $placeholders = array_merge($placeholders, $p);
+            }
+        }
 
         $query .= $this->resolveOrderBy();
 
@@ -497,8 +598,6 @@ class Handler
         if (!empty($this->__after_join_limit__)) {
             $query .= $this->resolveLimit(false, true);
         }
-
-
 
 
 

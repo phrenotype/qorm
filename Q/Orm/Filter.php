@@ -20,7 +20,7 @@ class Filter
     }
 
     public function parse()
-    {        
+    {
 
         foreach ($this->store as $key => $value) {
 
@@ -34,7 +34,6 @@ class Filter
                 /* Will maybe add object path lookups later */
                 /* E.g User::objects->filter(['user.accounts.id'=>]) */
                 //For now, only support first level filter lookups for primitives
-
 
                 $exploded = explode('.', $key);
 
@@ -98,11 +97,11 @@ class Filter
         $inBoth = $inProps && $inCols;
 
 
-        if(!$ignoreUnkownFields){
+        if (!$ignoreUnkownFields) {
             if ($doesNotExist) {
                 throw new \Error(sprintf("%s.%s field does not exist.", $model, $k));
             }
-    
+
             if ($onlyCols) {
                 //For direct column names of refs e.g user_id
                 throw new \Error(sprintf("%s.%s does not exist in code. Please use the field name declared on %s.", $model, $k, $model));
@@ -188,7 +187,7 @@ class Filter
                 $value = $v;
             }
 
-            if($ignoreUnkownFields){
+            if ($ignoreUnkownFields) {
                 $key = $k;
                 $value = $v;
             }
@@ -254,13 +253,10 @@ class Filter
         return $newAssoc;
     }
 
-    public static function validate($filters)
+    public static function validate(array $filters)
     {
         $count = count($filters);
         $keys = array_keys($filters);
-        if ($count === 0) {
-            //throw new \Error('Empty filters. Do not call the method if you have nothing to filter.');
-        }
         if ($count > 1) {
             if (in_array(strtolower($keys[1]), Filter::CONJUNCTIONS)) {
                 throw new \Error('Filters cannot start with a conjuction.');
@@ -277,6 +273,47 @@ class Filter
                 if (!in_array($last, Helpers::filterableTerminals()) && $n === 1) {
                     throw new \Error(". syntax fields must end with a terminal method.");
                 }
+                if ($n > 2) {
+                    $first = $ploded[1];
+                    if (!in_array($last, Helpers::filterableTerminals())) {
+                        throw new \Error(". syntax fields must end with a terminal method.");
+                    }
+                    if (!in_array($first, Helpers::filterableMutators())) {
+                        throw new \Error(". syntax fields must begin with a mutator method.");
+                    }
+                }
+            }
+        }
+    }
+
+    public static function validateHaving(array $filters)
+    {
+        $count = count($filters);
+        $keys = array_keys($filters);
+        if ($count > 1) {
+            if ($count !== 2) {
+                throw new \Error(sprintf("Having filters must be at least two"));
+            }
+            if (in_array(strtolower($keys[1]), Filter::CONJUNCTIONS)) {
+                throw new \Error('Filters cannot start with a conjuction.');
+            } else if (in_array($keys[$count - 1], Filter::CONJUNCTIONS)) {
+                throw new \Error('Filters cannot end with a conjunction.');
+            }
+        }
+        foreach ($keys as $k) {
+            if (!preg_match("/^(\w+)\((\*|\w+)\)\.\w+$/i", $k)) {
+                throw new \Error(sprintf("'%s' has to be an aggregate function without ticks", $k));
+            }
+            if (preg_match("#^(?:[\w()]+\.)+\w+$#", $k)) {
+                $ploded = explode(".", $k);
+                $n = count($ploded);
+                $last = $ploded[$n - 1];
+
+                if (!in_array($last, Helpers::filterableTerminals()) && $n === 1) {
+                    throw new \Error(". syntax fields must end with a terminal method.");
+                }
+
+
                 if ($n > 2) {
                     $first = $ploded[1];
                     if (!in_array($last, Helpers::filterableTerminals())) {
