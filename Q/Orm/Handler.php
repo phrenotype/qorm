@@ -46,6 +46,9 @@ class Handler
      * Whether this handler it to be grouped
      */
     private $__group_by__ = [];
+    private $__after_join_group_by__ = [];
+    private $__after_set_group_by__ = [];
+
     private $__having__ = [];
     private $__after_join_having__ = [];
     private $__after_set_having__ = [];
@@ -252,7 +255,7 @@ class Handler
                     return Helpers::ticks($fld) . '.' . $dot . ($alias ? ' AS ' . $alias : '');
                 }, $field);
             }
-        }        
+        }
         $this->__projected_fields__ = array_merge($this->__projected_fields__, $fields);
         return $this;
     }
@@ -456,7 +459,7 @@ class Handler
 
 
         return [$query, $placeholders];
-    } 
+    }
 
     private function resolveJoin($afterSet = false)
     {
@@ -588,6 +591,17 @@ class Handler
                 $rnd = $this->randomStr();
                 $query = "SELECT * FROM ($query) AS $rnd $q";
                 $placeholders = array_merge($placeholders, $p);
+            }
+        }
+
+        if (!empty($this->__after_join_group_by__)) {
+            $query .= " GROUP BY " . implode(', ', $this->__after_join_group_by__);
+            if (!empty($this->__after_join_having__)) {
+                list($q, $p) = $this->resolveHaving(false, true);
+                if ($q) {
+                    $query .= $q;
+                    $placeholders = array_merge($placeholders, $p);
+                }
             }
         }
 
