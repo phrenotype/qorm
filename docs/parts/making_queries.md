@@ -4,7 +4,7 @@
 
 Now, I will admit, I'm a thief, in fact a very cheap one. This orm was built with the idea of autodetecting changes made to models and without the user manually specifying what exactly what they changed. I stole that from django. And as you will see from the query api, it's going to be a cheap knock-off of django. In fact this whole project is a proof of concept, that we can have an orm in php like the django orm.
  
- Note though, that this is not a rewrite of the django orm in php. I'm building an orm that behaves like django in php. Different things are happening under the hood of both systems. Please take note. And leave me some dignity :).
+Note though, that this is not a rewrite of the django orm in php. I'm building an orm that behaves like django in php. Different things are happening under the hood of both systems. Please take note. And leave me some dignity :).
 
  ## THE MODEL HANDLER
 
