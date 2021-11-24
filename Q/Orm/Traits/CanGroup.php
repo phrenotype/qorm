@@ -20,10 +20,18 @@ trait CanGroup
                 throw new \Error(sprintf("Cannot call 'group by' without projecting fields and aggregates"));
             }
 
-            $this->__group_by__[] = Helpers::ticks($field);
+
+            if (!empty($this->__set_operations__)) {
+                $this->__after_set_group_by__[] = Helpers::ticks($field);
+            } else if (!empty($this->__joined__)) {
+                $this->__after_join_group_by__[] = Helpers::ticks($field);
+            } else {
+                $this->__group_by__[] = Helpers::ticks($field);
+            }
         }
         return $this;
     }
+
     public function having(array $assoc)
     {
 
