@@ -8,7 +8,7 @@
 - [ Defaults ]( defaults.md )
 - [ UUID's ]( uuid.md )
 - [ Joins ]( joins.md )
-- [ Grouping Aggregates ]( joins.md )
+- [ Grouping Aggregates ]( grouping.md )
 
 ---  
 
