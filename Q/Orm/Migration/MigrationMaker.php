@@ -97,6 +97,13 @@ class MigrationMaker
 
         /* Re-organise migrations to include files that are not registered */
         $files = array_values(array_diff(scandir(Setup::$migrationsFolder), array('..', '.')));
+        $files = array_filter($files, function ($f) {
+            if (preg_match("/^\./", $f)) {
+                return false;
+            } else {
+                return true;
+            }
+        });
         $files = array_map(function ($f) {
             return basename($f, '.php');
         }, $files);
