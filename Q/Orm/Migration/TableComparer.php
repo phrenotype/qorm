@@ -134,6 +134,10 @@ class TableComparer
 
         $fromModels = Introspector::modelsToArrayOfTables();
         $fromSchema = StateBuilder::build();
+        if(empty($fromSchema)){
+            //Incase there are no migrations at all
+            $fromSchema = Introspector::schemaToArrayOfTables();
+        }
         $originalState = $fromSchema;
 
 
