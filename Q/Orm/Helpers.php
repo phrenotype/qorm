@@ -247,7 +247,7 @@ class Helpers
         //Get all the files in a folder. It includes files in child folders
         $files = scandir($folder);
         $modified_files = array_filter($files, function ($path) {
-            return ($path !== '.') && ($path !== '..');
+            return ($path !== '.') && ($path !== '..') && (!preg_match("/^\./", $path));
         });
 
         $tmp = [];
