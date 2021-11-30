@@ -19,7 +19,7 @@ class MigrationMaker
     {
         $files = scandir($folder);
         $modified_files = array_filter($files, function ($path) {
-            return ($path !== '.') && ($path !== '..');
+            return ($path !== '.') && ($path !== '..') && (!preg_match("/^\./", $path));
         });
 
         foreach ($modified_files as $file) {
