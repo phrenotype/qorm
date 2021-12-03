@@ -16,6 +16,10 @@ User::items()->project('votes', 'count(id) as n')
     ->all();
 ```
 
+```sql
+SELECT votes, COUNT(id) AS n FROM user GROUP BY votes HAVING  COUNT(id) > 1
+```
+
 Note how the aggregate is filtered in the `having` method. Only terminal operators can be used in having filters.
 
 The result comes back as objects of the `User` model, with the projected fields as attributes on them.
