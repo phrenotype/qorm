@@ -40,37 +40,36 @@ SELECT DISTINCT id, name, email FROM user AS user3 WHERE  user3.id > 2
 If you are using mysql, you will end up with the code below
 
 ```sql
-SELECT DISTINCT user1.id,
-                user1.name,
-                user1.email
-FROM            user AS user1
-
-WHERE           NOT EXISTS
-                (
-                    SELECT DISTINCT user3.id,
-                                    user3.name,
-                                    user3.email
-                    FROM            user AS user3
-                    WHERE           user3.id > 2
-                    AND             user3.id = user1.id
-                    AND             user3.name = user1.name
-                    AND             user3.email = user1.email
-                )
-
-OR              ( user1.id > 4 )
-
-AND             EXISTS
-                (
-                    SELECT DISTINCT user3.id,
-                                    user3.name,
-                                    user3.email
-                    FROM            user AS user3
-                    WHERE           user3.id > 2
-                    AND             user3.id = user1.id
-                    AND             user3.name = user1.name
-                    AND             user3.email = user1.email
-                )
-
+SELECT *
+FROM
+  (SELECT *
+   FROM
+     (SELECT DISTINCT user1.id,
+                      user1.name,
+                      user1.email
+      FROM user AS user1) AS eeafefcdfdd
+   WHERE NOT EXISTS
+       (SELECT DISTINCT user3.id, user3.name, user3.email
+        FROM user AS user3
+        WHERE user3.id > 2
+          AND eeafefcdfdd.id = user3.id
+          AND eeafefcdfd d.name = user3.name
+          AND eeafefcdfdd.email = user3.email)
+   UNION
+     (SELECT user2.id,
+             user2.name,
+             user2.email
+      FROM user AS user2
+      WHERE user2 .id > 4)) AS dafbedfdfebdc
+WHERE EXISTS
+    (SELECT DISTINCT user3.id,
+                     user3.name,
+                     user3.email
+     FROM user AS user3
+     WHERE user3.id > 2
+       AND dafbedfd febdc.id = user3.id
+       AND dafbedfdfebdc.name = user3.name
+       AND dafbedfdfebdc.email = user3.email)
 ```
 
 ## RULES / RECOMMENDATIONS
