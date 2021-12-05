@@ -10,6 +10,9 @@ trait CanJoin
 {
     private function j(Handler $modelHandler, string $fieldname, string $reffieldname, string $type)
     {
+        if($this === $modelHandler){
+            throw new \Error("Do not store base handler in variables when doing joins.");
+        }
         if (!(Helpers::isRefField($fieldname, $modelHandler->model()) || !in_array($fieldname, Helpers::getModelProperties($modelHandler->model()))) && $fieldname !== 'id') {
             throw new \Error(sprintf("%s.%s cannot be joined because it is not a reference field or does not exist on the model.", $modelHandler->model(), $fieldname));
         }
@@ -20,19 +23,19 @@ trait CanJoin
 
         if (
             !empty($this->__filters__) ||
-             !empty($this->__order_by__) || 
-             !empty($this->__limit__) ||
-             !empty($this->__having__) ||
-             !empty($this->__group_by__)
-             ) {
+            !empty($this->__order_by__) ||
+            !empty($this->__limit__) ||
+            !empty($this->__having__) ||
+            !empty($this->__group_by__)
+        ) {
             throw new \Error(sprintf("Cannot call filter, group, having, order, or limit before a join"));
         }
 
-        if (empty($this->__projected_fields__)) {
+        if (empty($this->projected())) {
             throw new \Error(sprintf("Fields must be projected before join can be made."));
         }
 
-        if (empty($this->__table_alias__) || $modelHandler->as() == null) {
+        if ($this->as() == null || $modelHandler->as() == null) {
             throw new \Error(sprintf("Every table in a join must have a unique alias."));
         }
 
@@ -79,5 +82,34 @@ trait CanJoin
         } else {
             return $this->__table_alias__;
         }
+    }
+
+
+    private function resolveJoin($afterSet = false)
+    {
+        if ($afterSet) {
+            $joined = $this->__after_set_joined__;
+        } else {
+            $joined = $this->__joined__;
+        }
+
+
+        $join = '';
+        $placeholders = [];
+
+        if ($joined) {
+            foreach ($joined as $j) {
+                list($handler, $field, $ref, $type) = $j;
+                $join .= sprintf(
+                    " $type %s ON %s.%s = %s.%s",
+                    $handler->tablenameWithAlias(),
+                    Helpers::ticks($handler->as()),
+                    Helpers::ticks($field),
+                    Helpers::ticks($this->as()),
+                    Helpers::ticks($ref)
+                );
+            }
+        }
+        return [$join, $placeholders];
     }
 }

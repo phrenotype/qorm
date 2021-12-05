@@ -29,4 +29,4 @@ When projecting for a grouping, try to alias the aggregate, in order to make it 
 
 
 ---
-**[Previous Part : JOINS](joins.md)** 
+**[Previous Part : Joins](joins.md)**  |  **[Next Part : Set Operations](sets.md)** 

@@ -68,4 +68,32 @@ trait CanGroup
 
         return $this;
     }
+
+    private function resolveHaving($afterSet = false, $afterJoin = false): array
+    {
+        if ($afterSet) {
+            $filters = $this->__after_set_having__;
+        } else if ($afterJoin) {
+            $filters = $this->__after_join_having__;
+        } else {
+            $filters = $this->__having__;
+        }
+        $query = '';
+        $placeholders = [];
+        if (!empty($filters)) {
+            $query .= ' HAVING ';
+            foreach ($filters as $filter) {
+                $query .= $filter['query'] . ' AND ';
+                $placeholders = array_merge($placeholders, $filter['placeholders']);
+            }
+            $query = rtrim($query, ' AND ');
+        }
+
+
+
+        //Will deal with after set when a viable set implementation is had
+
+
+        return [$query, $placeholders];
+    }    
 }

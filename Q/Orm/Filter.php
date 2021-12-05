@@ -19,7 +19,7 @@ class Filter
         $this->store = $assoc;
     }
 
-    public function parse()
+    public function parse($prefixWith = null)
     {
 
         foreach ($this->store as $key => $value) {
@@ -37,7 +37,14 @@ class Filter
 
                 $exploded = explode('.', $key);
 
-                $field = $exploded[0];
+                $field = Helpers::ticks($exploded[0]);
+
+                if (preg_match("/^\w+$/", $exploded[0])) {
+                    $field = Helpers::ticks($exploded[0]);
+                    if ($prefixWith) {
+                        $field = Helpers::ticks($prefixWith) . '.' . Helpers::ticks($exploded[0]);
+                    }
+                }
 
 
                 $methods = array_slice($exploded, 1);
@@ -76,9 +83,9 @@ class Filter
         return $filterable->extract();
     }
 
-    public static function filter(array $assoc)
+    public static function filter(array $assoc, $prefixWith = null)
     {
-        return (new static($assoc))->parse();
+        return (new static($assoc))->parse($prefixWith);
     }
 
     public static function normalize($k, $v, $model, $ignoreUnkownFields = false)
