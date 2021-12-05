@@ -53,7 +53,7 @@ FROM
         FROM user AS user3
         WHERE user3.id > 2
           AND eeafefcdfdd.id = user3.id
-          AND eeafefcdfd d.name = user3.name
+          AND eeafefcdfdd.name = user3.name
           AND eeafefcdfdd.email = user3.email)
    UNION
      (SELECT user2.id,
@@ -67,7 +67,7 @@ WHERE EXISTS
                      user3.email
      FROM user AS user3
      WHERE user3.id > 2
-       AND dafbedfd febdc.id = user3.id
+       AND dafbedfdfebdc.id = user3.id
        AND dafbedfdfebdc.name = user3.name
        AND dafbedfdfebdc.email = user3.email)
 ```
