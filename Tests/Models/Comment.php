@@ -13,6 +13,7 @@ class Comment extends Model
 
 	public $text;
 	public $user;
+	public $post;
 
 	public static function schema()
 	{
@@ -22,7 +23,10 @@ class Comment extends Model
 			}),
 			'user' => Field::ManyToOneField(User::class, function (Column $column) {
 				$column->null = false;
-			}, Index::INDEX)
+			}, Index::INDEX),
+			'post' => Field::ManyToOneField(Post::class, function (Column $c) {
+				$c->null = false;
+			}, Index::INDEX),
 		];
 	}
 }

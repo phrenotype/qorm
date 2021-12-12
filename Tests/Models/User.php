@@ -12,9 +12,10 @@ class User extends Model
 {
 
 	public $name;
-	public $votes;
+	public $email;
+	public $salary;
+	public $sponsor;
 	public $created;
-	public $parent;
 
 	public static function schema()
 	{
@@ -23,19 +24,23 @@ class User extends Model
 				$column->size = 255;
 				$column->null = false;
 			}),
-			'votes' => Field::IntegerField(function (Column $column) {
+			'email' => Field::CharField(function (Column $column) {
+				$column->size = 255;
+				$column->null = false;
+			}, Index::UNIQUE),
+			'salary' => Field::IntegerField(function (Column $column) {
 				$column->null = false;
 				$column->default = 0;
 			}),
+			'sponsor' => Field::OneToOneField(self::class, function (Column $column) {
+				$column->null = true;
+			}, Index::INDEX),
 			'created' => Field::DateTimeField(function (Column $column) {
 				$column->null = false;
 				$column->default = function () {
 					return date("Y-m-d H:i:s");
 				};
-			}),
-			'parent' => Field::OneToOneField(self::class, function (Column $c) {
-				$c->null = true;
-			}, Index::UNIQUE)
+			})
 		];
 	}
 }

@@ -13,7 +13,6 @@ class Address extends Model
 
 	public $zip;
 	public $owner;
-	public $date;
 
 
 	public static function schema()
@@ -23,14 +22,8 @@ class Address extends Model
 				$column->size = 255;
 				$column->null = true;
 			}, Index::INDEX),
-			'date' => Field::DateTimeField(function (Column $column) {
-				$column->null = true;
-				$column->default = function () {
-					return date('Y-m-d H:i:s');
-				};
-			}),
-			'owner' => Field::OneToOneField(User::class, function (Column $column) {
-				$column->null = false;
+			'owner' => Field::OneToOneField(User::class, function (Column $c) {
+				$c->null = false;
 			}, Index::UNIQUE)
 		];
 	}
