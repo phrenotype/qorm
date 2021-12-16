@@ -35,7 +35,7 @@ class Integrity
         }
     }
 
-    public static function phpVersionCheck(){
-
+    public static function phpVersionCheck()
+    {
     }
 }

@@ -1,8 +1,13 @@
 <?php
 
+/**
+ * This file is part of the Q Orm.
+ * 
+ * The git reposistory can be found at https://github.com/jameshadleychase/qorm.
+ */
+
 namespace Q\Orm;
 
-use Q\Orm\Migration\TableModelFinder;
 use Q\Orm\Traits\CanAggregate;
 use Q\Orm\Traits\CanBeASet;
 use Q\Orm\Traits\CanCrud;
@@ -11,6 +16,9 @@ use Q\Orm\Traits\CanJoin;
 use Q\Orm\Traits\CanRace;
 use Q\Orm\Traits\CanSelect;
 
+/**
+ * This is the class at the center of all querying. Think of it as the database table.  
+ */
 class Handler
 {
 
@@ -20,83 +28,206 @@ class Handler
     const AGGRT_WITH_AS_AND_TICKS = '/^(\w+)\((\*|`\w+`)\)(\s*AS\s*(`\w+`))$/i';
     const PLAIN_ALIASED_FIELD = "/(\w+)((?:\.)(\w+))?(\s*AS\s*(\w+))?/i";
 
+    /**
+     * @var string Table name of the current handler.
+     */
     private $__table_name__ = '';
+
+    /**
+     * @var string Model bound to handler.
+     */
     private $__model__;
 
+    /**
+     * @var array Filters to be applied.
+     */
     private $__filters__ = [];
+
+    /**
+     * @var array Filters to be applied after set operations.
+     */
     private $__after_set_filters__ = [];
+
+    /**
+     * @var array Filters to be applied after join operations.
+     */
     private $__after_join_filters__ = [];
 
+    /**
+     * @var array Raw, unprocessed filters passed by consumer.
+     */
     private $__raw_filters__ =  [];
 
+    /**
+     * @var array Order by clause to be applied.
+     */
     private $__order_by__ = [];
+
+    /**
+     * @var array Order by clause to be applied after set operations.
+     */
     private $__after_set_order__ = [];
+
+    /**
+     * @var array Order by clause to be applied after join operations.
+     */
     private $__after_join_order__ = [];
 
+
+    /**
+     * @var array Limit clause to be applied.
+     */
     private $__limit__ = [];
+
+    /**
+     * @var array Limit clause to be applied after set operations.
+     */
     private $__after_set_limit__ = [];
+
+    /**
+     * @var array Limit clause to be applied after join operations.
+     */
     private $__after_join_limit__ = [];
 
+
+    /**
+     * @var array Holds an array of fields to be projected.
+     */
     private $__projected_fields__ = [];
 
+    /**
+     * @var string Holds the table alias for a handler.
+     */
     private $__table_alias__;
 
+    /**
+     * @var bool Whether 'select distinct' should be used when projecting fields.
+     */
     private $__distinct__ = false;
 
     /**
-     * Whether this handler it to be grouped
+     * @var array Group by clause to be applied.
      */
+
     private $__group_by__ = [];
+    /**
+     * @var array Group by clause to be applied after join operations.
+     */
+
     private $__after_join_group_by__ = [];
+    /**
+     * @var array Group by clause to be applied after set operations.
+     */
     private $__after_set_group_by__ = [];
 
+
+    /**
+     * @var array Having filters to be applied.
+     */
     private $__having__ = [];
+
+    /**
+     * @var array Having filters to be applied after a join operations.
+     */
     private $__after_join_having__ = [];
+
+    /**
+     * @var array Having filters to be applied after a set operations.
+     */
     private $__after_set_having__ = [];
 
-    /**
-     * Aggregate holders
-     */
-    private $__count__;
-    private $__min__;
-    private $__max__;
-    private $__sum__;
-    private $__avg__;
 
     /**
-     *  For priming aggregates
+     * @var int Cache for aggregate COUNT.
+     */
+    private $__count__;
+
+    /**
+     * @var mixed Cache for aggregate MIN.
+     */
+    private $__min__;
+
+    /**
+     * @var mixed Cache for aggregate MAX.
+     */
+    private $__max__;
+
+    /**
+     * @var int|float Cache for aggregate SUM.
+     */
+    private $__sum__;
+
+    /**
+     * @var int|float Cache for aggregate AVG.
+     */
+    private $__avg__;
+
+
+    /**
+     * @var string Aggregate function to call on handler.
      */
     private $__primed_function;
+
+    /**
+     * @var string Field to call aggregate function on.
+     */
     private $__primed_field;
 
 
-    /**
-     * For join support
-     */
-    private $__joined__ = [];
-    private $__after_set_joined__ = [];
 
     /**
-     * For set support
+     * @var array An array of handlers to be joined.
+     */
+    private $__joined__ = [];
+
+    /**
+     * @var array Joined handlers after set operations.
+     */
+    private $__after_set_joined__ = [];
+
+
+
+    /**
+     * @var array Set operations to be performed.
      */
     private $__set_operations__ = [];
 
 
-    public function __construct($model)
+    /**
+     * The constructor. It binds to a handler to a model class.
+     * 
+     * @param string $model The fully qualified classname of the model to bind to.
+     */
+    public function __construct(string $model)
     {
         $this->__model__ = $model;
         $this->__table_name__ = Helpers::modelNameToTableName(Helpers::getShortName($model));
     }
 
-    public function tablename()
+    /**
+     * Get the tablename of the model bound to a handler as it is in the database.
+     * 
+     * @return string Returns tablename.
+     */
+    public function tablename(): string
     {
         return $this->__table_name__;
     }
 
-    public function tablenameWithAlias()
+    /**
+     * Get the tablename with alias, of the model bound to a handler as it is in the database.
+     * 
+     * @param bool $addTicks Add ticks or escaping if database dialect supports it.
+     * @return string Returns tablename.
+     */
+    public function tablenameWithAlias($addTicks = true): string
     {
         if ($this->as()) {
-            return Helpers::ticks($this->tablename()) . ' AS ' . Helpers::ticks($this->as());
+            if ($addTicks) {
+                return Helpers::ticks($this->tablename()) . ' AS ' . Helpers::ticks($this->as());
+            } else {
+                return $this->tablename() . ' AS ' . $this->as();
+            }
         }
     }
 
@@ -105,35 +236,45 @@ class Handler
         return preg_replace("|[^a-zA-Z]|", "", bin2hex(random_bytes(12)));
     }
 
-    public function model()
+    /**
+     * Get the model class bound to a handler.
+     * 
+     * @return string Returns than model class.
+     */
+    public function model(): string
     {
         return $this->__model__;
     }
 
-    public function projected()
+
+    /**
+     * Get the user projected fields.
+     * @return array
+     */
+    public function projected(): array
     {
         return $this->__projected_fields__;
     }
 
-    public function filtered()
+    /**
+     * Get the processed filters applied to this handler.
+     * 
+     * @return array
+     */
+    public function filtered(): array
     {
         return $this->__filters__;
     }
 
-    public function whackyFiltered($key)
-    {
-        if ($this->filtered()) {
-            return true;
-        } else if (SetUp::$engine === SetUp::MYSQL) {
-            if ($this->__set_operations__ && count($this->__set_operations__) > 1) {
-                if ($key > 0) {
-                    return true;
-                }
-            }
-        }
-    }
 
-    public function buildQuery($prefixTable = false)
+    /**
+     * Generates a query based on the handler it's called on.
+     * 
+     * @param bool $prefixTable Determines if fieldnames are prefixed with tablename. Default is false.
+     * 
+     * @return array Returns an associative array with keys 'query', 'placeholders', and 'projected'.
+     */
+    public function buildQuery($prefixTable = false): array
     {
 
         list($projected, $defered) = $this->resolveProjectedFields(true, $prefixTable);
@@ -228,39 +369,16 @@ class Handler
                     $setP = $b['placeholders'];
 
                     if ($setOp === 'union') {
-                        //$unionSnippet = '';
-                        //foreach ($setH->filtered() as $fpair) {
-                        //$unionSnippet .= ' ' . $fpair['query'];
-                        //$placeholders = array_merge($placeholders, $fpair['placeholders']);
-                        //}
-                        //$unionSnippet = trim($unionSnippet);
-                        //$setAlias = $setH->as();
-                        //$unionSnippet = preg_replace("/$setAlias/", $this->as(), $unionSnippet);
-
-                        //$unionSnippet = preg_replace("/$setAlias/", $rnd, $unionSnippet);
-
-                        /*
-                        if ($this->whackyFiltered($key)) {
-                            $query .= ' OR (' . $unionSnippet . ')';
-                        } else {
-                            $query .= ' WHERE (1 OR (' . $unionSnippet . '))';
-                        }
-                        */
 
                         $rnd = Helpers::ticks($rnd);
                         $query .= " UNION ($setQ)";
                         $placeholders = array_merge($placeholders, $setP);
                     } else if (in_array($setOp, ['except', 'intersect'])) {
 
-                        //$query = $query; //"SELECT * FROM ($query)";
                         $rnd = Helpers::ticks($rnd);
                         $query = "SELECT * FROM ($query) AS $rnd";
 
                         $projected = explode(", ", $setH->resolveProjectedFields()[0]);
-
-                        // $existsSnippet = array_reduce($projected, function ($c, $i) use ($setH) {
-                        //     return $c . Helpers::ticks($this->as()) . '.' . Helpers::ticks($i) . ' = ' . Helpers::ticks($setH->as()) . '.' . Helpers::ticks($i) . ' AND ';
-                        // }, '');
 
                         $existsSnippet = array_reduce($projected, function ($c, $i) use ($setH, $rnd) {
                             return $c . $rnd . '.' . Helpers::ticks($i) . ' = ' . Helpers::ticks($setH->as()) . '.' . Helpers::ticks($i) . ' AND ';
@@ -270,22 +388,8 @@ class Handler
 
                         if ($setOp === 'except') {
                             $query .= " WHERE NOT EXISTS";
-                            /*
-                            if (!$this->whackyFiltered($key)) {
-                                $query .= " WHERE NOT EXISTS";
-                            } else {
-                                $query .= " AND NOT EXISTS";
-                            }
-                            */
                         } else if ($setOp === 'intersect') {
                             $query .= " WHERE EXISTS";
-                            /*
-                            if (!$this->whackyFiltered($key)) {
-                                $query .= " WHERE EXISTS";
-                            } else {
-                                $query .= " AND EXISTS";
-                            }
-                            */
                         }
                         if (!empty($setH->filtered())) {
                             $query .= " (" . $setQ . " AND " . $existsSnippet . ")";
@@ -342,7 +446,21 @@ class Handler
         return ['query' => $query, 'placeholders' => $placeholders ?? [], 'project' => $defered];
     }
 
+    /**
+     * Check if a handler has any objects (rows) that fit it's criteria.
+     * 
+     * @return bool Returns true if there is at least one object (row) or false if there is none.
+     */
+    public function exists(): bool
+    {
+        return ($this->count() > 0);
+    }
 
+    /**
+     * Get the first object in a handler.
+     * 
+     * @return Q\Orm\Model | null
+     */
     public function one()
     {
         $assoc = $this->buildQuery();
@@ -357,7 +475,12 @@ class Handler
     }
 
 
-    public function all()
+    /**
+     * Get all the objects in a handler as a Generator.
+     * 
+     * @return \Generator
+     */
+    public function all(): \Generator
     {
         $assoc = $this->buildQuery();
         $query = $assoc['query'] ?? '';
@@ -371,11 +494,23 @@ class Handler
         }
     }
 
-    public function array()
+    /**
+     * Get all the objects in a handler as an array.
+     * 
+     * @return array
+     */
+    public function array(): array
     {
         return iterator_to_array($this->all());
     }
 
+    /**
+     * Apply a function to every object in a handler, usually with the aim of modification.
+     * 
+     * @param callable $f A callable that takes a model as argument.
+     * 
+     * @return \Generator
+     */
     public function map(callable $f)
     {
         $all = $this->all();
@@ -384,7 +519,15 @@ class Handler
         }
     }
 
-    public function pick(callable $f)
+
+    /**
+     * Filter a handler using a callable. If it returns true, the object is kept. If it returns false, the object is removed.
+     * 
+     * @param callable $f A callable that takes a model as argument.
+     * 
+     * @return \Generator
+     */
+    public function pick(callable $f): \Generator
     {
         $all = $this->all();
         foreach ($all as $obj) {
@@ -394,12 +537,21 @@ class Handler
         }
     }
 
-    public function raw($query, array $params = [])
+
+    /**
+     * Run raw sql queries (select, insert, update or delete) on a handler.
+     * 
+     * @param string $query The raw query to run. Should be one of select, insert, update, or delete.
+     * @param array $placeholders An array of placeholders, if any.
+     * 
+     * @return Generator|bool Returns a Generator for select queries and a bool for others.
+     */
+    public function raw(string $query, array $placeholders = [])
     {
         if (strpos(strtolower($query), 'select') === 0) {
-            return (Querier::queryAll($query, $params, $this->__model__, []))();
-        } else if (preg_match('#^(create|insert|update)#', strtolower($query))) {
-            Querier::raw($query, $params);
+            return (Querier::queryAll($query, $placeholders, $this->__model__, []))();
+        } else if (preg_match('#^(insert|update|delete)#', strtolower($query))) {
+            Querier::raw($query, $placeholders);
             return true;
         } else {
             throw new \Error(sprintf('Only SELECT, CREATE, INSERT and UPDATE queries are allowed via %s::raw().', self::class));

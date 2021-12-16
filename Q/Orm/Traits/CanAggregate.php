@@ -12,6 +12,9 @@ trait CanAggregate
 
     public function aggregate(string $function, string $field)
     {
+        if(!preg_match("/\w+/", $field)){
+            throw new \Error("Keywords are not supported in aggregate fieldname.");
+        }
         $this->__primed_function = $function;
         $this->__primed_field = $field;
         return $this;
@@ -36,6 +39,7 @@ trait CanAggregate
             $lowerF = Helpers::ticks(strtolower($function));
 
             $tmp = Helpers::ticks($this->randomStr());
+            $field = $tmp . '.' . Helpers::ticks($field);
 
             $q = "SELECT $upperF($field) AS $lowerF FROM ($query) AS $tmp";
             return [$q, $placeholders];
@@ -118,10 +122,5 @@ trait CanAggregate
         } else {
             return $this->__sum__;
         }
-    }
-
-    public function exists()
-    {
-        return ($this->count() > 0);
     }
 }

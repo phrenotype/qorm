@@ -23,7 +23,7 @@ class SetUp
 
     public static $dbConfig;
 
-    private static function init(string $engine, string $modelsPath, string $migrationsFolder, array $config)
+    private static function init(string $modelsPath, string $migrationsFolder, array $config = [], string $engine = null)
     {
 
         static::$engine = $engine;
@@ -31,21 +31,19 @@ class SetUp
         static::$migrationsFolder = $migrationsFolder;
         static::$dbConfig = $config;
 
-        Connection::setUp($config);
+        if (!empty($config) && $engine != null) {
+            Connection::setUp($config);
+            $pdo = Connection::getInstance();
+            Querier::setConnection($pdo);
+            Operation::setPDO($pdo);
+            MigrationMaker::setPDO($pdo);
+            CrossEngine::setPDO($pdo);
 
+            /* Model Integrity Checks */
+            Integrity::refuseDuplicateAttributes();
+        }
 
-        $pdo = Connection::getInstance();
-
-
-        Querier::setConnection($pdo);
-        Operation::setPDO($pdo);
-        MigrationMaker::setPDO($pdo);
-        CrossEngine::setPDO($pdo);
         MigrationMaker::setUpForMigrations($modelsPath, $migrationsFolder);
-
-
-        /* Model Integrity Checks */
-        Integrity::refuseDuplicateAttributes();
     }
 
     public static function env($key)
@@ -61,7 +59,7 @@ class SetUp
         } else if (file_exists('.env')) {
             if (is_null($qAssoc)) {
                 $qAssoc = parse_ini_file('.env', false, INI_SCANNER_RAW);
-            }            
+            }
             $value = $qAssoc[$key] ?? '';
             if ($value) {
                 putenv("$key=$value");
@@ -73,20 +71,31 @@ class SetUp
         return '';
     }
 
-    public static function main()
+    public static function main($hit = true)
     {
+        $models = self::env('Q_MODELS');
+        $migrations = self::env('Q_MIGRATIONS');
+
         $host = self::env('Q_DB_HOST');
         $name = self::env('Q_DB_NAME');
         $user = self::env('Q_DB_USER');
         $pass = self::env('Q_DB_PASS');
-        $models = self::env('Q_MODELS');
-        $migrations = self::env('Q_MIGRATIONS');
+
+
         $engine = self::env('Q_ENGINE');
-        self::init($engine, $models, $migrations, [
+
+        $config = [
             'host' => $host,
             'name' => $name,
             'user' => $user,
             'pass' => $pass
-        ]);
+        ];
+
+        if (!$hit) {
+            $engine = null;
+            $config = [];
+        }
+
+        self::init($models, $migrations, $config, $engine);
     }
 }
