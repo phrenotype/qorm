@@ -6,11 +6,15 @@ use Q\Orm\Handler;
 use Q\Orm\Helpers;
 use Q\Orm\Migration\TableModelFinder;
 
+
+/**
+ * Confers the ability to perform Joins on Handlers and Humans alike.
+ */
 trait CanJoin
 {
-    private function j(Handler $modelHandler, string $fieldname, string $reffieldname, string $type)
+    private function j(Handler $modelHandler, string $fieldname, string $reffieldname, string $type): Handler
     {
-        if($this === $modelHandler){
+        if ($this === $modelHandler) {
             throw new \Error("Do not store base handler in variables when doing joins.");
         }
         if (!(Helpers::isRefField($fieldname, $modelHandler->model()) || !in_array($fieldname, Helpers::getModelProperties($modelHandler->model()))) && $fieldname !== 'id') {
@@ -59,21 +63,56 @@ trait CanJoin
         return $this;
     }
 
-    public function join(Handler $modelHandler, string $fieldname, string $reffieldname)
+    /**
+     * Perform a join operation on a Handler.
+     * 
+     * @param string $reffieldname
+     * @param Handler $handler
+     * @param string $fieldname     
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function join(string $reffieldname, Handler $handler, string $fieldname): Handler
     {
-        return $this->j($modelHandler, $fieldname, $reffieldname, 'join');
+        return $this->j($handler, $fieldname, $reffieldname, 'join');
     }
 
-    public function leftJoin(Handler $modelHandler, string $fieldname, string $reffieldname)
+    /**
+     * Perform a left join operation on a Handler.
+     * 
+     * @param string $reffieldname
+     * @param Handler $handler
+     * @param string $fieldname     
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function leftJoin(string $reffieldname, Handler $handler, string $fieldname): Handler
     {
-        return $this->j($modelHandler, $fieldname, $reffieldname, 'left join');
+        return $this->j($handler, $fieldname, $reffieldname, 'left join');
     }
 
-    public function rightJoin(Handler $modelHandler, string $fieldname, string $reffieldname)
+    /**
+     * Perform a right join operation on a Handler.
+     * 
+     * @param string $reffieldname
+     * @param Handler $handler
+     * @param string $fieldname     
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function rightJoin(string $reffieldname, Handler $handler, string $fieldname): Handler
     {
-        return $this->j($modelHandler, $fieldname, $reffieldname, 'right join');
+        return $this->j($handler, $fieldname, $reffieldname, 'right join');
     }
 
+
+    /**
+     * Set or get Handler alias.
+     * 
+     * @param string|null $alias Alias to set. Optional. If not passed, the current alias is returned.
+     * 
+     * @return Handler|string If setting, it returns the Handler it was called on. When getting, it returns a string.
+     */
     public function as(string $alias = null)
     {
         if ($alias) {
@@ -85,7 +124,14 @@ trait CanJoin
     }
 
 
-    private function resolveJoin($afterSet = false)
+    /**
+     * Resolve join.
+     * 
+     * @param bool $afterSet
+     * 
+     * @return array
+     */
+    private function resolveJoin($afterSet = false): array
     {
         if ($afterSet) {
             $joined = $this->__after_set_joined__;
