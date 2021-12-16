@@ -4,11 +4,20 @@ namespace Q\Orm\Traits;
 
 use Q\Orm\Handler;
 
-
+/**
+ * Confers the ability to perform set operations on Handlers and Humans alike.
+ */
 trait CanBeASet
 {
 
-    private function errorChecks($h2)
+    /**
+     * Validates a Handler for set operations.
+     * 
+     * @param Handler $h2
+     * 
+     * @return void
+     */
+    private function errorChecks(Handler $h2): void
     {
         if ($this === $h2) {
             throw new \Error("Do not store base handler in variables when doing set operations.");
@@ -18,7 +27,15 @@ trait CanBeASet
         }
     }
 
-    public function union(Handler $h)
+
+    /**
+     * Perform a union between two Handlers.
+     * 
+     * @param Handler $h The second Handler.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function union(Handler $h): Handler
     {
         $this->errorChecks($h);
         //$this->distinct();
@@ -26,7 +43,14 @@ trait CanBeASet
         return $this;
     }
 
-    public function intersect(Handler $h)
+    /**
+     * Perform an instersection between two handlers.
+     * 
+     * @param Handler $h The second Handler.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function intersect(Handler $h): Handler
     {
         $this->errorChecks($h);
         $h->distinct();
@@ -34,7 +58,14 @@ trait CanBeASet
         return $this;
     }
 
-    public function except(Handler $h)
+    /**
+     * Perform a difference between two handlers.
+     * 
+     * @param Handler $h The second Handler.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function except(Handler $h): Handler
     {
         $this->errorChecks($h);
         $h->distinct();

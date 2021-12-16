@@ -1,16 +1,10 @@
 <?php
 
-/**
- * This file is part of the Q Orm.
- * 
- * The git reposistory can be found at https://github.com/jameshadleychase/qorm.
- */
-
 namespace Q\Orm;
 
 use Q\Orm\Traits\CanAggregate;
 use Q\Orm\Traits\CanBeASet;
-use Q\Orm\Traits\CanCrud;
+use Q\Orm\Traits\CanCud;
 use Q\Orm\Traits\CanGroup;
 use Q\Orm\Traits\CanJoin;
 use Q\Orm\Traits\CanRace;
@@ -22,19 +16,19 @@ use Q\Orm\Traits\CanSelect;
 class Handler
 {
 
-    use CanSelect, CanCrud, CanAggregate, CanRace, CanJoin, CanBeASet, CanGroup;
+    use CanSelect, CanCud, CanAggregate, CanRace, CanJoin, CanBeASet, CanGroup;
 
     const AGGRT_WITH_AS = '/^(\w+)\((\*|\w+)\)(\s*AS\s*(\w+))$/i';
     const AGGRT_WITH_AS_AND_TICKS = '/^(\w+)\((\*|`\w+`)\)(\s*AS\s*(`\w+`))$/i';
     const PLAIN_ALIASED_FIELD = "/(\w+)((?:\.)(\w+))?(\s*AS\s*(\w+))?/i";
 
     /**
-     * @var string Table name of the current handler.
+     * @var string Table name of the current Handler.
      */
     private $__table_name__ = '';
 
     /**
-     * @var string Model bound to handler.
+     * @var string Model bound to Handler.
      */
     private $__model__;
 
@@ -96,7 +90,7 @@ class Handler
     private $__projected_fields__ = [];
 
     /**
-     * @var string Holds the table alias for a handler.
+     * @var string Holds the table alias for a Handler.
      */
     private $__table_alias__;
 
@@ -164,7 +158,7 @@ class Handler
 
 
     /**
-     * @var string Aggregate function to call on handler.
+     * @var string Aggregate function to call on Handler.
      */
     private $__primed_function;
 
@@ -176,12 +170,12 @@ class Handler
 
 
     /**
-     * @var array An array of handlers to be joined.
+     * @var array An array of Handlers to be joined.
      */
     private $__joined__ = [];
 
     /**
-     * @var array Joined handlers after set operations.
+     * @var array Joined Handlers after set operations.
      */
     private $__after_set_joined__ = [];
 
@@ -194,7 +188,7 @@ class Handler
 
 
     /**
-     * The constructor. It binds to a handler to a model class.
+     * The constructor. It binds to a Handler to a model class.
      * 
      * @param string $model The fully qualified classname of the model to bind to.
      */
@@ -205,7 +199,7 @@ class Handler
     }
 
     /**
-     * Get the tablename of the model bound to a handler as it is in the database.
+     * Get the tablename of the model bound to a Handler as it is in the database.
      * 
      * @return string Returns tablename.
      */
@@ -215,7 +209,7 @@ class Handler
     }
 
     /**
-     * Get the tablename with alias, of the model bound to a handler as it is in the database.
+     * Get the tablename with alias, of the model bound to a Handler as it is in the database.
      * 
      * @param bool $addTicks Add ticks or escaping if database dialect supports it.
      * @return string Returns tablename.
@@ -237,7 +231,7 @@ class Handler
     }
 
     /**
-     * Get the model class bound to a handler.
+     * Get the model class bound to a Handler.
      * 
      * @return string Returns than model class.
      */
@@ -257,7 +251,7 @@ class Handler
     }
 
     /**
-     * Get the processed filters applied to this handler.
+     * Get the processed filters applied to this Handler.
      * 
      * @return array
      */
@@ -268,7 +262,7 @@ class Handler
 
 
     /**
-     * Generates a query based on the handler it's called on.
+     * Generates a query based on the Handler it's called on.
      * 
      * @param bool $prefixTable Determines if fieldnames are prefixed with tablename. Default is false.
      * 
@@ -447,7 +441,7 @@ class Handler
     }
 
     /**
-     * Check if a handler has any objects (rows) that fit it's criteria.
+     * Check if a Handler has any objects (rows) that fit it's criteria.
      * 
      * @return bool Returns true if there is at least one object (row) or false if there is none.
      */
@@ -457,7 +451,7 @@ class Handler
     }
 
     /**
-     * Get the first object in a handler.
+     * Get the first object in a Handler.
      * 
      * @return Q\Orm\Model | null
      */
@@ -476,7 +470,7 @@ class Handler
 
 
     /**
-     * Get all the objects in a handler as a Generator.
+     * Get all the objects in a Handler as a Generator.
      * 
      * @return \Generator
      */
@@ -495,7 +489,7 @@ class Handler
     }
 
     /**
-     * Get all the objects in a handler as an array.
+     * Get all the objects in a Handler as an array.
      * 
      * @return array
      */
@@ -505,7 +499,7 @@ class Handler
     }
 
     /**
-     * Apply a function to every object in a handler, usually with the aim of modification.
+     * Apply a function to every object in a Handler, usually with the aim of modification.
      * 
      * @param callable $f A callable that takes a model as argument.
      * 
@@ -521,7 +515,7 @@ class Handler
 
 
     /**
-     * Filter a handler using a callable. If it returns true, the object is kept. If it returns false, the object is removed.
+     * Filter a Handler using a callable. If it returns true, the object is kept. If it returns false, the object is removed.
      * 
      * @param callable $f A callable that takes a model as argument.
      * 
@@ -539,7 +533,7 @@ class Handler
 
 
     /**
-     * Run raw sql queries (select, insert, update or delete) on a handler.
+     * Run raw sql queries (select, insert, update or delete) on a Handler.
      * 
      * @param string $query The raw query to run. Should be one of select, insert, update, or delete.
      * @param array $placeholders An array of placeholders, if any.

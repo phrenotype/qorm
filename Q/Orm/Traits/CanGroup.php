@@ -6,10 +6,21 @@ use Q\Orm\Filter;
 use Q\Orm\Handler;
 use Q\Orm\Helpers;
 
+
+/**
+ * Confers the ability to group results (with having filters) on Handlers and Humans alike.
+ */
 trait CanGroup
 {
 
-    public function group_by(...$fields)
+    /**
+     * Group a Handler by certain fields. This method is variadic
+     * 
+     * @param mixed ...$fields The fields to group by.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function group_by(...$fields): Handler
     {
 
         foreach ($fields as $field) {
@@ -32,9 +43,15 @@ trait CanGroup
         return $this;
     }
 
-    public function having(array $assoc)
+    /**
+     * Apply Having filter on a Handler.
+     * 
+     * @param array $assoc The filters.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function having(array $assoc): Handler
     {
-
         if (empty($this->__group_by__)) {
             throw new \Error("'group_by' must be called before 'having'.");
         }
@@ -69,6 +86,14 @@ trait CanGroup
         return $this;
     }
 
+    /**
+     * Resolves the having filters on a Handler.
+     * 
+     * @param bool $afterSet
+     * @param bool $afterJoin
+     * 
+     * @return array
+     */
     private function resolveHaving($afterSet = false, $afterJoin = false): array
     {
         if ($afterSet) {
@@ -89,11 +114,6 @@ trait CanGroup
             $query = rtrim($query, ' AND ');
         }
 
-
-
-        //Will deal with after set when a viable set implementation is had
-
-
         return [$query, $placeholders];
-    }    
+    }
 }

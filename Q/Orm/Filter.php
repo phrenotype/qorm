@@ -7,7 +7,7 @@ use Q\Orm\Migration\TableModelFinder;
 class Filter
 {
 
-    const CONJUNCTIONS = ['and', 'or', '&&', '||'];
+    const CONJUNCTIONS = ['and', 'or'];
 
     private $string = '';
     private $values = [];
