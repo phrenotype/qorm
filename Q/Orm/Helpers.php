@@ -153,11 +153,20 @@ class Helpers
 
     public static function ticks(string $value)
     {
-        if (preg_match('#(?mi)^`.*`$#', $value)) {
-            return $value;
-        } else {
-            return '`' . $value . '`';
+        if(SetUp::$engine === SetUp::MYSQL){
+            if (preg_match('#(?mi)^`.*`$#', $value)) {
+                return $value;
+            } else {
+                return '`' . $value . '`';
+            }
+        }else{
+            if (preg_match('#(?mi)^".*"$#', $value)) {
+                return $value;
+            } else {
+                return '"' . $value . '"';
+            }
         }
+
     }
 
     public static function getClassName(object $object)

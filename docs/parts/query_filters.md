@@ -230,7 +230,7 @@ SELECT ... FROM user WHERE id NOT IN ( SELECT user_id FROM comment )
 **NOTE**: Terminal filters are case sensitive.  
 
 ## CONJUNCTION OPERATORS
-These are **and, or , &&, ||**. They are case insensitive. They are used to join together different parts of the predicate ( WHERE CLAUSE ).
+These are **and, or**. They are case insensitive. They are used to join together different parts of the predicate ( WHERE CLAUSE ).
 
 ```php
 User::items()->filter(['firstname.startswith'=>'p', 'and', 'id.gte'=>7, 'or', 'id.lte'=>10]);

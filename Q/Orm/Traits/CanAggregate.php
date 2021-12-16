@@ -4,13 +4,25 @@ namespace Q\Orm\Traits;
 
 use Q\Orm\Aggregate;
 use Q\Orm\Connection;
+use Q\Orm\Handler;
 use Q\Orm\Helpers;
 use Q\Orm\QueryStack;
 
+/**
+ * Confers the ability to aggregate on Handlers and Humans alike.
+ */
 trait CanAggregate
 {
 
-    public function aggregate(string $function, string $field)
+    /**
+     * Prime a Handler to be used for aggregating.
+     * 
+     * @param string $function The aggregate function to apply.
+     * @param string $field The field to call the aggregate function on.
+     * 
+     * @return Handler
+     */
+    public function aggregate(string $function, string $field) : Handler
     {
         if(!preg_match("/\w+/", $field)){
             throw new \Error("Keywords are not supported in aggregate fieldname.");
@@ -21,7 +33,12 @@ trait CanAggregate
     }
 
 
-    public function buildAggregateQuery()
+    /**
+     * Build aggregate query.
+     * 
+     * @return array
+     */
+    public function buildAggregateQuery() : array
     {
         if ($this->__count__ == null) {
             $assoc = $this->buildQuery();
@@ -32,7 +49,7 @@ trait CanAggregate
             $function = $this->__primed_function;
 
             if (!($field && $function)) {
-                throw new \Error(sprintf("Model handler must be primed with the %s::%s method before aggregate query can be built.", Handler::class, 'aggregate'));
+                throw new \Error(sprintf("Model Handler must be primed with the %s::%s method before aggregate query can be built.", Handler::class, 'aggregate'));
             }
 
             $upperF = strtoupper($function);
@@ -46,6 +63,14 @@ trait CanAggregate
         }
     }
 
+    /**
+     * Builds immediately executes an aggregate query.
+     * 
+     * @param string $function
+     * @param string $field
+     * 
+     * @return mixed | null 
+     */
     private function buildAndExecuteAggregateQuery(string $function, string $field)
     {
         $this->aggregate($function, $field);
@@ -59,7 +84,14 @@ trait CanAggregate
     }
 
 
-    public function count($field = '*')
+    /**
+     * Get the total count of objects in a Handler.
+     * 
+     * @param string $field The field to count based on.
+     * 
+     * @return int
+     */
+    public function count($field = '*') : int
     {
         if ($this->__count__ == null) {
 
@@ -68,11 +100,18 @@ trait CanAggregate
             $this->__count__ = $count;
             return $this->__count__;
         } else {
-            return $this->__count__;
+            return 0;
         }
     }
 
-    public function max($field)
+    /**
+     * Get the maximum value in a field for all objects in a Handler.
+     * 
+     * @param mixed $field The field to get max on.
+     * 
+     * @return mixed
+     */
+    public function max($field) : mixed
     {
         if ($this->__max__ == null) {
 
@@ -85,7 +124,14 @@ trait CanAggregate
         }
     }
 
-    public function min($field)
+    /**
+     * Get the miniimum value in a field for all objects in a Handler.
+     * 
+     * @param mixed $field The field to get min on.
+     * 
+     * @return mixed
+     */
+    public function min($field) : mixed
     {
         if ($this->__min__ == null) {
 
@@ -98,7 +144,14 @@ trait CanAggregate
         }
     }
 
-    public function avg($field)
+    /**
+     * Get the average value in a field for all objects in a Handler.
+     * 
+     * @param mixed $field The field to calculate average based on.
+     * 
+     * @return mixed
+     */
+    public function avg($field) : mixed
     {
         if ($this->__avg__ == null) {
 
@@ -111,7 +164,14 @@ trait CanAggregate
         }
     }
 
-    public function sum($field)
+    /**
+     * Get the sum of values in a field for all objects in a Handler.
+     * 
+     * @param mixed $field The field to calculate sum based on.
+     * 
+     * @return mixed
+     */
+    public function sum($field) : mixed
     {
         if ($this->__sum__ == null) {
 

@@ -8,9 +8,18 @@ use Q\Orm\Helpers;
 use Q\Orm\Migration\TableModelFinder;
 use Q\Orm\Querier;
 
-trait CanCrud
-{
 
+/**
+ * Confers the ability to perform Insert, Update and Delete operations on Handlers and Humans alike.
+ */
+trait CanCud
+{
+    /**
+     * Raise an exception if the key 'id' exists in an associative array.
+     * 
+     * @param array
+     * @return void
+     */
     private function idException(array $assoc)
     {
         $keys = array_keys($assoc);
@@ -19,8 +28,13 @@ trait CanCrud
         }
     }
 
-
-    private function renameCols(array $assoc, string $model)
+    /**
+     * Rename reference (key) fields to match the database column name.
+     * 
+     * @param array $assoc
+     * @return array
+     */
+    private function renameCols(array $assoc): array
     {
         $this->idException($assoc);
         $na = [];
@@ -38,9 +52,16 @@ trait CanCrud
     }
 
 
-    private function removeNonDeclaredProperties(array $assoc, string $model)
+    /**
+     * Remove properties not declared on model from assoc keys.
+     * 
+     * @param array $assoc
+     * 
+     * @return array
+     */
+    private function removeNonDeclaredProperties(array $assoc): array
     {
-        $cols = Helpers::getModelProperties($model);
+        $cols = Helpers::getModelProperties($this->__model__);
         $na = [];
         foreach ($assoc as $k => $v) {
             if (in_array($k, $cols)) {
@@ -51,9 +72,14 @@ trait CanCrud
     }
 
 
-
-    private function addDefaults($assoc)
-    {        
+    /**
+     * Generate values for default fields based on callbacks set.
+     * 
+     * @param array $assoc Associative array of values
+     * @return array Returns associative array with new keys and values.
+     */
+    private function addDefaults($assoc): array
+    {
         $props = $this->__model__::schema();
         $keys = array_keys($assoc);
         foreach ($props as $prop => $field) {
@@ -67,10 +93,17 @@ trait CanCrud
         return $assoc;
     }
 
-    private function checkNotNullWithoutDefault($assoc)
+    /**
+     * Ensures that fields defined as 'not null' without defaults always have a value.
+     * 
+     * @param array $assoc
+     * 
+     * @return void
+     */
+    private function checkNotNullWithoutDefault(array $assoc): void
     {
         //Can foreign keys have defaults ? Yes.
-        $props = $this->__model__::schema();           
+        $props = $this->__model__::schema();
         $keys = array_keys($assoc);
         foreach ($props as $prop => $field) {
             //Is it in filters ?
@@ -84,28 +117,40 @@ trait CanCrud
     }
 
     /**
-     * The purpose is actually for prefiltered Handlers, in _set relationships. Not for any other purpose.
-     * That's why we don't even bother to open the handler.
+     * This is for when a new record is being created on a pre-filtered Handler, in _set relationships. Not for any other purpose.     
+     * 
+     * @param array $assoc
+     * 
+     * @return array
      */
-    private function addFiltersToCreate(array $assoc){        
+    private function addFiltersToCreate(array $assoc)
+    {
         $assocKeys = array_keys($assoc);
-        foreach($this->__raw_filters__ as $k=>$v){
-            if(!in_array($k, $assocKeys) && $k !== 'id' && !($v instanceof Handler) && Helpers::isRefField($k, $this->__model__)){
+        foreach ($this->__raw_filters__ as $k => $v) {
+            if (!in_array($k, $assocKeys) && $k !== 'id' && !($v instanceof Handler) && Helpers::isRefField($k, $this->__model__)) {
                 //Is it the primary key ?
                 $assoc[$k] = $v;
             }
-        }        
+        }
         return $assoc;
     }
 
-    public function create(...$args)
+
+    /**
+     * Create a new record, or records on a Handler. This method is variadic.
+     * 
+     * @param mixed ...$args A record(s) to be created.
+     * 
+     * @return Handler|null Returns the handler it was called on on success and null on failure.
+     */
+    public function create(...$args): Handler
     {
         if (count($args) === 1 && is_array($args[0])) {
             $assoc = $this->addFiltersToCreate($args[0]);
-            $assoc = $this->renameCols($assoc, $this->__model__);            
+            $assoc = $this->renameCols($assoc);
             $this->checkNotNullWithoutDefault($assoc);
             $assoc = $this->addDefaults($assoc);
-                        
+
             if (!empty($assoc)) {
                 $insert = Querier::insert($assoc, $this->__table_name__);
                 return $this;
@@ -116,7 +161,7 @@ trait CanCrud
             $a = [];
             foreach ($args as $arg) {
                 $assoc = $this->addFiltersToCreate($arg);
-                $assoc = $this->renameCols($assoc, $this->__model__);
+                $assoc = $this->renameCols($assoc);
                 $this->checkNotNullWithoutDefault($assoc);
                 $assoc = $this->addDefaults($assoc);
                 $a[] = $assoc;
@@ -127,8 +172,12 @@ trait CanCrud
     }
 
 
-
-    private function prepFiltersForUpdateOrDelete()
+    /**
+     * Prepares filters for update or deletion.
+     * 
+     * @return array Returns an associative array with keys 'query', 'placeholders'.
+     */
+    private function prepFiltersForUpdateOrDelete(): array
     {
         $query_predicate = '';
         $predicate_values = [];
@@ -151,10 +200,18 @@ trait CanCrud
         return ['query' => $query_predicate, 'placeholders' => $predicate_values];
     }
 
-    private function validateUpdateFields(array $assoc)
+
+    /**
+     * Validate update fields.
+     * 
+     * @param array $assoc
+     * 
+     * @return array
+     */
+    private function validateUpdateFields(array $assoc): array
     {
-        $assoc = $this->removeNonDeclaredProperties($assoc, $this->__model__);
-        $assoc = $this->renameCols($assoc, $this->__model__);
+        $assoc = $this->removeNonDeclaredProperties($assoc);
+        $assoc = $this->renameCols($assoc);
 
 
         $pk = TableModelFinder::findPk($this->__model__);
@@ -173,7 +230,15 @@ trait CanCrud
     }
 
 
-    private function prepareFieldsForUpdate(array $assoc, $prevState)
+    /**
+     * Prepare fields for update. Removes non 'dirty' fields.
+     * 
+     * @param array $assoc
+     * @param mixed $prevState
+     * 
+     * @return array
+     */
+    private function prepareFieldsForUpdate(array $assoc, $prevState): array
     {
         /* Allow only 'dirty' fields */
         $nf = [];
@@ -193,7 +258,15 @@ trait CanCrud
     }
 
 
-    public function update(array $assoc, array $prevState = null)
+    /**
+     * Update record(s) in a Handler.
+     * 
+     * @param array $assoc The new values to update.
+     * @param array|null $prevState The previous state, when dealing with a single model. Optional.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function update(array $assoc, array $prevState = null): Handler
     {
         $assoc = $this->prepareFieldsForUpdate($assoc, $prevState);
         if (!empty($assoc)) {
@@ -207,16 +280,19 @@ trait CanCrud
     }
 
 
-    public function delete()
+    /**
+     * Deletes a record(s) from a Hander.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function delete(): Handler
     {
         $preppedFilters = $this->prepFiltersForUpdateOrDelete();
         $predicate = $preppedFilters['query'];
         $values = $preppedFilters['placeholders'];
 
         $delete = Querier::delete($predicate, $values, $this->__table_name__);
-        //if ((int)$delete > 0) {
-        return $this;
-        //}
 
+        return $this;
     }
 }
