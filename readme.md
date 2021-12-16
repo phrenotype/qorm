@@ -146,7 +146,7 @@ Setup::main();
 That's it for the setup. From now on, we'll assume you already have a setup and have the `\Q\Orm\SetUp::main()` method called already.
 
 ## QUICK TUTORIAL
-For a quick tutorial, click [ here ](docs/tutorial/start.md)
+For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ here ](docs/tutorial/start.md)
 
 ## IN-DEPTH TUTORIAL
 For a more complete and in-depth tutorial, click [ here ](docs/parts/toc.md)
