@@ -11,7 +11,7 @@ A way of introduction and summary, joins here are all about calling `Q\Orm\Handl
 
 Another thing you need to know about is the `Q\Orm\Handler::as()` method. This method confers an alias on a Handler same way one would alias a table in sql.
 
-The `Q\Orm\Handler::join` method takes three parameters, all required. The first is the handler you wish to join on, the second is the field on the handler (the previous parameter), the last is the field on the handler (the original one) :). Look below.
+The `Q\Orm\Handler::join` method takes three parameters, all required. The first is field on the handler.The second is the handler you wish to join on, the last is the field on the handler (the previous parameter). Look below.
 
 For left and right joins, simply use `Q\Orm\Handler::leftJoin` and `Q\Orm\Handler::rightJoin` respectively. The parameters remain the same.
 
@@ -19,7 +19,7 @@ For left and right joins, simply use `Q\Orm\Handler::leftJoin` and `Q\Orm\Handle
 <?php
 
 Comment::items()->as('comment')
-            ->join(User::items()->as('user'), 'id', 'user');
+            ->join('user', User::items()->as('user'), 'id');
 ``` 
 
 I hope it makes sense now.
@@ -130,8 +130,8 @@ We will the write it like so ( based on the five(5) rules):
 $all = Comment::items()->as('comment')
     ->project('comment.text', 'user.name', 'post.title')
 
-    ->join(User::items()->as('user'), 'id', 'user')
-    ->join(Post::items()->as('post'), 'id', 'post')
+    ->join('user', User::items()->as('user'), 'id')
+    ->join('post', Post::items()->as('post'), 'id')
 
     ->limit(10)
     ->all();
@@ -148,15 +148,15 @@ To avoid running into problems when the column names class, simply alias the col
 $all = Comment::items()->as('comment')
     ->project('comment.id AS cid', 'comment.text', 'user.id AS uid', 'user.name', 'post.title')
     
-    ->join(User::items()->as('user'), 'id', 'user')
-    ->join(Post::items()->as('post'), 'id', 'post')
+    ->join('user', User::items()->as('user'), 'id')
+    ->join('post', Post::items()->as('post'), 'id')
 
     ->limit(10)
     ->all();
 
 ```
 
-## FILTER, LIMIT AND ORDER BY
+## FILTER, LIMIT AND ORDER BY... E.T.C.
 
 You are not allowed to filter, limit or order any of the handlers taking part in the join. You can only do these **after** the all the joins have been made. Look below.
 
@@ -166,8 +166,8 @@ You are not allowed to filter, limit or order any of the handlers taking part in
 $all = Comment::items()->as('comment')
     ->project('comment.text', 'comment.id AS cid', 'user.name', 'post.title')
     
-    ->join(User::items()->as('user'), 'id', 'user')
-    ->join(Post::items()->as('post'), 'id', 'post')
+    ->join('user', User::items()->as('user'), 'id')
+    ->join('post', Post::items()->as('post'), 'id')
 
     ->filter(['title.startswith'=>'a', 'cid.gt' => 5])
     ->limit(10)
