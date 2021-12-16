@@ -53,23 +53,6 @@ class HelpersTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function ticksDataProvider(){
-        return [
-            ['`column`', '`column`'],
-            ['column', '`column`'],
-            ['', '``']
-        ];
-    }
-
-    /**
-     * @dataProvider ticksDataProvider
-     */
-    public function testTicks($value, $expected){
-        $actual = Helpers::ticks($value);
-        $this->assertEquals($expected, $actual);
-    }
-
-
     public function modelNameToTableNameDataProvider(){
         return [
             ['ThriftUser', 'thrift_user'],

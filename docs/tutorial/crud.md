@@ -54,7 +54,7 @@ To find out more about filters , please refer to [ this page ](./../parts/query_
 ## UPDATE
 
 ```php
-Post::items()->filter(['id'])->update([
+Post::items()->filter(['id'=>4])->update([
     'title' => 'Blogging'
 ]);
 ```
