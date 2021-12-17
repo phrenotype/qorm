@@ -7,9 +7,19 @@ use Q\Orm\Handler;
 use Q\Orm\Helpers;
 use Q\Orm\Migration\TableModelFinder;
 
+/**
+ * Confers the ability to perform the select operation on Handlers and Humans alike.
+ */
 trait CanSelect
 {
-    public function order_by(...$fields)
+    /**
+     * Order objects in a Handler by fields. This method is variadic.
+     * 
+     * @param mixed ...$fields The fields to order by.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function order_by(...$fields): Handler
     {
         foreach ($fields as $k => $f) {
             if (!preg_match("#^(\w+|\w+\((\*|\w+)\))(\s+(?:desc|asc))?$#", strtolower($f))) {
@@ -55,7 +65,15 @@ trait CanSelect
         return $this;
     }
 
-    public function limit(int $limit, int $offset = 0)
+    /**
+     * Limit the objects that will potentially be fetched from a Handler.
+     * 
+     * @param int $limit
+     * @param int $offset
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function limit(int $limit, int $offset = 0): Handler
     {
         if (!empty($this->__set_operations__)) {
             $this->__after_set_limit__ = [$limit, $offset];
@@ -67,7 +85,15 @@ trait CanSelect
         return $this;
     }
 
-    public function page(int $page, int $ipp = 20)
+    /**
+     * Fetch a particular page or objects based on offset and limit. TLDR; Use this for pagination.
+     * 
+     * @param int $page The page number.
+     * @param int $ipp Items per page (limit). Default is 20.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function page(int $page, int $ipp = 20): Handler
     {
         if ($page < 1) {
             $page = 1;
@@ -77,13 +103,25 @@ trait CanSelect
         return $this;
     }
 
-    public function distinct()
+    /**
+     * Select only distinct objects from a Handler.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function distinct(): Handler
     {
         $this->__distinct__ = true;
         return $this;
     }
 
-    public function filter(array $assoc)
+    /**
+     * Filter the objects in a Handler based on certain criteria.
+     * 
+     * @param array $assoc The associative array of query filters.
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function filter(array $assoc): Handler
     {
         Filter::validate($assoc);
 
@@ -122,7 +160,15 @@ trait CanSelect
         return $this;
     }
 
-    public function project(...$fields)
+
+    /**
+     * Project fields. This method is variadic.
+     * 
+     * @param mixed ...$fields The fields to project.
+     * 
+     * @return Handler Returns the handler it was called on.
+     */
+    public function project(...$fields): Handler
     {
 
         foreach ($fields as $k => $field) {
@@ -173,7 +219,12 @@ trait CanSelect
 
 
 
-
+    /**
+     * @param bool $includePk
+     * @param bool $prefixtable
+     * 
+     * @return array
+     */
     public function resolveProjectedFields($includePk = true, $prefixtable = false): array
     {
 
@@ -294,6 +345,12 @@ trait CanSelect
         return [$projected, $defered];
     }
 
+    /**
+     * @param bool $afterSet
+     * @param bool $afterJoin
+     * 
+     * @return array
+     */
     private function resolveFilters($afterSet = false, $afterJoin = false): array
     {
         if ($afterSet) {
@@ -351,6 +408,12 @@ trait CanSelect
         return [$query, $placeholders];
     }
 
+    /**
+     * @param bool $afterSet
+     * @param bool $afterJoin
+     * 
+     * @return string
+     */
     private function resolveOrderBy($afterSet = false, $afterJoin = false): string
     {
         $order = $this->__order_by__;
@@ -365,6 +428,12 @@ trait CanSelect
         return '';
     }
 
+    /**
+     * @param bool $afterSet
+     * @param bool $afterJoin
+     * 
+     * @return string
+     */
     private function resolveLimit($afterSet = false, $afterJoin = false): string
     {
         $limit = $this->__limit__;

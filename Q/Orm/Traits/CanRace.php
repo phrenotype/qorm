@@ -3,14 +3,29 @@
 namespace Q\Orm\Traits;
 
 use Q\Orm\Engines\Functions;
+use Q\Orm\Handler;
 use Q\Orm\Helpers;
 use Q\Orm\Migration\TableModelFinder;
 use Q\Orm\Querier;
 use Q\Orm\SetUp;
 
+
+/**
+ * Confers the ability to avoid race conditions on Handlers and Humans alike.
+ */
 trait CanRace
 {
-    private function conBuild(array $values, $operator, $numeric = true, $append = true)
+    /**
+     * Build anti-race query
+     * 
+     * @param array $values
+     * @param mixed $operator
+     * @param bool $numeric
+     * @param bool $append
+     * 
+     * @return void
+     */
+    private function conBuild(array $values, $operator, $numeric = true, $append = true): void
     {
         $pk = TableModelFinder::findPk($this->__model__);
 
@@ -72,50 +87,104 @@ trait CanRace
         Querier::raw($sql, $params);
     }
 
-    public function increment(array $values)
-    {        
+    /**
+     * Increment (add to) the value in a field.
+     * 
+     * @param array $values
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function increment(array $values): Handler
+    {
         $this->conBuild($values, '+');
         return $this;
     }
 
-    public function decrement(array $values)
-    {        
+    /**
+     * Decrement (subtract) from the value in a field.
+     * 
+     * @param array $values
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function decrement(array $values): Handler
+    {
         $this->conBuild($values, '-');
         return $this;
     }
 
-    public function multiply(array $values)
-    {        
+    /**
+     * Multiply the value in a field.
+     * 
+     * @param array $values
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function multiply(array $values): Handler
+    {
         $this->conBuild($values, '*');
-        $this;
+        return $this;
     }
 
-    public function divide(array $values)
-    {        
+    /**
+     * Divide the value in a field.
+     * 
+     * @param array $values
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function divide(array $values): Handler
+    {
         $this->conBuild($values, '/');
         return $this;
     }
 
+    /**
+     * Get a random object (row) from a Handler.
+     * 
+     * @return Q\Orm\Model | null
+     */
     public function random()
-    {        
+    {
         $function = Functions::random(SetUp::$engine);
         return $this->order_by($function)->one();
     }
 
-    public function sample($limit)
-    {        
+    /**
+     * Get several random objects (rows) from a Handler.
+     * 
+     * @param int $limit
+     * 
+     * @return \Generator
+     */
+    public function sample(int $limit): \Generator
+    {
         $function = Functions::random(SetUp::$engine);
         return $this->order_by($function)->limit($limit)->all();
     }
 
-    public function append(array $values)
-    {        
+    /**
+     * Append a value to the current value in a field.
+     * 
+     * @param array $values
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function append(array $values): Handler
+    {
         $this->conBuild($values, null, false, true);
         return $this;
     }
 
-    public function prepend(array $values)
-    {        
+    /**
+     * Prepend a value to the current value in a field.
+     * 
+     * @param array $values
+     * 
+     * @return Handler Returns the Handler it was called on.
+     */
+    public function prepend(array $values): Handler
+    {
         $this->conBuild($values, null, false, false);
         return $this;
     }
