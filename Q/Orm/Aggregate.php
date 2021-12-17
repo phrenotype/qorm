@@ -2,6 +2,9 @@
 
 namespace Q\Orm;
 
+/**
+ * Contains constants defined for use by computers and humans alike.
+ */
 class Aggregate
 {
     const COUNT = 'COUNT';

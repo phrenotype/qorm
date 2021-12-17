@@ -4,9 +4,12 @@ namespace Q\Orm;
 
 use Q\Orm\Migration\TableModelFinder;
 
+
+/**
+ * A collection of helper methods to make computer and human life easy.
+ */
 class Helpers
 {
-
     public static function filterableTerminals()
     {
         return [
@@ -57,7 +60,12 @@ class Helpers
         ];
     }
 
-    public static function isModelEmpty(Model $object)
+    /**
+     * @param Model $object
+     * 
+     * @return bool
+     */
+    public static function isModelEmpty(Model $object): bool
     {
 
         //At least one defined attribute has to be set
@@ -80,7 +88,12 @@ class Helpers
         return $empty;
     }
 
-    public static function getModelRefFields(string $model)
+    /**
+     * @param string $model
+     * 
+     * @return array
+     */
+    public static function getModelRefFields(string $model): array
     {
         $schema = $model::schema();
         $r = [];
@@ -99,32 +112,16 @@ class Helpers
         return $r;
     }
 
-    public static function isRefField(string $field, string $model)
+    /**
+     * @param string $field
+     * @param string $model
+     * 
+     * @return bool
+     */
+    public static function isRefField(string $field, string $model): bool
     {
 
         $returnValue = false;
-
-        // $cols = Helpers::getModelColumns($model);
-        // $props = Helpers::getModelProperties($model);
-
-        // $inCols = in_array($field, $cols);
-        // $inProps = in_array($field, $props);
-
-        // $onlyProps = $inProps && !$inCols;
-        // $onlyCols = !$inProps && $inCols;
-        // $inBoth = $inProps && $inCols;
-
-        // /* Doing this because fk check only uses the 'property' name of the field */
-        // $colName = TableModelFinder::findModelColumnName($model, $field);
-
-        // $isFk = TableModelFinder::findModelFK($model, function ($table, $fk) use ($colName) {
-        //     return ($fk->field == $colName);
-        // });
-
-
-        // if (($inBoth || $onlyProps) && is_object($isFk)) {
-        //     $returnValue = true;
-        // }
 
         if (!$returnValue) {
             $schema = $model::schema();
@@ -141,9 +138,14 @@ class Helpers
         return $returnValue;
     }
 
-    public static function remove($value, array $assoc)
+    /**
+     * @param mixed $value
+     * @param array $assoc
+     * 
+     * @return array
+     */
+    public static function remove($value, array $assoc): array
     {
-
         $key = array_search($value, $assoc);
         if ($key !== false) {
             unset($assoc[$key]);
@@ -151,35 +153,61 @@ class Helpers
         return $assoc;
     }
 
-    public static function ticks(string $value)
+    /**
+     * @return string
+     */
+    public static function getEscaper(): string
     {
-        if(SetUp::$engine === SetUp::MYSQL){
-            if (preg_match('#(?mi)^`.*`$#', $value)) {
-                return $value;
-            } else {
-                return '`' . $value . '`';
-            }
-        }else{
-            if (preg_match('#(?mi)^".*"$#', $value)) {
-                return $value;
-            } else {
-                return '"' . $value . '"';
-            }
+        if (SetUp::$engine === SetUp::MYSQL) {
+            return '`';
+        } else {
+            return '"';
         }
-
     }
 
-    public static function getClassName(object $object)
+    /**
+     * @param string $value
+     * 
+     * @return string
+     */
+    public static function ticks(string $value): string
+    {
+        $escaper = self::getEscaper();
+
+        if (preg_match('#(?mi)^' . $escaper . '.*' . $escaper . '$#', $value)) {
+            return $value;
+        } else {
+            return "$escaper{$value}$escaper";
+        }
+    }
+
+    /**
+     * @param object $object
+     * 
+     * @return string
+     */
+    public static function getClassName(object $object): string
     {
         return (new \ReflectionObject($object))->name;
     }
 
-    public static function getShortName($class)
+    /**
+     * @param string $class
+     * 
+     * @return string
+     */
+    public static function getShortName(string $class): string
     {
         return (new \ReflectionClass($class))->getShortName();
     }
 
-    public static function getModelProperties($class)
+
+    /**
+     * @param string $class
+     * 
+     * @return array
+     */
+    public static function getModelProperties(string $class): array
     {
         $schema = $class::schema();
         $fields = [];
@@ -190,7 +218,12 @@ class Helpers
         return $fields;
     }
 
-    public static function getModelColumns($class)
+    /**
+     * @param string $class
+     * 
+     * @return array
+     */
+    public static function getModelColumns(string $class): array
     {
         $schema = $class::schema();
         $fields = [];
@@ -200,7 +233,10 @@ class Helpers
         return $fields;
     }
 
-    public static function getDeclaredModels()
+    /**
+     * @return array
+     */
+    public static function getDeclaredModels(): array
     {
         $parent = Model::class;
         return array_filter(get_declared_classes(), function ($class) use ($parent) {
@@ -208,7 +244,14 @@ class Helpers
         });
     }
 
-    public static function tableNameToModelName(string $tableName)
+    /**
+     * Convert a table name to it's model name.
+     * 
+     * @param string $tableName
+     * 
+     * @return string
+     */
+    public static function tableNameToModelName(string $tableName): string
     {
         $tableName = trim($tableName, "_");
         return preg_replace_callback(
@@ -220,7 +263,14 @@ class Helpers
         );
     }
 
-    public static function modelNameToTableName(string $modelName)
+    /**
+     * Convert a model class name to it's table name.
+     * 
+     * @param string $modelName
+     * 
+     * @return string
+     */
+    public static function modelNameToTableName(string $modelName): string
     {
         $modelName = trim($modelName, "_");
         $replaced = preg_replace_callback(
@@ -235,7 +285,14 @@ class Helpers
         return strtolower($replaced);
     }
 
-    public static function runAsTransaction(string $largeQuery)
+    /**
+     * Run a raw SQL query as a transaction.
+     * 
+     * @param string $largeQuery
+     * 
+     * @return void
+     */
+    public static function runAsTransaction(string $largeQuery): void
     {
         $pdo = Connection::getInstance();
         try {
@@ -251,7 +308,14 @@ class Helpers
         }
     }
 
-    public static function files($folder)
+    /**
+     * Recursively include all files in specified directory.
+     * 
+     * @param string $folder
+     * 
+     * @return array Returns an array of all the files found.
+     */
+    public static function files(string $folder): array
     {
         //Get all the files in a folder. It includes files in child folders
         $files = scandir($folder);
