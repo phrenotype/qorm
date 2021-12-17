@@ -5,6 +5,10 @@ namespace Q\Orm;
 use Q\Orm\Migration\Column;
 use Q\Orm\Migration\ForeignKey;
 
+
+/**
+ * Represents a model field.
+ */
 class Field
 {
 
@@ -21,26 +25,69 @@ class Field
     const DATETIME = 'datetime';
 
 
+    /**
+     * @var Q\Orm\Migration\Column|null
+     */
     public $column;
+
+    /**
+     * @var string|null
+     */
     public $index;
 
+    /**
+     * @var string|null
+     */
     public $model;
+
+
+    /**
+     * @var string|null
+     */
     public $onDelete;
 
+    /**
+     * @var bool|null
+     */
     private $isKey;
+
+
+    /**
+     * @var bool|null
+     */
     private $isFk;
 
-    public function isKey()
+    /**
+     * Checks if a field has a key defined on it.
+     * 
+     * @return bool
+     */
+    public function isKey(): bool
     {
         return $this->isKey;
     }
 
-    public function isFk()
+    /**
+     * Checks if a field is a foreign key.
+     * @return bool
+     */
+    public function isFk(): bool
     {
         return $this->isFk;
     }
 
-    private static function generic($type, callable $mutator, $model = null, $index = null, $onDelete = null)
+    /**
+     * Creates a new Field object.
+     * 
+     * @param string $type
+     * @param callable $mutator
+     * @param string|null $model
+     * @param string|null $index
+     * @param string|null $onDelete
+     * 
+     * @return Field
+     */
+    private static function generic(string $type, callable $mutator, string $model = null, string $index = null, string $onDelete = null): Field
     {
 
         $column = new Column;
@@ -92,76 +139,166 @@ class Field
         return $field;
     }
 
-    public static function BooleanField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function BooleanField(callable $mutator, $index = null): Field
     {
         return self::generic(self::BOOL, $mutator, null, $index);
     }
 
-    public static function CharField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function CharField(callable $mutator, $index = null): Field
     {
         return self::generic(self::CHAR, $mutator, null, $index);
     }
 
-    public static function TextField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function TextField(callable $mutator, $index = null): Field
     {
         return self::generic(self::TEXT, $mutator, null, $index);
     }
 
-    public static function IntegerField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function IntegerField(callable $mutator, $index = null): Field
     {
         return self::generic(self::INTEGER, $mutator, null, $index);
     }
 
-    public static function FloatField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function FloatField(callable $mutator, $index = null): Field
     {
         return self::generic(self::FLOAT, $mutator, null, $index);
     }
 
-    public static function DoubleField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function DoubleField(callable $mutator, $index = null): Field
     {
         return self::generic(self::DOUBLE, $mutator, null, $index);
     }
 
-    public static function DecimalField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function DecimalField(callable $mutator, $index = null): Field
     {
         return self::generic(self::DECIMAL, $mutator, null, $index);
     }
 
-    public static function NumericField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function NumericField(callable $mutator, $index = null): Field
     {
         return self::generic(self::NUMERIC, $mutator, null, $index);
     }
 
-    public static function EnumField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function EnumField(callable $mutator, $index = null): Field
     {
         return self::generic(self::ENUM, $mutator, null, $index);
     }
 
-    public static function DateField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function DateField(callable $mutator, $index = null): Field
     {
         return self::generic(self::DATE, $mutator, null, $index);
     }
 
-    public static function DateTimeField(callable $mutator, $index = null)
+    /**
+     * @param callable $mutator
+     * @param string|null $index
+     * 
+     * @return Field
+     */
+    public static function DateTimeField(callable $mutator, $index = null): Field
     {
         return self::generic(self::DATETIME, $mutator, null, $index);
     }
 
-    public static function ManyToOneField($model, callable $mutator, $index, $onDelete = ForeignKey::RESTRICT)
+
+
+    /**
+     * @param string $model
+     * @param callable $mutator
+     * @param string $index
+     * @param string $onDelete
+     * 
+     * @return Field
+     */
+    public static function ManyToOneField(string $model, callable $mutator, string $index, string $onDelete = ForeignKey::RESTRICT): Field
     {
         return self::generic('many_to_one', $mutator, $model, $index, $onDelete);
     }
 
-    public static function OneToOneField($model, callable $mutator, $index, $onDelete = ForeignKey::RESTRICT)
+    /**
+     * @param string $model
+     * @param callable $mutator
+     * @param string $index
+     * @param string $onDelete
+     * 
+     * @return Field
+     */
+    public static function OneToOneField(string $model, callable $mutator, string $index, string $onDelete = ForeignKey::RESTRICT): Field
     {
         return self::generic('one_to_one', $mutator, $model, $index, $onDelete);
     }
 
-    public static function textToCode(string $text){
+    /**
+     * @param string $text
+     * 
+     * @return string
+     */
+    public static function textToCode(string $text): string
+    {
         $rf = new \ReflectionClass(__CLASS__);
         $constants = $rf->getConstants();
-        foreach($constants as $c=>$v){
-            if($v === $text){
+        foreach ($constants as $c => $v) {
+            if ($v === $text) {
                 return $c;
             }
         }

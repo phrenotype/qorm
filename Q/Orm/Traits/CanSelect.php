@@ -241,7 +241,8 @@ trait CanSelect
 
                 /* If we are in a join and it does not follow a pattern, throw error */
                 if (!empty($this->__joined__)) {
-                    if (!preg_match('|(`\w+`\.`\w+`)(\s+as\s+`\w+`)?|i', $p)) {
+                    $escaper = Helpers::getEscaper();
+                    if (!preg_match("|($escaper\w+$escaper\.$escaper\w+$escaper)(\s+as\s+$escaper\w+$escaper)?|i", $p)) {
                         throw new \Error(sprintf("Projected fields in joins must always be prefixed with Handler alias. Prefix '%s' with an alias.", $p));
                     }
                 }

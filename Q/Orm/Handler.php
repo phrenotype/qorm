@@ -19,7 +19,7 @@ class Handler
     use CanSelect, CanCud, CanAggregate, CanRace, CanJoin, CanBeASet, CanGroup;
 
     const AGGRT_WITH_AS = '/^(\w+)\((\*|\w+)\)(\s*AS\s*(\w+))$/i';
-    const AGGRT_WITH_AS_AND_TICKS = '/^(\w+)\((\*|`\w+`)\)(\s*AS\s*(`\w+`))$/i';
+    const AGGRT_WITH_AS_AND_TICKS = '/^(\w+)\((\*|("|`)\w+\3)\)(\s*AS\s*(\3\w+\3))$/i';
     const PLAIN_ALIASED_FIELD = "/(\w+)((?:\.)(\w+))?(\s*AS\s*(\w+))?/i";
 
     /**

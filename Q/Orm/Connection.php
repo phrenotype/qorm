@@ -4,6 +4,9 @@ namespace Q\Orm;
 
 use Q\Orm\Engines\Decider;
 
+/**
+ * Handles instantiation of PDO objects.
+ */
 class Connection
 {
 
@@ -20,7 +23,6 @@ class Connection
         }
     }
 
-    /* Engine Check Marker */
     private function decidePDOInstance(array $parameters)
     {
         return Decider::decide(
@@ -62,9 +64,11 @@ class Connection
             $pdo->sqliteCreateFunction(
                 'concat',
                 function (...$args) {
-                    return array_reduce($args, function($c, $i){ return $c . (string)$i; }, '');
-                }                
-            );            
+                    return array_reduce($args, function ($c, $i) {
+                        return $c . (string)$i;
+                    }, '');
+                }
+            );
 
             return $pdo;
         } else {
@@ -103,13 +107,26 @@ class Connection
         }
     }
 
-    public static function getInstance()
+
+    /**
+     * Get connected PDO instance.
+     * 
+     * @return \PDO
+     */
+    public static function getInstance(): \PDO
     {
         return self::$instance;
     }
 
 
-    public static function setUp($parameters)
+    /**
+     * Create a connection.
+     * 
+     * @param mixed $parameters
+     * 
+     * @return \PDO
+     */
+    public static function setUp($parameters): \PDO
     {
         if (self::$instance == false) {
             new self($parameters);
@@ -120,6 +137,12 @@ class Connection
         }
     }
 
+
+    /**
+     * Get connection parameters.
+     * 
+     * @return array
+     */
     public static function getParameters(): array
     {
         return self::$parameters;
