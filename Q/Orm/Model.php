@@ -4,9 +4,17 @@ namespace Q\Orm;
 
 use Q\Orm\Migration\TableModelFinder;
 
+/**
+ * A model that can represent both abstract ideas and humans alike.
+ */
 abstract class Model
 {
 
+    /**
+     * Construct a new model. This does not persist the object.
+     * 
+     * @param array $fields
+     */
     public function __construct($fields = [])
     {
         $properties = Helpers::getModelProperties(static::class);
@@ -54,14 +62,24 @@ abstract class Model
         return static::class . "($v)";
     }
 
-    public function pk()
+    /**
+     * Get the primary key field of this model.
+     * 
+     * @return string
+     */
+    public function pk(): string
     {
         return TableModelFinder::findPk(static::class);
     }
 
+    /**
+     * Saves the object to the database.
+     * 
+     * @return Q\Orm\Model|null
+     */
     public function save()
     {
-        $pk = TableModelFinder::findPk(static::class);
+        $pk = $this->pk();
         $object_props = get_object_vars($this);
         if (array_key_exists($pk, $object_props)) {
 
@@ -75,7 +93,14 @@ abstract class Model
         }
     }
 
-    public function prevState(array $assoc = null)
+    /**
+     * Used to get and state the previous state of a model.
+     * 
+     * @param array|null $assoc
+     * 
+     * @return array
+     */
+    public function prevState(array $assoc = null): array
     {
         static $state;
         if ($assoc) {
@@ -88,7 +113,12 @@ abstract class Model
         return [];
     }
 
-    public function reload()
+    /**
+     * Reload the model from the database.
+     * 
+     * @return Model
+     */
+    public function reload(): Model
     {
         $prevState = $this->prevState();
         $isDirty = false;
@@ -112,6 +142,13 @@ abstract class Model
         return $this;
     }
 
+    /**
+     * Get a JSON representation of a model.
+     * 
+     * @param bool $expandLists
+     * 
+     * @return string|false
+     */
     public function json($expandLists = false)
     {
         $vars = get_object_vars($this);
@@ -130,10 +167,20 @@ abstract class Model
         return json_encode($vars, JSON_PRETTY_PRINT);
     }
 
-    public static function items()
+    /**
+     * All the objects that belong to a model.
+     * 
+     * @return Handler
+     */
+    public static function items(): Handler
     {
         return new Handler(static::class);
     }
 
-    public static abstract function schema();
+    /**
+     * Get the user defined schema.
+     * 
+     * @return array
+     */
+    public static abstract function schema(): array;
 }
