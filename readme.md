@@ -148,6 +148,20 @@ That's it for the setup. From now on, we'll assume you already have a setup and 
 ## QUICK TUTORIAL
 For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ here ](docs/tutorial/start.md)
 
-## IN-DEPTH TUTORIAL (STRONGLY RECOMMENDED)
-For a more complete and in-depth tutorial, click [ here ](docs/parts/toc.md)
-      
+## IN-DEPTH TUTORIAL
+
+- [ Creating Models ]( creating_models.md )
+- [ Migrating Models ]( migrating_models.md )
+- [ Making Queries ]( making_queries.md )
+- [ Query Filters ]( query_filters.md )
+- [ Model Relationships ]( relationships.md )
+- [ The Command Line Interface ]( cli.md )
+- [ Defaults ]( defaults.md )
+- [ UUID's ]( uuid.md )
+- [ Joins ]( joins.md )
+- [ Grouping Aggregates ]( grouping.md )
+- [ Set Operations ]( sets.md )
+
+## FINALLY
+Work with databases smiling and write **less** SQL, if any.
+    
