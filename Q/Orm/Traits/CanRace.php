@@ -27,7 +27,7 @@ trait CanRace
      */
     private function conBuild(array $values, $operator, $numeric = true, $append = true): void
     {
-        $pk = TableModelFinder::findPk($this->__model__);
+        $pk = TableModelFinder::findModelPk($this->__model__);
 
         foreach ($values as $k => $value) {
             if (!is_numeric($value) && !is_string($value)) {

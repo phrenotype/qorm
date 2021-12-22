@@ -15,7 +15,7 @@ class Address extends Model
 	public $owner;
 
 
-	public static function schema()
+	public static function schema(): array
 	{
 		return [
 			'zip' => Field::CharField(function (Column $column) {

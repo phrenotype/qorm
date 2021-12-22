@@ -102,7 +102,7 @@ class CrossEngine
         );
     }
 
-    public static function modelsToTables(array $models)
+    public static function modelsToTables(array $models): array
     {
         return Decider::decide(
             Setup::$engine,
@@ -111,7 +111,8 @@ class CrossEngine
             },
             function () use ($models) {
                 return Sqlite::modelsToTables($models);
-            }
+            },
+            []
         );
     }
 
@@ -124,7 +125,8 @@ class CrossEngine
             },
             function () use ($table, $field, $indexName) {
                 return Sqlite::addUniqueIndexQuery($table, $field, $indexName);
-            }
+            },
+            []
         );
     }
 
@@ -217,7 +219,7 @@ class CrossEngine
                 return Sqlite::changeColumnQuery($table, $oldName, $column);
             }
         );
-    }    
+    }
 
     public static function dropColumnQuery($engine, string $table, string $column)
     {

@@ -57,7 +57,7 @@ abstract class Model
 
     public function __toString()
     {
-        $pk = TableModelFinder::findPk(static::class);
+        $pk = $this->pk();
         $v = $this->$pk;
         return static::class . "($v)";
     }
@@ -69,7 +69,7 @@ abstract class Model
      */
     public function pk(): string
     {
-        return TableModelFinder::findPk(static::class);
+        return TableModelFinder::findModelPk(static::class);
     }
 
     /**

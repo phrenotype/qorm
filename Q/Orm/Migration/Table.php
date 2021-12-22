@@ -4,24 +4,49 @@ namespace Q\Orm\Migration;
 
 use Q\Orm\Engines\CrossEngine;
 
+/**
+ * Represents a database table.
+ */
 class Table
 {
 
+    /**
+     * @var string
+     */
     public $name;
+
+    /**
+     * @var string|null
+     */
     public $oldName;
 
-    /*
-        * An array of Q\Orm\Migration\Column
-    */
+
+    /**
+     * @var Q\Orm\Migration\Column[]
+     */
     public $fields = [];
 
-    /* An array of Index */
+
+    /**
+     * @var Q\Orm\Migration\Index[]
+     */
     public $indexes = [];
 
-    /* An array of foreign keys */
+
+    /**
+     * @var Q\Orm\Migration\ForeignKey[]
+     */
     public $foreignKeys = [];
 
-    public function __construct($name, array $fields = [], array $indexes = [], array $foreignKeys = [])
+    /**
+     * The constructor.
+     * 
+     * @param string $name
+     * @param array $fields
+     * @param array $indexes
+     * @param array $foreignKeys
+     */
+    public function __construct(string $name, array $fields = [], array $indexes = [], array $foreignKeys = [])
     {
         $this->name = $name;
         $this->fields = $fields;
@@ -29,7 +54,12 @@ class Table
         $this->foreignKeys = $foreignKeys;
     }
 
-    public function toSql()
+    /**
+     * Get SQL representation of a Q\Orm\Migration\Table.
+     * 
+     * @return string
+     */
+    public function toSql(): string
     {
         return CrossEngine::tableToSql($this);
     }
@@ -43,5 +73,4 @@ class Table
     {
         return '';
     }
-
 }

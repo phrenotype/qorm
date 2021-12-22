@@ -299,7 +299,7 @@ trait CanSelect
             }
         }
 
-        $pk = TableModelFinder::findPk($this->__model__);
+        $pk = TableModelFinder::findModelPk($this->__model__);
 
         $cols = Helpers::getModelColumns($this->__model__);
 
@@ -371,40 +371,6 @@ trait CanSelect
             }
             $query = rtrim($query, ' AND ');
         }
-
-
-
-        /*
-        $holders = [];
-
-        foreach ($this->__set_operations__ as $pair) {
-            $thisPk = TableModelFinder::findPk($this->model());
-            list($op, $h) = $pair;
-            if ($op === 'union') {
-                continue;
-            }
-            $hPk = TableModelFinder::findPk($h->model());
-            $h->project($hPk);
-
-            $holders = $h->buildQuery(true)['placeholders'];
-
-            if ($query == '') {
-                $query .= ' WHERE ';
-            } else {
-                $query .= ' AND ';
-            }
-
-            if ($op === 'except') {
-                $query .= $thisPk . " NOT IN (" . $h->buildQuery()['query'] . ')';
-            } else if ($op === 'intersect') {
-                $query .= $thisPk . ' IN (' . $h->buildQuery()['query'] . ')';
-            }
-
-            $placeholders = array_merge($placeholders, $holders);
-        }
-
-        */
-
 
         return [$query, $placeholders];
     }

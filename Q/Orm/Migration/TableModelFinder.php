@@ -7,7 +7,7 @@ use Q\Orm\Helpers;
 
 class TableModelFinder
 {
-    public static function findPk(string $model)
+    public static function findModelPk(string $model)
     {
         $schema = $model::schema();
         $pk = 'id';
@@ -32,11 +32,10 @@ class TableModelFinder
                         $columnName = $fieldObject->column->name;
                     } else {
                         $parentClass = $fieldObject->model;
-                        $parentPk = TableModelFinder::findPk($parentClass);
+                        $parentPk = TableModelFinder::findModelPk($parentClass);
                         $parentClassShortName = Helpers::getShortName($parentClass);
                         if (strtolower($fieldName) === strtolower($parentClassShortName)) {
-                            $fieldModelPk = self::findPk($fieldObject->model);
-                            $columnName = Helpers::modelNameToTableName(Helpers::getShortName($fieldObject->model)) . '_' . $fieldModelPk;
+                            $columnName = Helpers::modelNameToTableName($parentClassShortName) . '_' . $parentPk;
                         } else {
                             $columnName = $fieldName;
                         }
@@ -68,8 +67,8 @@ class TableModelFinder
     }
 
     public static function findModelFK(string $model, callable $predicate)
-    {
-        $table = CrossEngine::tableFromModels(Helpers::modelNameToTableName(Helpers::getShortName($model)));
+    {        
+        $table = CrossEngine::tableFromModels(Helpers::modelNameToTableName(Helpers::getShortName($model)));        
         if (is_object($table)) {
             foreach ($table->foreignKeys as $fk) {
                 if ($predicate($table, $fk) === true) {

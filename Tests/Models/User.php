@@ -17,7 +17,7 @@ class User extends Model
 	public $sponsor;
 	public $created;
 
-	public static function schema()
+	public static function schema(): array
 	{
 		return [
 			'name' => Field::CharField(function (Column $column) {

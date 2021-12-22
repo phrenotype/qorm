@@ -214,7 +214,7 @@ trait CanCud
         $assoc = $this->renameCols($assoc);
 
 
-        $pk = TableModelFinder::findPk($this->__model__);
+        $pk = TableModelFinder::findModelPk($this->__model__);
         $new_assoc = [];
         foreach ($assoc as $field => $value) {
 

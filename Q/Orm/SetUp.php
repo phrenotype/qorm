@@ -7,10 +7,10 @@ use Q\Orm\Migration\MigrationMaker;
 use Q\Orm\Migration\Operation;
 
 
-/*
-    SetUp is an Injector for the different services
-*/
 
+/**
+ * An Injector for different classes
+ */
 class SetUp
 {
     const MYSQL = 'MYSQL';
@@ -22,6 +22,8 @@ class SetUp
     public static $migrationsFolder;
 
     public static $dbConfig;
+
+    public static $env;
 
     private static function init(string $modelsPath, string $migrationsFolder, array $config = [], string $engine = null)
     {
@@ -46,20 +48,36 @@ class SetUp
         MigrationMaker::setUpForMigrations($modelsPath, $migrationsFolder);
     }
 
-    public static function env($key)
+    /**
+     * Get and environment variable.
+     * 
+     * @param string $key
+     * 
+     * @return string
+     */
+    public static function env(string $key): string
     {
         static $qAssoc;
 
+        $env = self::$env;
+        if (!$env) {
+            $env = '.env';
+        }
+
         if (($_ENV[$key] ?? false)) {
+
             return $_ENV[$key];
         } else if (($_SERVER[$key] ?? false)) {
             return $_SERVER[$key];
         } else if (getenv($key)) {
+
             return getenv($key);
-        } else if (file_exists('.env')) {
+        } else if (is_readable($env)) {
+
             if (is_null($qAssoc)) {
-                $qAssoc = parse_ini_file('.env', false, INI_SCANNER_RAW);
+                $qAssoc = parse_ini_file($env, false, INI_SCANNER_RAW);
             }
+
             $value = $qAssoc[$key] ?? '';
             if ($value) {
                 putenv("$key=$value");
@@ -71,8 +89,19 @@ class SetUp
         return '';
     }
 
-    public static function main($hit = true)
+
+    /**
+     * Wire up everthing.
+     * 
+     * @param bool $hit
+     * @param string|null $env Path to env file, if none exists in root folder.
+     * 
+     * @return void
+     */
+    public static function main($hit = true, string $env = null): void
     {
+        self::$env = $env;
+
         $models = self::env('Q_MODELS');
         $migrations = self::env('Q_MIGRATIONS');
 

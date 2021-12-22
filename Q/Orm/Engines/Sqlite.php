@@ -306,7 +306,7 @@ class Sqlite implements IEngine
 
             if ($fieldObject->isFk()) {
                 $parentClass = $fieldObject->model;
-                $parentPk = TableModelFinder::findPk($parentClass);
+                $parentPk = TableModelFinder::findModelPk($parentClass);
                 $parentClassShortName = Helpers::getShortName($parentClass);
             }
 

@@ -73,7 +73,7 @@ class Helpers
         $props = Helpers::getModelProperties($class);
         $empty = true;
 
-        $pk = TableModelFinder::findPk($class);
+        $pk = $object->pk();
 
         if ($object->$pk ?? false) {
             return false;
@@ -146,11 +146,14 @@ class Helpers
      */
     public static function remove($value, array $assoc): array
     {
-        $key = array_search($value, $assoc);
-        if ($key !== false) {
-            unset($assoc[$key]);
+        $new = [];
+        foreach ($assoc as $v) {
+            if ($v == $value) {
+                continue;
+            }
+            $new[] = $v;
         }
-        return $assoc;
+        return $new;
     }
 
     /**
@@ -174,7 +177,7 @@ class Helpers
     {
         $escaper = self::getEscaper();
 
-        if (preg_match('#(?mi)^' . $escaper . '.*' . $escaper . '$#', $value)) {
+        if (preg_match('#(?mi)^(`|").*\1$#', trim($value))) {
             return $value;
         } else {
             return "$escaper{$value}$escaper";
