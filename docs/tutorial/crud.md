@@ -21,7 +21,7 @@ $post = $p->save();
 
 ```
 
-To find out other ways to create records, please refer to [ this page ](./../parts/making_queries.md)
+To find out other ways to create records, please refer to [ this page ](./../parts/making_queries.md#creating-objects)
 
 ## READ
 To query a single author
@@ -59,13 +59,14 @@ Post::items()->filter(['id'=>4])->update([
 ]);
 ```
 
-To find out more about other ways to update records, please refer to [ this page ](./../parts/making_queries.md)
+To find out more about other ways to update records, please refer to [ this page ](./../parts/making_queries.md#updating)
 To find out more about filters , please refer to [ this page ](./../parts/query_filters.md)
 
 ## DELETE
 ```php
 $post = Post::items()->filter(['id'=>4])->delete();
 ```
+To find out other ways to delete objects, please refer to [ this page ](./../parts/making_queries.md#deleting-objects)
 To find out more about filters , please refer to [ this page ](./../parts/query_filters.md)
 
 And that's it !
