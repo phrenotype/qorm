@@ -129,7 +129,7 @@ trait CanSelect
 
         $joined = !empty($this->__joined__);
 
-        $assoc = Filter::objectify($assoc, $this->model(), $joined);
+        $assoc = Filter::deClass($assoc, $this->model(), $joined);
 
         $alias = null;
 

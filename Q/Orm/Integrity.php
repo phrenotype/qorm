@@ -7,8 +7,10 @@ use Q\Orm\Migration\Introspector;
 
 use function Q\Orm;
 
-/* The Integrity class tries to make sure that the models are in order */
 
+/**
+ * The Integrity class tries to make sure that the models are in order
+ */
 class Integrity
 {
     public static function refuseDuplicateAttributes()
@@ -37,5 +39,9 @@ class Integrity
 
     public static function phpVersionCheck()
     {
+        if (version_compare(PHP_VERSION, '7.0.0') == -1) {
+            throw new \Error("Minimum version of php required is 7.0.0.");
+        }
+        die;
     }
 }
