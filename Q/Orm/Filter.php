@@ -31,9 +31,6 @@ class Filter
                 $this->string .= ' ' . Helpers::ticks($key) . ' = ?';
                 $this->values[] = $value;
             } else {
-                /* Will maybe add object path lookups later */
-                /* E.g User::objects->filter(['user.accounts.id'=>]) */
-                //For now, only support first level filter lookups for primitives
 
                 $exploded = explode('.', $key);
 
@@ -87,6 +84,12 @@ class Filter
     {
         return (new static($assoc))->parse($prefixWith);
     }
+
+
+
+
+
+
 
     public static function normalize($k, $v, $model, $ignoreUnkownFields = false)
     {
@@ -167,16 +170,6 @@ class Filter
 
             $columnName = TableModelFinder::findModelColumnName($model, $k);
 
-            /*
-            $isFk = TableModelFinder::findModelFK($model, function ($table, $fk) use ($k, $columnName) {
-                return ($fk->field === $columnName);
-            });
-
-            if (is_object($isFk)) {
-                throw new \Error(sprintf("%s.%s cannot point to non-objects because it is a reference field.", $model, $k));
-            }
-            */
-
             if ($onlyProps) {
 
                 if ($columnName) {
@@ -203,19 +196,13 @@ class Filter
         return [$key, $value];
     }
 
-    public static function objectify(array $assoc, string $model, $joined = false)
+    public static function deClass(array $assoc, string $model, $joined = false)
     {
 
         $newAssoc = [];
 
 
         foreach ($assoc as $k => $v) {
-
-            /* Skip instances of Handler */
-            // if($v instanceof Handler){
-            //     $newAssoc[$k]=$v;
-            //     continue;
-            // }
 
             $tmpKey = null;
             if (preg_match("#(\w+\.)+\w+#", $k)) {
@@ -259,6 +246,15 @@ class Filter
         }
         return $newAssoc;
     }
+
+
+
+
+
+
+
+
+
 
     public static function validate(array $filters)
     {
@@ -309,7 +305,7 @@ class Filter
         }
         foreach ($keys as $k) {
             if (!preg_match("/^(\w+)\((\*|\w+)\)\.\w+$/i", $k)) {
-                throw new \Error(sprintf("'%s' has to be an aggregate function without ticks", $k));
+                throw new \Error(sprintf("'%s' has to be an aggregate function without ticks/escaping.", $k));
             }
             if (preg_match("#^(?:[\w()]+\.)+\w+$#", $k)) {
                 $ploded = explode(".", $k);
