@@ -7,106 +7,248 @@ use Q\Orm\Field;
 class SchemaBuilder
 {
 
+    /**
+     * @var string
+     */
     public $name = '';
+
+    /**
+     * @var Q\Orm\Migration\Column[]
+     */
     public $field_set = [];
+
+    /**
+     * @var Q\Orm\Migration\Index[]
+     */
     public $index_set = [];
+
+    /**
+     * @var Q\Orm\Migration\ForeignKey[]
+     */
     public $foreign_key_set = [];
 
-    public function __construct($name)
+
+    /**
+     * The constructor.
+     * 
+     * @param string $name
+     */
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    public function toTable()
+    /**
+     * Get a Q\Orm\Migration\Table representation of built schema.
+     * 
+     * @return Table
+     */
+    public function toTable(): Table
     {
         return new Table($this->name, $this->field_set, $this->index_set, $this->foreign_key_set);
     }
 
-    public function column($name, $type, $definition)
+    /**
+     * Add a column.
+     * 
+     * @param string $name
+     * @param string $type
+     * @param array $definition
+     * 
+     * @return Q\Orm\Migration\SchemaBuilder
+     */
+    public function column(string $name, string $type, array $definition): SchemaBuilder
     {
         $this->field_set[] = new Column($name, $type, $definition);
         return $this;
     }
 
-    public function id()
+
+    /**
+     * Add an autoincrementing integer field called 'id' as primary key.
+     * 
+     * @return SchemaBuilder
+     */
+    public function id(): SchemaBuilder
     {
         return $this->column('id', 'bigint', ['null' => false, 'auto_increment' => true, 'unsigned' => true])
             ->primary('id');
     }
 
-    public function integer($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function integer(string $name, array $definition): SchemaBuilder
     {
-        return $this->column($name, Field::INTEGER, $definition);
+        $this->column($name, Field::INTEGER, $definition);
+        return $this;
     }
 
-    public function boolean($name, $definition){
-        return $this->column($name, Field::BOOL, $definition);
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function boolean(string $name, array $definition): SchemaBuilder
+    {
+        $this->column($name, Field::BOOL, $definition);
+        return $this;
     }
 
-    public function string($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function string(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::CHAR, $definition);
+        return $this;
     }
 
-    public function text($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function text(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::TEXT, $definition);
+        return $this;
     }
 
-    public function date($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function date(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::DATE, $definition);
+        return $this;
     }
 
-    public function dateTime($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function dateTime(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::DATETIME, $definition);
+        return $this;
     }
 
-    public function decimal($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function decimal(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::DECIMAL, $definition);
+        return $this;
     }
 
-    public function numeric($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function numeric(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::NUMERIC, $definition);
+        return $this;
     }
 
-    public function float($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function float(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::FLOAT, $definition);
+        return $this;
     }
 
-    public function double($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function double(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::DOUBLE, $definition);
+        return $this;
     }
 
-    public function enum($name, $definition)
+    /**
+     * @param string $name
+     * @param array $definition
+     * 
+     * @return SchemaBuilder
+     */
+    public function enum(string $name, array $definition): SchemaBuilder
     {
         $this->column($name, Field::ENUM, $definition);
+        return $this;
     }
 
-    public function index($field)
+    /**
+     * @param string $field
+     * 
+     * @return SchemaBuilder
+     */
+    public function index(string $field): SchemaBuilder
     {
         $this->index_set[] = new Index($field, Index::INDEX);
         return $this;
     }
 
-    public function unique($field)
+    /**
+     * @param string $field
+     * 
+     * @return SchemaBuilder
+     */
+    public function unique(string $field): SchemaBuilder
     {
         $this->index_set[] = new Index($field, Index::UNIQUE);
         return $this;
     }
 
-    public function primary($field)
+    /**
+     * @param string $field
+     * 
+     * @return SchemaBuilder
+     */
+    public function primary(string $field): SchemaBuilder
     {
         $this->index_set[] = new Index($field, Index::PRIMARY_KEY);
         return $this;
     }
 
-    public function foreignKey($field, $refTable, $refField, $onDelete)
+    /**
+     * @param string $field
+     * @param string $refTable
+     * @param string $refField
+     * @param string $onDelete
+     * 
+     * @return SchemaBuilder
+     */
+    public function foreignKey(string $field, string $refTable, string $refField, string $onDelete)
     {
         $this->foreign_key_set[] = new ForeignKey($field, $refTable, $refField, $onDelete);
         return $this;

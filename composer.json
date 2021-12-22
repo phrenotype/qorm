@@ -7,11 +7,11 @@
         "php orm",
         "migrations",
         "automigration"
-    ],    
+    ],
     "license": "MIT",
     "authors": [
         {
-            "name": "Paul Robert"            
+            "name": "Paul Robert"
         }
     ],
     "autoload": {
@@ -27,5 +27,7 @@
         "phpunit/phpunit": "^9.5",
         "fakerphp/faker": "^1.15"
     },
-    "bin": ["bin/qorm"]
+    "bin": [
+        "bin/qorm"
+    ]
 }

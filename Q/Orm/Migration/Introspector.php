@@ -9,14 +9,14 @@ use Q\Orm\SetUp;
 
 class Introspector
 {
-    public static function modelsToArrayOfTables()
+    public static function modelsToArrayOfTables() : array
     {
         $models = Helpers::getDeclaredModels();        
         $processed = CrossEngine::modelsToTables($models);        
         return $processed;
     }
 
-    public static function schemaToArrayOfTables()
+    public static function schemaToArrayOfTables(): array
     {
         $dbName = Connection::getParameters()['name'];
         return CrossEngine::schemaToTables(SetUp::$engine, $dbName);

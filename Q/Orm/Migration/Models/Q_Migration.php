@@ -8,21 +8,22 @@ use Q\Orm\Migration\Index;
 use Q\Orm\Migration\Column;
 
 
-class Q_Migration extends Model {
+class Q_Migration extends Model
+{
 
 	public $name;
-    public $applied;
+	public $applied;
 
-	public static function schema(){
+	public static function schema(): array
+	{
 		return [
-			'name' => Field::CharField(function(Column $column){
+			'name' => Field::CharField(function (Column $column) {
 				$column->size = 255;
 				$column->null = false;
 			}, Index::UNIQUE),
-			'applied' => Field::DateTimeField(function(Column $column){
+			'applied' => Field::DateTimeField(function (Column $column) {
 				$column->null = true;
-			}),				
+			}),
 		];
 	}
 }
-

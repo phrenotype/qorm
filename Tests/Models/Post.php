@@ -15,10 +15,11 @@ class Post extends Model
 	public $body;
 	public $user;
 
-	public static function schema()
+	public static function schema(): array
 	{
 		return [
 			'title' => Field::CharField(function (Column $column) {
+				$column->name = 'realtitle';
 				$column->size = 255;
 				$column->null = false;
 			}),

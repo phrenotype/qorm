@@ -15,30 +15,33 @@ class MigrationMaker
 
     private static $pdo;
 
-    private static function requireFiles($folder)
+    private static function requireModels($folder)
     {
         $files = scandir($folder);
         $modified_files = array_filter($files, function ($path) {
-            return ($path !== '.') && ($path !== '..') && (!preg_match("/^\./", $path));
+            return ($path !== '.') && ($path !== '..') && (!preg_match("/^\./", $path)) && (preg_match("/\.php$/", $path));
         });
 
         foreach ($modified_files as $file) {
             $file = $folder . DIRECTORY_SEPARATOR . $file;
-            (is_dir($file)) && (self::requireFiles($file)()) || (require($file));
+            $namespaced = str_replace("/", "\\", dirname($file)) . "\\" . basename($file, '.php');
+            if (!class_exists($namespaced)) {
+                (is_dir($file)) && (self::requireModels($file)()) || (require($file));
+            }
         }
         return true;
     }
 
-    public static function setUpForMigrations($models, $migrationsFolder)
+    public static function setUpForMigrations(string $models, string $migrationsFolder)
     {
         global $argc;
 
-        //Manually Include models;        
+        //Manually Include models;                
         if (is_dir($models)) {
             if (!file_exists($models)) {
                 mkdir($models, 0777, true);
             }
-            self::requireFiles($models);
+            self::requireModels($models);
         } else if (is_file($models)) {
             if (file_exists($models)) {
                 include_once $models;
@@ -63,7 +66,7 @@ class MigrationMaker
         });
 
         // To avoid a query overhead every time
-        if (php_sapi_name() === 'cli' && ($argc ?? 0) > 1) {
+        if (php_sapi_name() === 'cli' && ($argc ?? 0) > 1 && SetUp::$engine != null) {
             self::createMigrationsTable();
             self::checkIntergrity();
         }

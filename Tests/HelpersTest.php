@@ -2,89 +2,127 @@
 
 use PHPUnit\Framework\TestCase;
 use Q\Orm\Helpers;
+use Q\Orm\SetUp;
 use Tests\Models\Comment;
+use Tests\Models\User;
 
 class HelpersTest extends TestCase
 {
 
     protected function setUp(): void
     {
+        SetUp::main(false, __DIR__ . '/Database/.env');
     }
 
     protected function tearDown(): void
     {
     }
 
-
-    public function isRefFieldDataProvider()
+    public function testIsModelEmpty()
     {
-        return [
-            ['user_id', Comment::class, true],
-            ['user', Comment::class, true],
-            ['text', Comment::class, false]
-        ];
+        $m1 = new User();
+        $m1->id = 5;
+
+        $m2 = new User();
+
+        $m3 = new User();
+        $m3->name = "qorm";
+
+        $r1 = Helpers::isModelEmpty($m1);
+        $r2 = Helpers::isModelEmpty($m2);
+        $r3 = Helpers::isModelEmpty($m3);
+
+        $this->assertEquals($r1, false);
+        $this->assertEquals($r2, true);
+        $this->assertEquals($r3, false);
     }
 
-    /**
-     * @dataProvider isRefFieldDataProvider
-     */
-    public function testIsRefField($field, $class, $expected)
+    public function testGetModelRefFields()
     {
-        $actual = Helpers::isRefField($field, $class);
-        $this->assertEquals($expected, $actual);
+        $r1 = Helpers::getModelRefFields(User::class);
+        $r2 = Helpers::getModelRefFields(Comment::class);
+
+        $this->assertEquals(count($r1), 1);
+        $this->assertEquals(count($r2), 2);
     }
 
-    public function removeDataProvider()
+    public function testIsRefField()
     {
-        $arr = ['a', 'b', 'c'];
-        unset($arr[0]);
-        return [
-            ['a', ['a', 'b', 'c'], $arr],
-            ['d', ['a', 'b', 'c'], ['a', 'b', 'c']],
-        ];
+        $r1 = Helpers::isRefField('user_id', Comment::class);
+        $r2 = Helpers::isRefField('user', Comment::class);
+        $r3 = Helpers::isRefField('text', Comment::class);
+
+        $this->assertEquals($r1, true);
+        $this->assertEquals($r2, true);
+        $this->assertEquals($r3, false);
     }
 
-    /**
-     * @dataProvider removeDataProvider
-    */
-    public function testRemove($value, $assoc, $expected)
+    public function testRemove()
     {
-        $actual = Helpers::remove($value, $assoc);
-        $this->assertEquals($expected, $actual);
+        $r1 = Helpers::remove('a', ['a', 'b', 'c']);
+        $r2 = Helpers::remove('d', ['a', 'b', 'c']);
+
+        $this->assertEquals($r1, ['b', 'c']);
+        $this->assertEquals($r2, ['a', 'b', 'c']);
     }
 
-    public function modelNameToTableNameDataProvider(){
-        return [
-            ['ThriftUser', 'thrift_user'],
-            ['_Thrift_99', 'thrift_99'],
-            ['Thrift_99_', 'thrift_99'],
-            ['Q_Migration', 'q_migration'],
-        ];
+    public function testTicks()
+    {
+        $r1 = Helpers::ticks("example");
+        $r2 = Helpers::ticks('`example`');
+        $r3 = Helpers::ticks('"example"');
+
+        $bool = (bool)preg_match('/(`|")example\1/', $r1);
+
+        $this->assertEquals($bool, true);
+        $this->assertEquals($r2, "`example`");
+        $this->assertEquals($r3, '"example"');
     }
 
-    /**
-     * @dataProvider modelNameToTableNameDataProvider
-     */
-    public function testModelNameToTableName($modelName, $expected){
-        $actual = Helpers::modelNameToTableName($modelName);
-        $this->assertEquals($expected, $actual);
-    }
-    
+    public function testGetModelProperties()
+    {
+        $r1 = Helpers::getModelProperties(User::class);
+        $r2 = Helpers::getModelProperties(Comment::class);
 
-    public function tableNameToModelNameDataProvider(){
-        return [
-            ['thrift_user', 'ThriftUser'],
-            ['_thrift_user_', 'ThriftUser'],
-            ['user_home_address', 'UserHomeAddress']
-        ];
+        $this->assertEquals(count($r1), 5);
+        $this->assertEquals(count($r2), 3);
     }
 
-    /**
-     * @dataProvider tableNameToModelNameDataProvider
-     */
-    public function testTableNameToModelName($tableName, $expected){
-        $actual = Helpers::tableNameToModelName($tableName);
-        $this->assertEquals($expected, $actual);
+    public function testGetModelColumns()
+    {
+        $r1 = Helpers::getModelProperties(User::class);
+        $r2 = Helpers::getModelColumns(User::class);
+
+        $this->assertEquals(count($r1), count($r2));
     }
 
+    public function testGetDeclaredModels()
+    {
+        $models = Helpers::getDeclaredModels();
+        $this->assertEquals(count($models), 4);
+    }
+
+    public function testModelNameToTableName()
+    {
+        $r1 = Helpers::modelNameToTableName('ThriftUser');
+        $r2 = Helpers::modelNameToTableName('_Thrift_99');
+        $r3 = Helpers::modelNameToTableName('Thrift_99_');
+        $r4 = Helpers::modelNameToTableName('Q_Migration');
+
+        $this->assertEquals($r1, 'thrift_user');
+        $this->assertEquals($r2, 'thrift_99');
+        $this->assertEquals($r3, 'thrift_99');
+        $this->assertEquals($r4, 'q_migration');
+    }
+
+    public function testTableNameToModelName()
+    {
+        $r1 = Helpers::tableNameToModelName('thrift_user');
+        $r2 = Helpers::tableNameToModelName('_thrift_user_');
+        $r3 = Helpers::tableNameToModelName('user_home_address');
+
+        $this->assertEquals($r1, 'ThriftUser');
+        $this->assertEquals($r2, 'ThriftUser');
+        $this->assertEquals($r3, 'UserHomeAddress');
+    }
 }

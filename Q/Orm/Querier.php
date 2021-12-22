@@ -72,7 +72,7 @@ class Querier
             if ($fieldObject->isFk()) {
 
                 $parentClass = $fieldObject->model;
-                $parentPkField = TableModelFinder::findPk($parentClass);
+                $parentPkField = TableModelFinder::findModelPk($parentClass);
 
 
                 $ownAttribute = $fieldObject->column->name;
@@ -118,13 +118,6 @@ class Querier
                         continue;
                     }
 
-                    //$parent_pk_field = TableModelFinder::findPk($parentClassName);
-
-
-                    //$child_field = TableModelFinder::findModelColumnName($childClass, $fieldName);
-
-                    //$lookup = $model->$parent_pk_field ?? NULL;
-
                     $attr = Helpers::modelNameToTableName($childClass);
 
                     $childTableName = Helpers::modelNameToTableName(Helpers::getShortName($childClass));
@@ -137,7 +130,7 @@ class Querier
 
                     /* To avoid referencing id with an object, as in the case of self relationships */
                     if ($childTableName === $parentTableName) {
-                        $fieldName = TableModelFinder::findPk($childClass);
+                        $fieldName = TableModelFinder::findModelPk($childClass);
                         $value = $model->$fieldName;
                     } else {
                         $value = clone $model;
@@ -175,7 +168,7 @@ class Querier
 
                     /* To avoid referencing id with an object, as in the case of self relationships */
                     if ($childTableName === $parentTableName) {
-                        $fieldName = TableModelFinder::findPk($childClass);
+                        $fieldName = TableModelFinder::findModelPk($childClass);
                         $value = $model->$fieldName;
                     } else {
                         $value = clone $model;

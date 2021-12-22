@@ -133,7 +133,7 @@ class Filter
             $columnName = TableModelFinder::findModelColumnName($model, $k);
 
 
-            $valuePkField = ($v instanceof Model) ? TableModelFinder::findPk(Helpers::getClassName($v)) : null;
+            $valuePkField = ($v instanceof Model) ? $v->pk() : null;
 
             if ($inBoth) {
 

@@ -47,15 +47,15 @@ class Field
     public $onDelete;
 
     /**
-     * @var bool|null
+     * @var bool
      */
-    private $isKey;
+    private $isKey = false;
 
 
     /**
-     * @var bool|null
+     * @var bool
      */
-    private $isFk;
+    private $isFk = false;
 
     /**
      * Checks if a field has a key defined on it.

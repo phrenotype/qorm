@@ -15,7 +15,7 @@ class Comment extends Model
 	public $user;
 	public $post;
 
-	public static function schema()
+	public static function schema(): array
 	{
 		return [
 			'text' => Field::TextField(function (Column $column) {
