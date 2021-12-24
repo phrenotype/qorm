@@ -10,6 +10,7 @@
 - [ Joins ]( joins.md )
 - [ Grouping Aggregates ]( grouping.md )
 - [ Set Operations ]( sets.md )
+- [ SubQueries ]( docs/parts/subqueries.md )  
 
 ---  
 

@@ -77,4 +77,4 @@ Aliases are required for all the handlers that will be directly involved in the 
 
 
 ---
-**[Previous Part : Grouping Aggregates](grouping.md)** 
+**[Previous Part : Grouping Aggregates](grouping.md)** | **[Next Part : SubQueries](subqueries.md)**

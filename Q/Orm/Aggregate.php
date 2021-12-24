@@ -11,5 +11,5 @@ class Aggregate
     const MAX = 'MAX';
     const MIN = 'MIN';
     const SUM = 'SUM';
-    const AVG = 'AVERAGE';
+    const AVG = 'AVG';
 }

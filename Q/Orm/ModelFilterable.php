@@ -194,6 +194,19 @@ class ModelFilterable implements Filterable
         return $this;
     }
 
+    public function exists()
+    {
+        $values = $this->value;
+        if (!($values instanceof Handler)) {
+            throw new \Error(sprintf(".exists only accepts instances of Q\Orm\Handler"));
+        }
+        $items = $values->buildQuery();
+        $query = $items['query'];
+        $placeholders = $items['placeholders'];
+        $this->expression = 'EXISTS (' . $query . ')';
+        $this->value = $placeholders;
+    }
+
     public function not_in()
     {
         $values = $this->value;

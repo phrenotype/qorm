@@ -161,6 +161,7 @@ For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ he
 - [ Joins ]( docs/parts/joins.md )
 - [ Grouping Aggregates ]( docs/parts/grouping.md )
 - [ Set Operations ]( docs/parts/sets.md )
+- [ SubQueries ]( docs/parts/subqueries.md )
 
 ## FINALLY
 Work with databases smiling and write **less** SQL, if any.

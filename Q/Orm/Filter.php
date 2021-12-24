@@ -19,6 +19,11 @@ class Filter
         $this->store = $assoc;
     }
 
+    private function isDotted(string $path)
+    {
+        return preg_match("/^(\w+\.)+\w+$/", $path);
+    }
+
     public function parse($prefixWith = null)
     {
 
@@ -27,26 +32,32 @@ class Filter
             if (is_int($key) && in_array(strtolower($value), self::CONJUNCTIONS)) {
                 //For connectors and & or
                 $this->string .= ' ' . strtoupper($value);
-            } else if (is_string($key) && preg_match("#^\w+$#", $key)) {
+            } else if (is_string($key) && preg_match("#^\w+$#", $key) && !is_a($value, Handler::class)) {
                 $this->string .= ' ' . Helpers::ticks($key) . ' = ?';
                 $this->values[] = $value;
-            } else {
+            } else if (is_string($key)) {
 
-                $exploded = explode('.', $key);
-
-                $field = Helpers::ticks($exploded[0]);
-
-                if (preg_match("/^\w+$/", $exploded[0])) {
-                    $field = Helpers::ticks($exploded[0]);
-                    if ($prefixWith) {
-                        $field = Helpers::ticks($prefixWith) . '.' . Helpers::ticks($exploded[0]);
-                    }
+                //Dot the undotted
+                if ($key !== '.exists' && !$this->isDotted($key) && is_a($value, Handler::class)) {
+                    $key = $key . '.eq';
                 }
 
 
-                $methods = array_slice($exploded, 1);
+                if ($this->isDotted($key)) {
+                    $exploded = explode('.', $key);
+                    $field = $exploded[0];
 
-                $eval = $this->path($field, $value, $methods);
+                    if ($prefixWith) {
+                        $field = Helpers::ticks($prefixWith) . '.' . Helpers::ticks($exploded[0]);
+                    }
+                    $methods = array_slice($exploded, 1);
+
+                    $eval = $this->path($field, $value, $methods);
+                } else if ($key === '.exists') {
+                    $eval = $this->path('', $value, ['exists']);
+                }
+
+
 
                 if (is_array($eval)) {
                     $this->string .= ' ' . $eval[0];
@@ -203,6 +214,12 @@ class Filter
 
 
         foreach ($assoc as $k => $v) {
+
+            // No point normalizing a non-field
+            if ($k === '.exists') {
+                $newAssoc[$k] = $v;
+                continue;
+            }
 
             $tmpKey = null;
             if (preg_match("#(\w+\.)+\w+#", $k)) {
