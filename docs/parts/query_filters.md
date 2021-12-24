@@ -390,6 +390,10 @@ User::items()->filter(['firstname.trim.lower.upper.eq'=>'PAUL']);
 User::items()->filter(['firstname.trim.length.gt'=>8]);
 ```
 
+## THE EXCEPTION  
+The exception to the above syntax is the `.exists` operator. It is an operator that fits into none of the above as it is neither a conjuction nor does it operate on a specific column. Reference [this page](subqueries.md) for more information.
+
+
 ----
 **[Previous : Making Queries](making_queries.md)**  |
 **[Next Part : Model Relationships](relationships.md)**

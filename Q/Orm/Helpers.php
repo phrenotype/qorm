@@ -35,7 +35,9 @@ class Helpers
             'is_null',
 
             'in',
-            'not_in'
+            'not_in',
+
+            '.exists'
         ];
     }
 
@@ -177,7 +179,7 @@ class Helpers
     {
         $escaper = self::getEscaper();
 
-        if (preg_match('#(?mi)^(`|").*\1$#', trim($value))) {
+        if (preg_match('/(?mi)^(`|").*\1$/', trim($value))) {
             return $value;
         } else {
             return "$escaper{$value}$escaper";

@@ -315,7 +315,7 @@ trait CanSelect
 
         $ticked = array_map(function ($c) {
 
-            if (strpos(strtolower($c), ' as ') === false || preg_match(Handler::AGGRT_WITH_AS_AND_TICKS, $c)) {
+            if (strpos(strtolower($c), ' as ') !== false || preg_match(Handler::AGGRT_WITH_AS_AND_TICKS, $c)) {
                 return $c;
             } else {
                 return Helpers::ticks($c);
