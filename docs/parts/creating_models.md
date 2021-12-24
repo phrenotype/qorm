@@ -11,7 +11,7 @@ The Q orm convention for naming models is the **pascal case**, e.g. **User, Post
 
 Also, use of singular words for naming models is encouraged. For instance User, instead of Users.
 
-A model should always extend the `\Q\Orm\Model` abstract class. It's also required to implement an abstract static method `\Q\Orm\Model::schema()`. This static method is what is used to build the database schema. It returns an associative array. The keys here are the column names as you want them in the database, and the values are instances of `\Q\Orm\Field` object. The benefit of doing things this way is that both your class definition and database table definition are in one place. At a glance, you can see what your database looks like without switching to a database viewer.
+A model should always extend the `Q\Orm\Model` abstract class. It's also required to implement an abstract static method `Q\Orm\Model::schema()`. This static method is what is used to build the database schema. It returns an associative array. The keys here are the column names as you want them in the database, and the values are instances of `Q\Orm\Field` object. The benefit of doing things this way is that both your class definition and database table definition are in one place. At a glance, you can see what your database looks like without switching to a database viewer.
 
 We are now going to create a **User** model. In your models folder, create a file **User.php** or if you are using a single file to store all the models, add this code to the file.
 
@@ -63,9 +63,11 @@ class User extends Model {
 
 ### SCHEMA FIELDS
 
-It is important to know that the fields that matter to the orm are the keys of the associative array that `\Q\Orm\Model::schema()` returns. The publicly defined attributes are only for code auto-completion and are completely optional, though adding them is strongly recommended.
+It is important to know that the fields that matter to the orm are the keys of the associative array that `Q\Orm\Model::schema()` returns. The publicly defined attributes are only for code auto-completion and are completely optional, though adding them is strongly recommended.
 
-The value of each key in tha `schema` array is a `\Q\Orm\Field` Object. There are different field types. Each field has a column, which the is passed to a closure for mutation.
+The value of each key in tha `schema` array is a `Q\Orm\Field` Object. There are different field types. Each field has a column, which the is passed to a closure for mutation.
+
+**For more details on Schema fields, refer to [this page](../partials/schema_fields.md)**.
 
 A column has the following attributes : 
 
@@ -84,8 +86,10 @@ This is used to define the default value for a column. It can take a static valu
 **`auto_increment`**  
 This is also set to true or false. There is no default.
 
+**To find out more about columns, refer to [this page](../partials/column.md)**.  
 
-A schema also has an `Index`, which is optional for all fields except `\Q\Orm\Field::ManyToOne()` and `\Q\Orm\Field::OneToOne()`.
+
+A schema also has an `Index`, which is optional for all fields except `Q\Orm\Field::ManyToOne()` and `\Q\Orm\Field::OneToOne()`.
 
 Indexes can be :
 
@@ -98,13 +102,16 @@ This creates a regular index on a field
 **`Index::UNIQUE`**
 This creates a unique index on a field 
 
+**To find out more about indexes, refer to [this page](../partials/indexes.md)**. 
 
-If the field is `\Q\Orm\Field::ManyToOne()` or `\Q\Orm\Field::OneToOne()`, there is another optional parameter, called `onDelete`.
+If the field is `Q\Orm\Field::ManyToOne()` or `Q\Orm\Field::OneToOne()`, there is another optional parameter, called `onDelete`.
 
 It can be :   
 **`ForeignKey::CASCADE`**  
 **`ForeignKey::RESTRICT`**  
 **`ForeignKey::NULLIFY`**
+
+**For more details on Schema fields, refer to [this page](../partials/schema_fields.md)**.  
 
 ----
 **[ Previous : Table Of Contents](toc.md)**  |  **[Next Part : Migrating Models](migrating_models.md)**   
