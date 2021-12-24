@@ -1,10 +1,10 @@
 # **Q Orm**
 
-![github stars](https://img.shields.io/github/stars/jameshadleychase/qorm?style=social)
+![github stars](https://img.shields.io/github/stars/phrenotype/qorm?style=social)
 ![packagist stars](https://img.shields.io/packagist/stars/qorm/qorm)
-![license](https://img.shields.io/github/license/jameshadleychase/qorm)
-![contributors](https://img.shields.io/github/contributors/jameshadleychase/qorm)
-![contributors](https://img.shields.io/github/languages/code-size/jameshadleychase/qorm)
+![license](https://img.shields.io/github/license/phrenotype/qorm)
+![contributors](https://img.shields.io/github/contributors/phrenotype/qorm)
+![contributors](https://img.shields.io/github/languages/code-size/phrenotype/qorm)
 ![downloads](https://img.shields.io/packagist/dm/qorm/qorm)
 
 ```php
