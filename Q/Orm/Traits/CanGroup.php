@@ -94,7 +94,7 @@ trait CanGroup
      * 
      * @return array
      */
-    private function resolveHaving($afterSet = false, $afterJoin = false): array
+    public function resolveHaving($afterSet = false, $afterJoin = false): array
     {
         if ($afterSet) {
             $filters = $this->__after_set_having__;

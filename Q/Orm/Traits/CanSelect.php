@@ -352,7 +352,7 @@ trait CanSelect
      * 
      * @return array
      */
-    private function resolveFilters($afterSet = false, $afterJoin = false): array
+    public function resolveFilters($afterSet = false, $afterJoin = false): array
     {
         if ($afterSet) {
             $filters = $this->__after_set_filters__;
@@ -381,7 +381,7 @@ trait CanSelect
      * 
      * @return string
      */
-    private function resolveOrderBy($afterSet = false, $afterJoin = false): string
+    public function resolveOrderBy($afterSet = false, $afterJoin = false): string
     {
         $order = $this->__order_by__;
         if ($afterSet) {
@@ -401,7 +401,7 @@ trait CanSelect
      * 
      * @return string
      */
-    private function resolveLimit($afterSet = false, $afterJoin = false): string
+    public function resolveLimit($afterSet = false, $afterJoin = false): string
     {
         $limit = $this->__limit__;
         if ($afterSet) {
