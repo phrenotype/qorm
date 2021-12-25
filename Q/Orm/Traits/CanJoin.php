@@ -131,7 +131,7 @@ trait CanJoin
      * 
      * @return array
      */
-    private function resolveJoin($afterSet = false): array
+    public function resolveJoin($afterSet = false): array
     {
         if ($afterSet) {
             $joined = $this->__after_set_joined__;
