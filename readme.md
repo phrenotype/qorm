@@ -165,4 +165,6 @@ For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ he
 
 ## FINALLY
 Work with databases smiling and write **less** SQL, if any.
+
+## Contact
     

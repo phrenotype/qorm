@@ -11,7 +11,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Paul Robert"
+            "name": "Paul Robert",
+            "email": "paul.contrib@gmail.com"
         }
     ],
     "autoload": {
