@@ -5,7 +5,7 @@ namespace Q\Orm;
 use Q\Orm\Migration\TableModelFinder;
 
 /**
- * A model that can represent both abstract ideas and humans alike.
+ * A model that can represent concrete or abstract ideas as well as humans.
  */
 abstract class Model
 {

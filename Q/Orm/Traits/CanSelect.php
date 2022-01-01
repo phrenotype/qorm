@@ -6,6 +6,7 @@ use Q\Orm\Filter;
 use Q\Orm\Handler;
 use Q\Orm\Helpers;
 use Q\Orm\Migration\TableModelFinder;
+use Q\Orm\Project;
 
 /**
  * Confers the ability to perform the select operation on Handlers and Humans alike.
@@ -218,6 +219,34 @@ trait CanSelect
     }
 
 
+    public function validateJoinProjectSyntax(string $f)
+    {
+        if (!empty($this->__joined__)) {
+            if (!Project::join($f)) {
+                throw new \Error(sprintf("Projected fields in joins must always be prefixed with Handler alias. Prefix '%s' with an alias.", $f));
+            }
+        }
+    }
+
+    private function makeExceptions(string $value, array $newProjected)
+    {
+        $newProjected = [];
+        $copy = $newProjected;
+
+        //Making an exception for join fields with alias
+        if (!empty($this->__joined__) && Project::plainAliased($value)) {
+            $newProjected[] = $value;
+        }
+
+        //Making an exception for group by
+        if (!empty($this->__group_by__) && Project::aggregateWithAsAndTicks($value)) {
+            $newProjected[] = $value;
+        }
+        if ($copy != $newProjected) {
+            return false;
+        }
+        return $newProjected;
+    }
 
     /**
      * @param bool $includePk
@@ -240,37 +269,25 @@ trait CanSelect
             foreach ($projected as $p) {
 
                 /* If we are in a join and it does not follow a pattern, throw error */
-                if (!empty($this->__joined__)) {
-                    $escaper = Helpers::getEscaper();
-                    if (!preg_match("|($escaper\w+$escaper\.$escaper\w+$escaper)(\s+as\s+$escaper\w+$escaper)?|i", $p)) {
-                        throw new \Error(sprintf("Projected fields in joins must always be prefixed with Handler alias. Prefix '%s' with an alias.", $p));
-                    }
-                }
+                $this->validateJoinProjectSyntax($p);
 
                 $inCols = in_array($p, $cols);
                 $inProps = in_array($p, $props);
 
-                $doesNotExist = !$inCols && !$inProps;
-                $onlyCols = $inCols && !$inProps;
                 $onlyProps = $inProps && !$inCols;
                 $inBoth = $inProps && $inCols;
 
-                //Making an exception for join fields with alias
-                if (preg_match(Handler::PLAIN_ALIASED_FIELD, strtolower($p))) {
-                    $newProjected[] = $p;
+                //Making special exceptions to bypass validation
+                $na = $this->makeExceptions($p, $newProjected);
+                if($na === false){
                     continue;
-                }
-
-                //Making an exception for group by
-                if (!empty($this->__group_by__) && preg_match(Handler::AGGRT_WITH_AS_AND_TICKS, strtolower($p))) {
-                    $newProjected[] = $p;
-                    continue;
+                }else{
+                    $newProjected = $na;
                 }
 
                 //So that id may or may not come back
                 if ($p === 'id') {
                     $newProjected[] = $p;
-                    continue;
                 }
 
                 if ($inBoth) {
@@ -315,7 +332,7 @@ trait CanSelect
 
         $ticked = array_map(function ($c) {
 
-            if (strpos(strtolower($c), ' as ') !== false || preg_match(Handler::AGGRT_WITH_AS_AND_TICKS, $c)) {
+            if (strpos(strtolower($c), ' as ') !== false || Project::aggregateWithAsAndTicks($c)) {
                 return $c;
             } else {
                 return Helpers::ticks($c);
@@ -324,7 +341,7 @@ trait CanSelect
 
         if ($prefixtable) {
             $tablenameAppended = array_map(function ($c) {
-                if (preg_match(Handler::AGGRT_WITH_AS_AND_TICKS, $c)) {
+                if (Project::aggregateWithAsAndTicks($c)) {
                     return $c;
                 } else if (strpos($c, '.') === false) {
                     if ($this->as()) {
