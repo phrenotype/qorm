@@ -33,7 +33,7 @@ Also, the models are **autoloaded**, eliminating the need for an autoloader.
 
 As long as you point to the correct file(s) or folders for models and migrations, you can leave the rest to the orm.
 
-## WHY USE Q ORM?
+## Why Use Q Orm ?
 1. You don't have to write migrations by hand.
 1. Model definition and schema are all in one class.
 1. An intuitive and powerful api for set operations.
@@ -46,7 +46,7 @@ As long as you point to the correct file(s) or folders for models and migrations
 1. You will end up with a well modelled data and properly designed database without feeling forced to do so.
 1. All changes to model classes are automatically detected and migrations made. With this, you will hardly ever need to write your own migrations. And if you do, you have the ability to do so, even in raw sql.
 
-## WHY .env FOR SETUP ?
+## Why .env For Setup ?
 This orm uses the .env file for configuration. This is for two reasons:  
 
 1. Convention.
@@ -56,16 +56,16 @@ The benefits more than out weight whatever minimalist risks there may be. Also, 
 
 TLDR; Just create a file called .env in the root of your project if your setup is not using one already.
 
-## INSTALLATION
+## Install
 Installation is done via composer.
 
 `composer require qorm/qorm`
 
 
-## SETUP
+## Setup
 There are three short steps here.  
 
-### STEP ONE
+### Step 1
 Open ( or create ) the **.env** and add the following content to it:    
 
 ```
@@ -93,7 +93,7 @@ Q_MIGRATIONS=migrations
 **Q_MIGRATIONS** : **Relative path** from project root to the ***folder*** where your generated migration files will be kept.
 
 
-### STEP TWO
+### Step 2
 Then, setup your workspace like this :  
 
 - index.php
@@ -108,12 +108,12 @@ If you are using a framework, then create these folders wherever you please.
 **migrations** is the empty folder where our migrations will be housed. **models.php or models** is the file or folder I intend to define my models in. Both of these are currently empty.
 
 
-### STEP THREE
+### Step 3
 
 The last step is to find where to call the method `\Q\Orm\SetUp::main()` that will initialize the orm. 
 
-#### FOR FRAMEWORK USERS
-If you are using a framework, find the bootstrap file, or create a middleware and call `\Q\Orm\SetUp::main()` method within it. 
+#### For Framework Users
+If you use a framework, find the bootstrap file, or create a middleware and call `\Q\Orm\SetUp::main()` method within it. 
 
 ```php
 <?php
@@ -126,7 +126,7 @@ Setup::main();
 
 After this you can proceed to make queries anywhere with your project.
 
-#### FOR NON FRAMEWORK USERS
+#### For Non Framework Users
 
 Use the code below as a template. The Q orm autoloads all the models. Assuming here that the `User` model has been defined.
 
@@ -145,10 +145,10 @@ Setup::main();
 
 That's it for the setup. From now on, we'll assume you already have a setup and have the `\Q\Orm\SetUp::main()` method called already.
 
-## QUICK TUTORIAL
+## Quick Tutorial
 For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ here ](docs/tutorial/start.md)
 
-## IN-DEPTH TUTORIAL
+## In-depth Tutorial
 
 - [ Creating Models ]( docs/parts/creating_models.md )
 - [ Migrating Models ]( docs/parts/migrating_models.md )
@@ -163,9 +163,9 @@ For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ he
 - [ Set Operations ]( docs/parts/sets.md )
 - [ SubQueries ]( docs/parts/subqueries.md )
 
-## FINALLY
+## Finally
 Work with databases smiling and write **less** SQL, if any.
 
 ## Contact
 **Email** : paul.contrib@gmail.com  
-    
+
