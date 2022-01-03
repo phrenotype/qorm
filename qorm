@@ -1,3 +1,0 @@
-<?php
-require 'vendor/autoload.php';
-require 'Q/Orm/Cli/cli.php';
