@@ -5,6 +5,6 @@ vendor/
 *.code-workspace
 *.sqlite3
 composer.lock
-qb
+qorm
 main.php
 seed.php
