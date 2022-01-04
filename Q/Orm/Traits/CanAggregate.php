@@ -22,9 +22,9 @@ trait CanAggregate
      * 
      * @return Handler
      */
-    public function aggregate(string $function, string $field) : Handler
+    public function aggregate(string $function, string $field): Handler
     {
-        if(!preg_match("/\w+/", $field)){
+        if (!preg_match("/[\w*]+/", $field)) {
             throw new \Error("Keywords are not supported in aggregate fieldname.");
         }
         $this->__primed_function = $function;
@@ -38,7 +38,7 @@ trait CanAggregate
      * 
      * @return array
      */
-    public function buildAggregateQuery() : array
+    public function buildAggregateQuery(): array
     {
         if ($this->__count__ == null) {
             $assoc = $this->buildQuery();
@@ -56,9 +56,14 @@ trait CanAggregate
             $lowerF = Helpers::ticks(strtolower($function));
 
             $tmp = Helpers::ticks($this->randomStr());
-            $field = $tmp . '.' . Helpers::ticks($field);
+
+            if ($field !== '*') {
+                $field = $tmp . '.' . Helpers::ticks($field);
+            }
+
 
             $q = "SELECT $upperF($field) AS $lowerF FROM ($query) AS $tmp";
+
             return [$q, $placeholders];
         }
     }
@@ -91,7 +96,7 @@ trait CanAggregate
      * 
      * @return int
      */
-    public function count($field = '*') : int
+    public function count($field = '*'): int
     {
         if ($this->__count__ == null) {
 
@@ -111,7 +116,7 @@ trait CanAggregate
      * 
      * @return mixed
      */
-    public function max($field) : mixed
+    public function max($field): mixed
     {
         if ($this->__max__ == null) {
 
@@ -131,7 +136,7 @@ trait CanAggregate
      * 
      * @return mixed
      */
-    public function min($field) : mixed
+    public function min($field): mixed
     {
         if ($this->__min__ == null) {
 
@@ -151,7 +156,7 @@ trait CanAggregate
      * 
      * @return mixed
      */
-    public function avg($field) : mixed
+    public function avg($field): mixed
     {
         if ($this->__avg__ == null) {
 
@@ -171,7 +176,7 @@ trait CanAggregate
      * 
      * @return mixed
      */
-    public function sum($field) : mixed
+    public function sum($field): mixed
     {
         if ($this->__sum__ == null) {
 
