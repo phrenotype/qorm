@@ -290,6 +290,11 @@ class Handler
      */
     public function buildQuery($prefixTable = false): array
     {
+
+        //Reset these two. I know, resetting __query__ is not neccesary since it's basically reset.
+        $this->__query__ = '';
+        $this->__placeholders__ = [];
+
         if (!empty($this->__set_operations__) && SetUp::$engine === SetUp::MYSQL) {
             list($projected, $defered) = $this->resolveProjectedFields(true, true);
         } else {
@@ -330,7 +335,7 @@ class Handler
      */
     public function exists(): bool
     {
-        return ($this->count() > 0);
+        return ((int)$this->count() > 0);
     }
 
     /**
