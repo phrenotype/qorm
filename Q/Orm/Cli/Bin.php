@@ -2,7 +2,15 @@
 
 namespace Q\Orm\Cli;
 
-const Q_LOGO = "";
+const Q_LOGO = <<<STR
+ #####                       
+#     #  ####  #####  #    # 
+#     # #    # #    # ##  ## 
+#     # #    # #    # # ## # 
+#   # # #    # #####  #    # 
+#    #  #    # #   #  #    # 
+ #### #  ####  #    # #    # 
+STR;
 
 class Bin
 {
@@ -19,7 +27,7 @@ class Bin
     }
 
     private function commands()
-    {
+    {        
         $usage = self::color("Usage", FG::BROWN, BG::BLACK) . PHP_EOL;
         $usage .= "command [arguments]" . PHP_EOL . PHP_EOL;
 
@@ -54,7 +62,7 @@ class Bin
         if (php_sapi_name() === 'cli') {
 
             if (count($args) <= 1) {
-                $header = self::color(Q_LOGO, FG::LIGHT_PURPLE, BG::BLACK) . PHP_EOL . PHP_EOL;
+                $header = self::color(Q_LOGO, FG::LIGHT_BLUE, BG::BLACK) . PHP_EOL . PHP_EOL;
                 $version = self::color('Q Orm', FG::GREEN, BG::BLACK) . PHP_EOL . PHP_EOL;
                 fwrite(STDOUT, $header . $version . $this->commands());
                 die;
