@@ -146,9 +146,9 @@ Setup::main();
 That's it for the setup. From now on, we'll assume you already have a setup and have the `\Q\Orm\SetUp::main()` method called already.
 
 ## Quick Tutorial
-For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ here ](docs/tutorial/start.md)
+For a quick tutorial on basic **CRUD** (Create, Read, Update, Delete) operations, click [ here ](docs/tutorial/start.md).
 
-## In-depth Tutorial
+## In-depth Tutorial ( Highly Recommended )
 
 - [ Creating Models ]( docs/parts/creating_models.md )
 - [ Migrating Models ]( docs/parts/migrating_models.md )
@@ -163,8 +163,8 @@ For a quick tutorial on basic **CRUD**(Create, Read, Update, Delete), click [ he
 - [ Set Operations ]( docs/parts/sets.md )
 - [ SubQueries ]( docs/parts/subqueries.md )
 
-## Finally
-Work with databases smiling and write **less** SQL, if any.
+## Contribution
+To contribute contact the email below.
 
 ## Contact
 **Email** : paul.contrib@gmail.com  
