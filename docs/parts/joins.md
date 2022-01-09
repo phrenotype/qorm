@@ -5,13 +5,13 @@ If you don't already know what joins are, or do not know (or have an idea on) ho
 
 If you insist you want to write joins, maybe for performance gains or whatever reason you have, then we have you covered.
 
-Keep in mind though, alot of problems solved by joins can be solved with model relationships or subqueries in filters (.exists, in and not_id).
+Keep in mind though, alot of problems solved by joins can be solved with model relationships or subqueries in filters (`.exists`, `in` and `not_in`).
 
 A way of introduction and summary, joins here are all about calling `Q\Orm\Handler::join()` and passing to it the Handler you with to join. Examples will explain this better.
 
 Another thing you need to know about is the `Q\Orm\Handler::as()` method. This method confers an alias on a Handler same way one would alias a table in sql.
 
-The `Q\Orm\Handler::join` method takes three parameters, all required. The first is field on the handler.The second is the handler you wish to join on, the last is the field on the handler (the previous parameter). Look below.
+The `Q\Orm\Handler::join` method takes three parameters, all required. The first is field on the handler. The second is the handler you wish to join on, the last is the field on the handler (the previous parameter).
 
 For left and right joins, simply use `Q\Orm\Handler::leftJoin` and `Q\Orm\Handler::rightJoin` respectively. The parameters remain the same.
 
@@ -27,13 +27,13 @@ I hope it makes sense now.
 Finally, all joins in this orm are equi-joins.
 
 ## THE FIVE(5) RULES
-To write a join or joins in the Q orm, there are **5 rules** you must observe.
+To write a join or joins in the Q orm, there are **5 rules** you **must** observe.
 
 1. Every handler **taking part in the join** must have an alias.
-1. The first Handler **must** project the needed columns.
+1. The first handler **must** project the needed columns.
 1. The projected columns **must be** prefixed with their handler alias.
 1. Note that **reference columns will never be returned**, since they are essentially primary keys of the joined tables, but then **every aliased column will be returned**.
-1. When filtering a joined Handler, **do not** prefix the fieldnames with aliases, just filter as though the fields existed on the first Handler's model.
+1. When filtering a joined handler, **do not** prefix the fieldnames with aliases, just filter as though the fields existed on the first Handler's model.
 
 ## PROPER EXAMPLES
 
@@ -47,7 +47,6 @@ namespace models;
 use Q\Orm\Model;
 use Q\Orm\Field;
 use Q\Orm\Migration\Column;
-use Q\Orm\Migration\ForeignKey;
 use Q\Orm\Migration\Index;
 
 
@@ -83,7 +82,7 @@ class Comment extends Model {
             'text' => Field::TextField(function (Column $column) {
                 $column->null = false;
             }),
-            'user' => Field::ManyToOneField(User::class, function (Column $column) { $column->null = false; },Index::INDEX),
+            'user' => Field::ManyToOneField(User::class, function (Column $column) { $column->null = false; }, Index::INDEX),
             'post' => Field::ManyToOneField(Post::class, function(Column $column){
                 $column->null = false;
             }, Index::INDEX),
@@ -122,7 +121,7 @@ Now let's say we want to create a table or list that shows for each comment the 
 - The title of the post it was made on
 - The name of the user who mad the comment
 
-We will the write it like so ( based on the five(5) rules):
+We will the write it like so ( based on the five(5) rules ):
 
 ```php
 <?php
@@ -175,11 +174,11 @@ $all = Comment::items()->as('comment')
 
 ```
 
-**As per rule 5, you will notice that the filtered fields are not prefixed. Please just call the names or aliases as though they existed on the Handler**
+**As per rule 5, you will notice that the filtered fields are not prefixed. Just call the names or aliases as though they existed on the main handler**
 
 ## SELF JOINS
 
-Yes. You can perform self joins. Simply give the handlers different aliases. If you don't know what self joins are, well... ;)
+Yes. You can perform self joins. Simply give the handlers different aliases. If you don't know what self joins are, well... :)
 
 ---
 **[Previous Part : UUIDs](uuid.md)**  | **[Next Part : GROUPING AGGREGATES](grouping.md)**
