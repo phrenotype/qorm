@@ -148,7 +148,7 @@ That's it for the setup. From now on, we'll assume you already have a setup and 
 ## Quick Tutorial
 For a quick tutorial on basic **CRUD** (Create, Read, Update, Delete) operations, click [ here ](docs/tutorial/start.md).
 
-## In-depth Tutorial ( Highly Recommended )
+## In-Depth Tutorial ( Highly Recommended )
 
 - [ Creating Models ]( docs/parts/creating_models.md )
 - [ Migrating Models ]( docs/parts/migrating_models.md )
@@ -164,7 +164,7 @@ For a quick tutorial on basic **CRUD** (Create, Read, Update, Delete) operations
 - [ SubQueries ]( docs/parts/subqueries.md )
 
 ## Contribution
-To contribute contact the email below.
+To contribute, contact the email below.
 
 ## Contact
 **Email** : paul.contrib@gmail.com  
