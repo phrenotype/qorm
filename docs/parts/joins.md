@@ -5,7 +5,7 @@ If you don't already know what joins are, or do not know (or have an idea on) ho
 
 If you insist you want to write joins, maybe for performance gains or whatever reason you have, then we have you covered.
 
-Keep in mind though, alot of problems solved by joins can be solved with model relationships or subqueries in filters (in and not_id).
+Keep in mind though, alot of problems solved by joins can be solved with model relationships or subqueries in filters (.exists, in and not_id).
 
 A way of introduction and summary, joins here are all about calling `Q\Orm\Handler::join()` and passing to it the Handler you with to join. Examples will explain this better.
 
