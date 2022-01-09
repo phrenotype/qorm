@@ -59,8 +59,7 @@ class Operation
             }
             $pdo->commit();
         } catch (\PDOException $e) {
-            $pdo->rollback();
-            throw $e;
+            $pdo->rollback();            
         }
     }
 

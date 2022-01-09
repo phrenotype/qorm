@@ -44,10 +44,12 @@ class Connection
 
             $connectionString = 'sqlite:' . $name . '.sqlite3';
 
-            $pdo = new \PDO($connectionString, null, null, [\PDO::ATTR_EMULATE_PREPARES => false]);
+            $pdo = new \PDO($connectionString, null, null, [
+                \PDO::ATTR_EMULATE_PREPARES => false,
+                \PDO::ATTR_PERSISTENT => true,
+            ]);
 
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            //$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
 
             /* Create a function for sql regex to use */
             $pdo->sqliteCreateFunction(
@@ -99,7 +101,6 @@ class Connection
             );
 
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            //$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
 
             return $pdo;
         } else {

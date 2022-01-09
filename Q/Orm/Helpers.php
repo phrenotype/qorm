@@ -307,9 +307,8 @@ class Helpers
             $pdo->beginTransaction();
             $pdo->exec($largeQuery);
             $pdo->commit();
-        } catch (\Exception $e) {
-            $pdo->rollback();
-            throw $e;
+        } catch (\PDOException $e) {
+            $pdo->rollback();            
         }
     }
 
