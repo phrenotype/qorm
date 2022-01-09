@@ -9,7 +9,6 @@ Unfortunately, no major php framework has anything of the sorts. One has to manu
 
 With this, you can zip your migrations folder and send it to another developer and with a single command, they will have an exact replica of your database. So, migration files are **generate once, run everywhere**.
 
-The cli too need is automatically installed with the library.
 
 ## COMMANDS
 To see all the available commands, run  
@@ -17,7 +16,7 @@ To see all the available commands, run
 `php vendor/bin/qorm`
 
 ## ALL MIGRATIONS
-To see all the migrations that have been registered, run  
+To see all the migrations that have been created, run  
 
 `php vendor/bin/qorm migrations`
 
@@ -26,7 +25,7 @@ After defining or making changes your models, go to the terminal and run
 
 `php vendor/bin/qorm makemigrations`  
 
-In the *migrations* folder, you'll notice that a new file has been added with the format `Migration000[digit(s)].php`, based on the changes you've made to the models (Or if you've added or removed a model).
+In the *migrations* folder, you'll notice that a new file has been added with the format `Migration000[digit(s)].php`, based on the changes you've made to the models.
 
 ## CREATING A BLANK MIGRATION
 To create a blank migration, go to the terminal and run
@@ -51,16 +50,16 @@ To rollback the last applied migration, go to the terminal and run:
 
 To apply all migrations down to a particular migration, Go to the terminal and run
 
-`php vendor/bin/qorm migrate Migration_Name`
+`php vendor/bin/qorm migrate MigrationName`
 
 Note that the .php extension is not added to the migration name.
 
 
 To rollback migrations up to a particular migration. Go to the terminal and run:
 
-`php vendor/bin/qorm rollback Migration_Name`
+`php vendor/bin/qorm rollback MigrationName`
 
-Note that the .php extension is not added to the migration name.
+Again, note that the .php extension is not added to the migration name.
 
 ----
 **[Previous Part : Model Relationships](relationships.md)** | **[Next Part : Defaults](defaults.md)**
