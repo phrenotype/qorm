@@ -32,9 +32,8 @@ class Querier
             $pdo->commit();
             /* Stack the query */
             QueryStack::stack($sql, $params);
-        } catch (\Exception $e) {
-            $pdo->rollBack();
-            throw $e;
+        } catch (\PDOException $e) {
+            $pdo->rollBack();            
         }
     }
 
@@ -290,9 +289,8 @@ class Querier
             $pdo->beginTransaction();
             $stmt->execute($v);
             $pdo->commit();
-        } catch (\Exception $e) {
-            $pdo->rollback();
-            throw $e;
+        } catch (\PDOException $e) {
+            $pdo->rollback();            
         }
 
         $stmt = null;
@@ -322,9 +320,8 @@ class Querier
                 $stmt->execute(array_values($asc));
             }
             $pdo->commit();
-        } catch (\Exception $e) {
-            $pdo->rollback();
-            throw $e;
+        } catch (\PDOException $e) {
+            $pdo->rollback();            
         }
         $stmt = null;
         return $pdo->lastInsertId();
@@ -360,9 +357,8 @@ class Querier
             $pdo->beginTransaction();
             $stmt->execute($final_placeholders);
             $pdo->commit();
-        } catch (\Exception $e) {
-            $pdo->rollback();
-            throw $e;
+        } catch (\PDOException $e) {
+            $pdo->rollback();            
         }
         $stmt = null;
     }
@@ -391,9 +387,8 @@ class Querier
             $pdo->beginTransaction();
             $stmt->execute($placeholders);
             $pdo->commit();
-        } catch (\Exception $e) {
-            $pdo->rollback();
-            throw $e;
+        } catch (\PDOException $e) {
+            $pdo->rollback();            
         }
 
         $stmt = null;
