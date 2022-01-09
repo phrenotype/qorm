@@ -7,9 +7,9 @@ If you've used django before, you'll notice that when you `makemigrations`, the 
 
 Unfortunately, no major php framework has anything of the sorts. One has to manually define migrations based on his/her changes. Well, we offer that as well, but for *most* of your migrations, we'll correctly detect the change and let you apply the migration at your own time.
 
-With this, you can zip you migrations folder and send it to another developer and with a single command, they will have an exactly replica of your database. So, migration files are **generate once, run everywhere**.
+With this, you can zip your migrations folder and send it to another developer and with a single command, they will have an exact replica of your database. So, migration files are **generate once, run everywhere**.
 
-To manage your models using migrations, you'll need the cli tool. You can download the single file <here>. Place the file in the root directory of your project, same level as the `vendor` folder.
+The cli too need is automatically installed with the library.
 
 ## COMMANDS
 To see all the available commands, run  
