@@ -132,8 +132,7 @@ Use the code below as a template. The Q orm autoloads all the models. Assuming h
 
 ```php
 <?php
-
-require "vendor/autoload";
+require "vendor/autoload.php";
 
 use Q\Orm\SetUp;
 
