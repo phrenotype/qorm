@@ -1,4 +1,5 @@
 # TABLE OF CONTENTS
+- [ Setup ]( ../setup.md )
 - [ Creating Models ]( creating_models.md )
 - [ Migrating Models ]( migrating_models.md )
 - [ Making Queries ]( making_queries.md )

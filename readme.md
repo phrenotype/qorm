@@ -1,15 +1,11 @@
 # **Q Orm**
 
-![github stars](https://img.shields.io/github/stars/phrenotype/qorm?style=social)
-![packagist stars](https://img.shields.io/packagist/stars/qorm/qorm)
 ![license](https://img.shields.io/github/license/phrenotype/qorm)
 ![contributors](https://img.shields.io/github/contributors/phrenotype/qorm)
 ![contributors](https://img.shields.io/github/languages/code-size/phrenotype/qorm)
-![downloads](https://img.shields.io/packagist/dm/qorm/qorm)
 
 ```php
 <?php
-//Fetch all the users that have at least one comment
 $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
     ->order_by('id desc')
     ->limit(10);
@@ -18,29 +14,52 @@ Will translate to
 
 ```sql
 SELECT ... FROM user WHERE id IN ( SELECT user_id FROM comment ) ORDER BY id DESC LIMIT 10
-```
-This is a simple orm that makes data modelling and migrations **extremely easy**. It auto detects changes in models when the user decides to make migrations, hence removing the need to manually write migrations.
+```  
 
-Also, you can **actually re-use migration files**. That is, you can copy and zip your migrations folder and send it to another developer, and all they have to do is run one command and an entire copy of your schema is made. As a bonus, the migrations are written in php, so, no sql will be seen in your code.
+What about this lovely snippet ?  
 
-So all you ever do is modify your models, ask the orm to detect the changes, then ask the orm to apply the changes. It's not your job to detect or keep track of changes you've made to your models. It's the orm's!. And for the first time, you can literally switch databases and the migrations will run without headaches.
+```php
+<?php
+$all = Comment::items()->as('comment')
+    ->project('comment.text', 'user.name', 'post.title')
+
+    ->join('user', User::items()->as('user'), 'id')
+    ->join('post', Post::items()->as('post'), 'id')
+
+    ->limit(10)
+    ->all();
+```  
+
+This is a simple orm that makes data modelling, quering and **above all**, making migrations **extremely easy**. It auto detects changes in models when the user decides to make migrations, hence **removing the need to manually write migrations**. With this, migrations become - **generate once, run everywhere**.
+
+This means you can **actually re-use migration files**. That is, you can copy and zip your migrations folder and send it to another developer, and all they have to do is run one command and an entire copy of your schema is made. As a bonus, the migrations are written in php, so, no sql will be seen in your code (unless you want it, of course).
+
+So all you ever do is modify your models, ask the orm to detect the changes, then ask the orm to apply the changes. It's not your job to detect or keep track of changes you've made to your models. And for the first time, you can literally switch databases and the migrations will run without headaches.
 
 This way, you can focus on modelling your data without ever having to convert it to a relational schema yourself.
 
 A .env parser is included, so you don't need any external libraries to parse the .env file.
 
-Also, the models are **autoloaded**, eliminating the need for an autoloader.
+Also, the models are **autoloaded**, eliminating the need for an autoloader, if you don't need one.
 
 As long as you point to the correct file(s) or folders for models and migrations, you can leave the rest to the orm.
 
 ## Why Use Q Orm ?
+
+If you've used django before, you'll notice that when you `makemigrations`, the django orm automatically detect any changes you've made to your models and creates a migration file based on that.
+
+Unfortunately, no major php orm has anything of that sort. One has to manually define migrations based on their changes. Well, we offer that as well, but for *most* of your migrations, we'll **correctly** detect the change and let you apply the migration at your own time.
+
+With this, you can zip your migrations folder and send it to another developer and with a single command, they will have an exact replica of your database. So, migration files are **generate once, run everywhere**.  
+
 1. You don't have to write migrations by hand.
 1. Model definition and schema are all in one class.
-1. An intuitive and powerful api for set operations.
-1. A powerful and smooth query api, including joins and nested queries.
+1. A powerful and smooth query api.
+1. Full support for nested queries, joins and **all** set operations, irrespective of sql dialect.
 1. You can compose nested queries more easily.
 1. Every operation is lazy. Except stated otherwise.
 1. The n+1 problem does not exist.
+1. Every update, insertion, or deletion is done via transactions.
 1. Most operations are done on the database to avoid race conditions.
 1. Migration files can be moved to another project and simply ran, irrespective of sql flavor.
 1. You will end up with a well modelled data and properly designed database without feeling forced to do so.
@@ -57,110 +76,11 @@ The benefits more than out weight whatever minimalist risks there may be. Also, 
 TLDR; Just create a file called .env in the root of your project if your setup is not using one already.
 
 ## Install
-Installation is done via composer.
 
 `composer require qorm/qorm`
 
-
 ## Setup
-There are three short steps here.  
-
-### Step 1
-Open ( or create ) the **.env** and add the following content to it:    
-
-```
-Q_ENGINE=MYSQL
-Q_DB_NAME=q
-Q_DB_HOST=127.0.0.1
-Q_DB_USER=user
-Q_DB_PASS=secret
-Q_MODELS=models
-Q_MIGRATIONS=migrations
-```
-
-**Q_ENGINE** : This is the database engine you are using. For now only the values **MYSQL** and  **SQLITE** are supported  
-
-**Q_DB_NAME** : This is the name of your database  
-
-**Q_DB_HOST** : This is the database host name or IP address. For **SQLITE**, **This is can be omitted or left empty**.  
-
-**Q_DB_USER** : This is your ***database username***. For **SQLITE**, **This is can be omitted or left empty**.  
-
-**Q_DB_PASS** : This is your ***database password***. For **SQLITE**, **This is can be omitted or left empty**.  
-
-**Q_MODELS** : **Relative path** from project root to the ***file or folder*** where your model classes will be defined. If using a file, add the `.php` extension to it.
-
-**Q_MIGRATIONS** : **Relative path** from project root to the ***folder*** where your generated migration files will be kept.
-
-
-### Step 2
-Then, setup your workspace like this :  
-
-- index.php
-- models ( or models.php, if you are using a single file to store the model classes )
-- migrations
-- .env 
-
-Note though, that the names above are arbitrary and you can keep your models and migrations anywhere in your project as far as you specify that path in the .env file.
-
-If you are using a framework, then create these folders wherever you please.
-
-**migrations** is the empty folder where our migrations will be housed. **models.php or models** is the file or folder I intend to define my models in. Both of these are currently empty.
-
-
-### Step 3
-
-The last step is to find where to call the method `\Q\Orm\SetUp::main()` that will initialize the orm. 
-
-#### For Framework Users
-If you use a framework, find the bootstrap file, or create a middleware and call `\Q\Orm\SetUp::main()` method within it. 
-
-```php
-<?php
-
-use Q\Orm\SetUp;
-
-Setup::main();
-
-```
-
-After this you can proceed to make queries anywhere with your project.
-
-#### For Non Framework Users
-
-Use the code below as a template. The Q orm autoloads all the models. Assuming here that the `User` model has been defined.
-
-```php
-<?php
-require "vendor/autoload.php";
-
-use Q\Orm\SetUp;
-
-Setup::main();
-
-// The rest of your code goes here
-
-```
-
-That's it for the setup. From now on, we'll assume you already have a setup and have the `\Q\Orm\SetUp::main()` method called already.
-
-## Quick Tutorial
-For a quick tutorial on basic **CRUD** (Create, Read, Update, Delete) operations, click [ here ](docs/tutorial/start.md).
-
-## In-Depth Tutorial ( Highly Recommended )
-
-- [ Creating Models ]( docs/parts/creating_models.md )
-- [ Migrating Models ]( docs/parts/migrating_models.md )
-- [ Making Queries ]( docs/parts/making_queries.md )
-- [ Query Filters ]( docs/parts/query_filters.md )
-- [ Model Relationships ]( docs/parts/relationships.md )
-- [ The Command Line Interface ]( docs/parts/cli.md )
-- [ Defaults ]( docs/parts/defaults.md )
-- [ UUID's ]( docs/parts/uuid.md )
-- [ Joins ]( docs/parts/joins.md )
-- [ Grouping Aggregates ]( docs/parts/grouping.md )
-- [ Set Operations ]( docs/parts/sets.md )
-- [ SubQueries ]( docs/parts/subqueries.md )
+For the complete setup and tutorials visit [this page](docs/setup.md).
 
 ## Contribution
 To contribute, contact the email below.
