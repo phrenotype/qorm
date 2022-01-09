@@ -30,7 +30,7 @@ $all = Comment::items()->as('comment')
     ->all();
 ```  
 
-This is a simple orm that makes data modelling, quering and **above all**, making migrations **extremely easy**. It auto detects changes in models when the user decides to make migrations, hence **removing the need to manually write migrations**. With this, migrations become - **generate once, run everywhere**.
+This is a simple orm that makes data modelling, quering and above all, making migrations extremely easy. It **auto detects** changes in models when the user decides to make migrations, hence **removing the need to manually write migrations**. With this, migrations become - **generate once, run everywhere**.
 
 This means you can **actually re-use migration files**. That is, you can copy and zip your migrations folder and send it to another developer, and all they have to do is run one command and an entire copy of your schema is made. As a bonus, the migrations are written in php, so, no sql will be seen in your code (unless you want it, of course).
 
