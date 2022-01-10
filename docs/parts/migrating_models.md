@@ -41,8 +41,6 @@ You should see a message like
 
 If you perform another change on your models, like renaming it or creating another model, or adding a new field, just go through the above steps. The changes made will be detected accordingly and migration files will be incrementally generated.
 
-## FINALLY
-
 
 ---- 
 **[Previous : Creating Models](creating_models.md)**   |   **[Next Part : Making Queries](making_queries.md)** 
