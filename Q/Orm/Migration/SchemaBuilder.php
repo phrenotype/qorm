@@ -76,6 +76,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add an integer column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -88,6 +90,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a boolean column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -100,6 +104,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a string (varchar) column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -112,6 +118,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a text column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -124,6 +132,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a date column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -136,6 +146,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a datetime column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -148,6 +160,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a decimal column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -160,6 +174,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a numeric column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -172,6 +188,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a float column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -184,6 +202,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a double column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -196,6 +216,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add an enum column.
+     * 
      * @param string $name
      * @param array $definition
      * 
@@ -208,6 +230,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add an index.
+     * 
      * @param string $field
      * 
      * @return SchemaBuilder
@@ -219,6 +243,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a unique index.
+     * 
      * @param string $field
      * 
      * @return SchemaBuilder
@@ -230,6 +256,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a primary key.
+     * 
      * @param string $field
      * 
      * @return SchemaBuilder
@@ -241,6 +269,8 @@ class SchemaBuilder
     }
 
     /**
+     * Add a foreign key.
+     * 
      * @param string $field
      * @param string $refTable
      * @param string $refField
