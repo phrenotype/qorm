@@ -8,7 +8,8 @@
 <?php
 $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
     ->order_by('id desc')
-    ->limit(10);
+    ->limit(10)
+    ->all();
 ```
 Will translate to  
 
