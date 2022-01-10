@@ -140,10 +140,6 @@ class TableComparer
         }
         $originalState = $fromSchema;
 
-
-        //print_r(array_map(fn($t) => $t, $fromSchema));die;
-        //print_r(array_map(fn($t) => $t, $fromModels));die;
-
         $operationsText = [];
 
         /* Don't forget to add reverse */
