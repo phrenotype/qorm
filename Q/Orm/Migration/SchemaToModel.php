@@ -124,7 +124,7 @@ class SchemaToModel
         $code .= PHP_EOL;
 
 
-        $code .= "\tpublic static function schema(){" . PHP_EOL;
+        $code .= "\tpublic static function schema() : array {" . PHP_EOL;
         $code .= "\t\treturn [" . PHP_EOL;
         foreach ($table->fields as $column) {
             if ($column->name === 'id' && is_object($pk) && $pk->field === 'id') continue;
@@ -146,7 +146,7 @@ class SchemaToModel
         }
         return $codes;
     }
-    private static function modelFileHeading($path)
+    public static function modelFileHeading($path)
     {
         $dir = str_replace('.', '', dirname($path));
         $base = basename($path, '.php');

@@ -25,7 +25,16 @@ After defining or making changes your models, go to the terminal and run
 
 `php vendor/bin/qorm makemigrations`  
 
-In the *migrations* folder, you'll notice that a new file has been added with the format `Migration000[digit(s)].php`, based on the changes you've made to the models.
+In the *migrations* folder, you'll notice that a new file has been added with the format `Migration000[digit(s)].php`, based on the changes you've made to the models.  
+
+## CREATING A BLANK MODEL
+To generate a model class file, go to the terminal and run  
+
+`php vendor/bin/qorm create ModelName`  
+
+In your models folder, you'll notice that a new file `ModelName.php` containing the an empty model.
+
+**Note that this only works if you are using a folder to store your models.**  
 
 ## CREATING A BLANK MIGRATION
 To create a blank migration, go to the terminal and run

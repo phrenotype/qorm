@@ -4,6 +4,7 @@ namespace Q\Orm\Cli;
 
 use Q\Orm\Migration\MigrationMaker;
 use Q\Orm\Migration\SchemaToModel;
+use Q\Orm\ModelGenerator;
 use Q\Orm\SetUp;
 
 $app = new Bin;
@@ -67,7 +68,13 @@ $app->register('inspect\s+\w+', function ($args) {
 });
 
 
-
+$app->register('create\s+\w+', function ($args) {
+    if (($args[1] ?? false)) {
+        ModelGenerator::generate($args[1]);
+    } else {
+        Bin::line("Usage: create [ModelLocation]", FG::RED, BG::LIGHT_GRAY);
+    }
+});
 
 
 $itsMe = (realpath(__FILE__) == realpath($_SERVER['SCRIPT_FILENAME']));
