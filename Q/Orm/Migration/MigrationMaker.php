@@ -73,7 +73,6 @@ class MigrationMaker
     }
 
 
-
     private static function createMigrationsTable()
     {
         $query = CrossEngine::createMigrationsTableQuery(SetUp::$engine);
@@ -150,62 +149,9 @@ class MigrationMaker
 
 
 
-    private static function nextMigrationId()
-    {
-        $migrationsFolder = Setup::$migrationsFolder;
-        $files = [];
-        if ($dh = opendir($migrationsFolder)) {
-            while (($file = readdir($dh)) !== false) {
-                $base = basename($file, '.php');
-                $base = str_replace('Migration', '', $base);
-                $files[] = (int)$base;
-            }
-            closedir($dh);
-        }
-        if (empty($files)) return 1;
-        else return (int)max($files) + 1;
-    }
-
-    private static function generateMigration(string $name, array $ups, array $downs)
-    {
-        $code = '';
-        $code  = "<?php" . PHP_EOL . PHP_EOL;
-        $code .= "use \\Q\\Orm\\Field;" . PHP_EOL;
-        $code .= "use \\Q\\Orm\\Migration\\Migration;" . PHP_EOL;
-        $code .= "use \\Q\\Orm\\Migration\\SchemaBuilder;" . PHP_EOL;
-        $code .= "use \\Q\\Orm\\Migration\\Schema;" . PHP_EOL;
-        $code .= "use \\Q\\Orm\\Migration\\Column;" . PHP_EOL . PHP_EOL;
-        $code .= "class Migration" . $name . " extends Migration {" . PHP_EOL . PHP_EOL;
-        $code .= "\tpublic function __construct(){" . PHP_EOL . PHP_EOL;
-        $code .= "\t\t\$this->operations = [" . PHP_EOL;
-
-        if (!empty($ups)) {
-            foreach ($ups as $op) {
-                $code .= "\t\t\t$op," . PHP_EOL;
-            }
-        }
 
 
-        $code .= "\t\t];" . PHP_EOL . PHP_EOL;
 
-        /* */
-        $code .= "\t\t\$this->reverse = [" . PHP_EOL;
-
-        if (!empty($downs)) {
-            foreach ($downs as $down) {
-                $code .= "\t\t\t$down," . PHP_EOL;
-            }
-        }
-
-        $code .= "\t\t];" . PHP_EOL;
-        /* */
-
-
-        $code .= "\t}" . PHP_EOL;
-        $code .= "}";
-
-        return $code;
-    }
 
     public static function make($blank = false)
     {
@@ -218,9 +164,9 @@ class MigrationMaker
         (!$blank) && (empty($ups)) && Bin::line('No Changes Detected', FG::RED, BG::BLACK) && die;
 
         //Creates the migration file and adds it to the database as an unapplied migration
-        $fileNumber = sprintf("%04d", self::nextMigrationId());
+        $fileNumber = sprintf("%04d", MigrationGenerator::nextMigrationId());
 
-        $code = self::generateMigration($fileNumber, $ups, $downs);
+        $code = MigrationGenerator::generateMigration($fileNumber, $ups, $downs);
 
 
         $migrationName = 'Migration' . $fileNumber;
@@ -297,10 +243,7 @@ class MigrationMaker
     public static function rollback($name = null)
     {
         if ($name === null) {
-            /*
-            Undo the LAST MIGRATION (NOT LAST APPLIED) migration
-        */
-            //$last = self::$pdo->query("SELECT * FROM q_migration WHERE NOT (applied IS NULL) ORDER BY id DESC LIMIT 1")->fetch(\PDO::FETCH_OBJ);
+                                
             $last = Q_Migration::items()->order_by('id DESC')->one();
             if ($last && $last->applied != false) {
 

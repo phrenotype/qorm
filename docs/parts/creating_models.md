@@ -4,14 +4,15 @@
 **[ Table Of Contents ](toc.md)**
 
 
-
 A model is a class that serves as a blueprint for your database tables.
 
-The Q orm convention for naming models is the **pascal case**, e.g. **User, Post, Address, UserAddress**.
+The Q Orm convention for naming models is the **pascal case**, e.g. **User, Post, Address, UserAddress**.
 
 Also, use of singular words for naming models is encouraged. For instance User, instead of Users.
 
-A model should always extend the `Q\Orm\Model` abstract class. It's also required to implement an abstract static method `Q\Orm\Model::schema()`. This static method is what is used to build the database schema. It returns an associative array. The keys here are the column names as you want them in the database, and the values are instances of `Q\Orm\Field` object. The benefit of doing things this way is that both your class definition and database table definition are in one place. At a glance, you can see what your database looks like without switching to a database viewer.
+A model should always extend the `Q\Orm\Model` abstract class. It's also required to implement an abstract static method `Q\Orm\Model::schema()`. This static method is what is used to build the database schema. It returns an associative array. The keys here are the column names as you want them in the database, and the values are instances of `Q\Orm\Field` object.  
+
+The benefit of doing things this way is that both your class definition and database table definition are in one place. At a glance, you can see what your database looks like without switching to a database viewer.
 
 We are now going to create a **User** model. In your models folder, create a file **User.php** or if you are using a single file to store all the models, add this code to the file.
 

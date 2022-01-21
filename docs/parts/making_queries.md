@@ -2,23 +2,23 @@
 
 **[ Table Of Contents](toc.md)**
 
-Now, I will admit, I'm a thief, in fact a very cheap one. This orm was built with the idea of autodetecting changes made to models and without the user manually specifying what exactly what they changed. I stole that from django. And as you will see from the query api, it's going to be a cheap knock-off of django. In fact this whole project is a proof of concept, that we can have an orm in php like the django orm.
- 
-Note though, that this is not a rewrite of the django orm in php. I'm building an orm that behaves like django in php. Different things are happening under the hood of both systems. Please take note. And leave me some dignity :).
+Now the fun begins. We have models, now it's time to play with them. From here, you'll begin to see that 'powerful query api' thing I talked about in the README.md.
 
  ## THE MODEL HANDLER
 
  This is the center of quering. Every model has a 'handler' or 'manager' that takes care of performing operations on all the objects (rows) of the model. You can think of the manager as a representation of the table itself.
 
- `Model::items()` returns an instance of `Q\Orm\Handler`. This class uses a fluent interface, where all the methods can be chained. And this is the class that performs queries on models. Based on the model we created previously, `User::items()` represents all the rows or objects of the User model or table.
+ `Model::items()` returns an instance of `Q\Orm\Handler`. This class uses a fluent interface, where all the methods can be chained. And this is the class that performs queries on models. 
+ 
+ Based on the model we created previously, `User::items()` represents all the rows or objects of the User model or table.
 
  `User::items()->one()` will return a single user object based on default sorting.
 
  `User::items()->all()` will return a generator pointing to the first item based on the default sorting.
 
- `User::items()->exists()` will return a boolean value, indicating whether an object exists for the query.
+ `User::items()->exists()` will return a boolean value, indicating whether an object exists in the handler.
 
- The second thing at the heart of querying is the `\Q\Orm\Handler::filter`. The chant is **always filter before you do anything, otherwise your operation will be applied to all the objects (rows) of the model (table)**.  
+ The **second thing** at the heart of querying is the `\Q\Orm\Handler::filter(array $filters)` method. The mantra is **always filter before you do anything, otherwise your operation will be applied to all the objects (rows) of the model (table)**. I know, that was a very long mantra.
  
  Filter is lazily evaluated. It stores the intended operation and and returns the model manager. **Filter always returns the same model manager you called it on**, so you can chain several filters and other methods that are available to the model manager like delete, update, create, and many others.
 
@@ -38,7 +38,11 @@ Note though, that this is not a rewrite of the django orm in php. I'm building a
         'lastname' => 'Robert'
     ]); 
     ```
-    This method **will return the model manager** on success and null on failure.
+    This method **will return the model manager** on success and null on failure.  
+
+    **Note that primary keys will not be overwritten.**
+
+    **Also keep in mind the mass assignment vulnerability.**
 
 2. The constructor method
     ```php
@@ -65,13 +69,15 @@ Note though, that this is not a rewrite of the django orm in php. I'm building a
 
     ```
 
+**Again, keep in mind the mass assignment vulnerability.**
+
 ------
 
 ## **UPDATING**
 
 An update is essentially fetching an object or collection of objects, making changes, and then saving those changes.
 
-**Note**: To set a field to `NULL` in the database, simply assign the attribute on the object to `null`.
+**To set a field to `NULL` in the database, simply assign the attribute on the object to `null`**.
 
 1. Using the `\Q\Orm\Handler::update()`
     ```php 
@@ -145,7 +151,9 @@ User::items()->filter(['id'=>7])->delete();
 
 ## PULLING OUT OBJECTS
 
-After calling all the methods we want on the model manager, we'll have to retrieve the results. To retrieve an object or a collection, the `\Q\Orm\Handler::one()` and `\Q\Orm\Handler::all()` methods are used on the model manager, after filtering ( or not ).
+After calling all the methods we want on the model manager, we'll have to retrieve the results.  
+
+To retrieve an object or a collection, the `\Q\Orm\Handler::one()` and `\Q\Orm\Handler::all()` methods are used on the model manager, before or after filtering.
 
 ```php
 <?php
@@ -164,7 +172,8 @@ This is used to restore an object to it's original state, if no changes on the o
 $user = User::items()->one();
 $user->name = 'Peter';
 $user->reload();
-//User now restored to initial state
+
+// User now restored to initial state
 ```
 
 ----

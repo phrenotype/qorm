@@ -66,11 +66,17 @@ $app->register('inspect\s+\w+', function ($args) {
     }
 });
 
+
+
+
+
 $itsMe = (realpath(__FILE__) == realpath($_SERVER['SCRIPT_FILENAME']));
-/* If you call me directly or include me in a file called 'qorm' or 'q' */
-$itsMe = $itsMe || (in_array(basename($_SERVER['SCRIPT_FILENAME'], '.php'), ['q', 'qorm']));
+
+/* If you call me directly, or include me in a file called 'qorm' */
+$itsMe = $itsMe || (in_array(basename($_SERVER['SCRIPT_FILENAME'], '.php'), ['qorm']));
+
+
 if ($itsMe) {
-    //File is being run directly or included in a file called q or qb
     $app->run($argv, function () {
         Setup::main();
         if (SetUp::$engine === Setup::SQLITE) {
