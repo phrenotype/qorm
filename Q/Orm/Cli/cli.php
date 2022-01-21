@@ -72,7 +72,7 @@ $app->register('create\s+\w+', function ($args) {
     if (($args[1] ?? false)) {
         ModelGenerator::generate($args[1]);
     } else {
-        Bin::line("Usage: create [ModelLocation]", FG::RED, BG::LIGHT_GRAY);
+        Bin::line("Usage: create [ModelName]", FG::RED, BG::LIGHT_GRAY);
     }
 });
 

@@ -51,9 +51,9 @@ class Bin
         $commandString .= $formatCommand("rollback") . $formatDesc("Undo the last applied migration.") . PHP_EOL;
         $commandString .= $formatCommand("rollback [MigrationName]") . $formatDesc("Rollback all migrations up to that particular migration.") . PHP_EOL;
 
-        $commandString .= $formatCommand("inspect") . $formatDesc("Generates models based on existing database.");
+        $commandString .= $formatCommand("inspect") . $formatDesc("Generates models based on existing database.") . PHP_EOL;
 
-        $commandString .= $formatCommand("create") . $formatDesc("Generates a new model.");
+        $commandString .= $formatCommand("create [ModelName]") . $formatDesc("Generates a new model.");
 
         $commands .= $commandString . PHP_EOL;
 
