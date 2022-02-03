@@ -47,7 +47,7 @@ As long as you point to the correct file(s) or folders for models and migrations
 
 ## Why Use Q Orm ?
 
-If you've used django before, you'll notice that when you `makemigrations`, the django orm automatically detect any changes you've made to your models and creates a migration file based on that.
+If you've used the django framework, you'll notice that when you `makemigrations`, the django orm automatically detect any changes you've made to your models and creates a migration file based on that.
 
 Unfortunately, no major php orm has anything of that sort. One has to manually define migrations based on their changes. Well, we offer that as well, but for *most* of your migrations, we'll **correctly** detect the change and let you apply the migration at your own time.
 
