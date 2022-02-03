@@ -61,7 +61,7 @@ With this, you can zip your migrations folder and send it to another developer a
 1. Every operation is lazy. Except stated otherwise.
 1. The n+1 problem does not exist.
 1. Every update, insertion, or deletion is done via transactions.
-1. Most operations are done on the database to avoid race conditions.
+1. All operations are done on the database to avoid race conditions.
 1. Migration files can be moved to another project and simply ran, irrespective of sql flavor.
 1. You will end up with a well modelled data and properly designed database without feeling forced to do so.
 1. All changes to model classes are automatically detected and migrations made. With this, you will hardly ever need to write your own migrations. And if you do, you have the ability to do so, even in raw sql.
