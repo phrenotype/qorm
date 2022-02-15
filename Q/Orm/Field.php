@@ -87,11 +87,19 @@ class Field
      * 
      * @return Field
      */
-    private static function generic(string $type, callable $mutator, string $model = null, string $index = null, string $onDelete = null): Field
+    private static function generic(string $type, callable $mutator = null, string $model = null, string $index = null, string $onDelete = null): Field
     {
 
         $column = new Column;
-        $mutator($column);
+        if (!is_null($mutator)) {
+            $mutator($column);
+        } else {
+            //Set default size for char fields
+            if ($type === 'varchar') {
+                $column->size = 255;
+            }
+            $column->null = false;
+        }
         if ($column->type !== $type) {
             $column->type = $type;
         }
@@ -145,7 +153,7 @@ class Field
      * 
      * @return Field
      */
-    public static function BooleanField(callable $mutator, $index = null): Field
+    public static function BooleanField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::BOOL, $mutator, null, $index);
     }
@@ -156,7 +164,7 @@ class Field
      * 
      * @return Field
      */
-    public static function CharField(callable $mutator, $index = null): Field
+    public static function CharField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::CHAR, $mutator, null, $index);
     }
@@ -167,7 +175,7 @@ class Field
      * 
      * @return Field
      */
-    public static function TextField(callable $mutator, $index = null): Field
+    public static function TextField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::TEXT, $mutator, null, $index);
     }
@@ -178,7 +186,7 @@ class Field
      * 
      * @return Field
      */
-    public static function IntegerField(callable $mutator, $index = null): Field
+    public static function IntegerField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::INTEGER, $mutator, null, $index);
     }
@@ -189,7 +197,7 @@ class Field
      * 
      * @return Field
      */
-    public static function FloatField(callable $mutator, $index = null): Field
+    public static function FloatField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::FLOAT, $mutator, null, $index);
     }
@@ -200,7 +208,7 @@ class Field
      * 
      * @return Field
      */
-    public static function DoubleField(callable $mutator, $index = null): Field
+    public static function DoubleField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::DOUBLE, $mutator, null, $index);
     }
@@ -211,7 +219,7 @@ class Field
      * 
      * @return Field
      */
-    public static function DecimalField(callable $mutator, $index = null): Field
+    public static function DecimalField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::DECIMAL, $mutator, null, $index);
     }
@@ -222,7 +230,7 @@ class Field
      * 
      * @return Field
      */
-    public static function NumericField(callable $mutator, $index = null): Field
+    public static function NumericField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::NUMERIC, $mutator, null, $index);
     }
@@ -244,7 +252,7 @@ class Field
      * 
      * @return Field
      */
-    public static function DateField(callable $mutator, $index = null): Field
+    public static function DateField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::DATE, $mutator, null, $index);
     }
@@ -255,7 +263,7 @@ class Field
      * 
      * @return Field
      */
-    public static function DateTimeField(callable $mutator, $index = null): Field
+    public static function DateTimeField(callable $mutator = null, $index = null): Field
     {
         return self::generic(self::DATETIME, $mutator, null, $index);
     }
