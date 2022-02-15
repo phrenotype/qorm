@@ -80,7 +80,7 @@ class Field
      * Creates a new Field object.
      * 
      * @param string $type
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $model
      * @param string|null $index
      * @param string|null $onDelete
@@ -148,7 +148,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -159,7 +159,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -170,7 +170,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -181,7 +181,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -192,7 +192,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -203,7 +203,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -214,7 +214,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -225,7 +225,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -247,7 +247,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
@@ -258,7 +258,7 @@ class Field
     }
 
     /**
-     * @param callable $mutator
+     * @param callable|null $mutator
      * @param string|null $index
      * 
      * @return Field
