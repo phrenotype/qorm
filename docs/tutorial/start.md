@@ -24,7 +24,7 @@ class Author extends Model {
 
 	public $name;
 
-	public static function schema(){
+	public static function schema() : array {
 		return [
 			'name' => Field::CharField(function(Column $column){		
 				$column->size = 255;
@@ -39,6 +39,14 @@ class Author extends Model {
 }
 ```
 **If your intended primary key is an auto-incrementing integer, do not bother defining one. A field called `id` is generated and added automatically.**
+
+**Note that in php 8, the above schema could be shortened to :**
+```php
+public static function schema() : array {
+	return [
+		'name' => Field::CharField()
+}
+```
 
 To find out about other types of schema fields, please refer to [ this page ](./../parts/creating_models.md).
 
@@ -66,7 +74,7 @@ class Post extends Model {
 	public $author;
 
 
-	public static function schema(){
+	public static function schema() : array {
 		return [
 			'title' => Field::CharField(function(Column $column){
 				$column->size = 255;

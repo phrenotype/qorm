@@ -38,7 +38,7 @@ class User extends Model {
     public $date_joined;
 
 
-    public static function schema(){
+    public static function schema() : array {
         return [
             'uuid_field' => FieldCharField(function(Column $column){
                 $column->size = 255;

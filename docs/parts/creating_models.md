@@ -40,15 +40,15 @@ class User extends Model {
 	public $date_joined;
 
 
-	public static function schema(){
+	public static function schema(): array {
 		return [
 			'firstname' => Field::CharField(function(Column $column){				
 				$column->size = 255;
-				$column->null = true;
+				$column->null = false;
 			}),
 			'lastname' => Field::CharField(function(Column $column){				
 				$column->size = 255;
-				$column->null = true;
+				$column->null = false;
 			}),
 			'date_joined' => Field::DateTimeField(function(Column $column){				
 				$column->default = function(){ return date("Y-m-d H:i:s"); };
@@ -61,6 +61,19 @@ class User extends Model {
 ```
 
 **An auto-incrementing integer field called `id` is automatically added. So, except your primary is of a different type, don't bother defining one.**
+
+**Note that in php 8, the above schema could be shortened to :**
+```php
+public static function schema(): array {
+	return [
+		'firstname' => Field::CharField(),
+		'lastname' => Field::CharField(),
+		'date_joined' => Field::DateTimeField(function(Column $column){
+			$column->default = function(){ return date("Y-m-d H:i:s"); }
+		})
+	];
+}
+```
 
 ### SCHEMA FIELDS
 
