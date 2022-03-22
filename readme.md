@@ -17,9 +17,11 @@ $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
 SELECT ... FROM user WHERE id IN ( SELECT user_id FROM comment ) ORDER BY id DESC LIMIT 10
 ```  
 
-This is a simple orm that makes data modelling, quering and generating migrations extremely easy. It **auto detects** changes in models when the user decides to make migrations, hence **removing the need to manually write migrations**. With this, migrations become - **auto-generate once, run everywhere**.
+This is a simple orm that makes quering and generating migrations extremely easy. It **auto detects** changes in models when the user decides to make migrations, hence **removing the need to manually write migrations**.
 
-This means you can **automatically generate and re-use migration files**. That is, you can copy and zip your migrations folder and send it to another developer, and all they have to do is run one command and an entire copy of your schema is made. As a bonus, the migrations are written in php, so, no sql will be seen in your code (unless you want it, of course).
+It provides all the basic pieces need to craft almost any SQL query. You end up with one query all written in SQL without having to do in PHP tasks that would have otherwise been done by SQL.
+
+You can **automatically generate and re-use migration files**. That is, you can copy and zip your migrations folder and send it to another developer, and all they have to do is run one command and an entire copy of your schema is made. As a bonus, the migrations are written in php, so, no sql will be seen in your code (unless you want it, of course).
 
 So all you ever do is modify your models, ask the orm to detect the changes, and when you are ready, apply the changes. It's not your job to detect or keep track of changes you've made to your models.
 
