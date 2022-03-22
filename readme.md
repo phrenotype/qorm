@@ -72,7 +72,7 @@ TLDR; Just create a file called .env in the root of your project if you do not a
 For the complete **setup** and **tutorials** visit [this page](docs/setup.md).  
 
 ## Database Support
-For now, this project only supports `MYSQL` (`MARIADB`), and `SQLITE`. Work is in progress to add support for `POSTGRESQL`.
+For now, this project only supports `MYSQL` (`MariaDB`), and `SQLITE`. Work is in progress to add support for `POSTGRESQL`.
 
 ## Contribution
 To contribute, contact the email below.
