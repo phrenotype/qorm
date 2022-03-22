@@ -40,11 +40,12 @@ class Author extends Model {
 ```
 **If your intended primary key is an auto-incrementing integer, do not bother defining one. A field called `id` is generated and added automatically.**
 
-**Note that in php 8, the above schema could be shortened to :**
+**Note that above schema could be shortened (using defaults) to :**
 ```php
 public static function schema() : array {
 	return [
 		'name' => Field::CharField()
+	];
 }
 ```
 
