@@ -37,7 +37,7 @@ INTERSECT
 SELECT DISTINCT id, name, email FROM user AS user3 WHERE  user3.id > 2
 ```  
 
-If you are using mysql, you will end up with the code below
+If you are using mysql, you will end up with something like the code below
 
 ```sql
 SELECT *
@@ -71,6 +71,7 @@ WHERE EXISTS
        AND dafbedfdfebdc.name = user3.name
        AND dafbedfdfebdc.email = user3.email)
 ```
+The above is equivalent to the previous query that used set operations.
 
 ## RULES / RECOMMENDATIONS
 Aliases are required for all the handlers that will be directly involved in the set operations.
