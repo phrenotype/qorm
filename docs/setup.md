@@ -20,9 +20,9 @@ Q_MIGRATIONS=migrations
 
 **Q_DB_HOST** : This is the database host name or IP address. For **SQLITE**, **This is can be omitted or left empty**.  
 
-**Q_DB_USER** : This is your ***database username***. For **SQLITE**, **This is can be omitted or left empty**.  
+**Q_DB_USER** : This is your **database username**. For **SQLITE**, **This is can be omitted or left empty**.  
 
-**Q_DB_PASS** : This is your ***database password***. For **SQLITE**, **This is can be omitted or left empty**.  
+**Q_DB_PASS** : This is your **database password**. For **SQLITE**, **This is can be omitted or left empty**.  
 
 **Q_MODELS** : **Relative path** from project root to the ***file or folder*** where your model classes will be defined. If using a file, add the `.php` extension to it.
 
@@ -82,7 +82,7 @@ That's it for the setup. From now on, we'll assume you already have a setup and 
 ## What Next ?
 
 ### Quick Tutorial
-For a quick tutorial on basic **CRUD** operations ( Create, Read, Update, Delete ), click [ here ](tutorial/start.md).
+For a quick tutorial on basic **CRUD** operations ( Create, Read, Update, Delete ), click **[ here ](tutorial/start.md)**.
 
 ### In-Depth Tutorial ( Highly Recommended )
 
