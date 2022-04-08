@@ -278,7 +278,7 @@ class Field
      * 
      * @return Field
      */
-    public static function ManyToOneField(string $model, callable $mutator = null, string $index, string $onDelete = ForeignKey::RESTRICT): Field
+    public static function ManyToOneField(string $model, callable $mutator, string $index, string $onDelete = ForeignKey::RESTRICT): Field
     {
         return self::generic('many_to_one', $mutator, $model, $index, $onDelete);
     }
@@ -291,7 +291,7 @@ class Field
      * 
      * @return Field
      */
-    public static function OneToOneField(string $model, callable $mutator = null, string $index, string $onDelete = ForeignKey::RESTRICT): Field
+    public static function OneToOneField(string $model, callable $mutator, string $index, string $onDelete = ForeignKey::RESTRICT): Field
     {
         return self::generic('one_to_one', $mutator, $model, $index, $onDelete);
     }
