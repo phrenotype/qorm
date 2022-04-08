@@ -115,7 +115,15 @@ class Mysql implements IEngine
 
         if ($column->size) {
             if (is_array($column->size)) {
-                $snippet .= '(' . join(",", $column->size) . ')';
+
+                $snippet .= '(' . ltrim(array_reduce($column->size, function ($c, $i) {
+                    $s = '';
+                    if (gettype($i) === 'string') {
+                        return $c . ", '" . $i . "'";
+                    } else {
+                        return $c . ', ' . $i;
+                    }
+                }, ''), ', ') . ')';
             } else {
                 $snippet .= '(' . $column->size . ')';
             }
