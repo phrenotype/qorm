@@ -46,20 +46,25 @@ class Operation
 
         $queries = explode(';', trim($this->sql));
 
-        $pdo->beginTransaction();
-        try {            
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+        }
+
+        try {
             foreach ($queries as $query) {
                 if ($query != false) {
-                                        
+
                     fwrite(STDOUT, $query . PHP_EOL);
-                    $stmt = $pdo->query($query);                    
+                    $stmt = $pdo->query($query);
                     $stmt = null;
-                    
                 }
             }
             $pdo->commit();
         } catch (\PDOException $e) {
-            $pdo->rollback();            
+
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
         }
     }
 

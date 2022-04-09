@@ -49,7 +49,7 @@ class Connection
                 \PDO::ATTR_PERSISTENT => true,
             ]);
 
-            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);            
 
             /* Create a function for sql regex to use */
             $pdo->sqliteCreateFunction(
@@ -100,7 +100,7 @@ class Connection
                 ]
             );
 
-            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);            
 
             return $pdo;
         } else {
