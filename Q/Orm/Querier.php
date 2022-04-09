@@ -24,8 +24,8 @@ class Querier
     public static function raw($sql, array $params = [])
     {
         $pdo = self::$connection;
-        try {
-            $pdo->beginTransaction();
+        $pdo->beginTransaction();
+        try {            
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $stmt = null;
@@ -284,9 +284,8 @@ class Querier
         $pdo = self::$connection;
 
         $stmt = $pdo->prepare($sql);
-
-        try {
-            $pdo->beginTransaction();
+        $pdo->beginTransaction();
+        try {            
             $stmt->execute($v);
             $pdo->commit();
         } catch (\PDOException $e) {
@@ -314,8 +313,8 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        try {
-            $pdo->beginTransaction();
+        $pdo->beginTransaction();
+        try {            
             foreach ($assocs as $asc) {
                 $stmt->execute(array_values($asc));
             }
@@ -353,8 +352,8 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        try {
-            $pdo->beginTransaction();
+        $pdo->beginTransaction();
+        try {            
             $stmt->execute($final_placeholders);
             $pdo->commit();
         } catch (\PDOException $e) {
@@ -383,8 +382,8 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        try {
-            $pdo->beginTransaction();
+        $pdo->beginTransaction();
+        try {            
             $stmt->execute($placeholders);
             $pdo->commit();
         } catch (\PDOException $e) {

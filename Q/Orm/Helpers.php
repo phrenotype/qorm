@@ -300,11 +300,10 @@ class Helpers
     public static function runAsTransaction(string $largeQuery): void
     {
         $pdo = Connection::getInstance();
+        $pdo->beginTransaction();
         try {
 
-            fwrite(STDOUT, $largeQuery . PHP_EOL);
-
-            $pdo->beginTransaction();
+            fwrite(STDOUT, $largeQuery . PHP_EOL);            
             $pdo->exec($largeQuery);
             $pdo->commit();
         } catch (\PDOException $e) {
