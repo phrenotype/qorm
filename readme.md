@@ -82,6 +82,7 @@ For now, this project only supports `MYSQL` (`MariaDB`), and `SQLITE`. Work is i
 To contribute, contact the email below.
 
 ## Contact
-**Twitter** : [@phrenotyper](https://twitter.com/phrenotyper)
+**Twitter** : [@phrenotyper](https://twitter.com/phrenotyper)  
+
 **Email** : paul.contrib@gmail.com  
 
