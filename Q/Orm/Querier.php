@@ -24,8 +24,11 @@ class Querier
     public static function raw($sql, array $params = [])
     {
         $pdo = self::$connection;
-        $pdo->beginTransaction();
-        try {            
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+        }
+
+        try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $stmt = null;
@@ -33,7 +36,9 @@ class Querier
             /* Stack the query */
             QueryStack::stack($sql, $params);
         } catch (\PDOException $e) {
-            $pdo->rollBack();            
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
         }
     }
 
@@ -108,10 +113,10 @@ class Querier
 
 
                 if ($fieldObject->column->type === 'one_to_one' && $fieldObject->model === $parentClassName) {
-                    if (!empty($project) && !in_array($fieldName, $project)) {                        
+                    if (!empty($project) && !in_array($fieldName, $project)) {
                         continue;
                     }
-    
+
                     /* If it's a self relationship, don't point back. continue. Related schema returns self as well. */
                     if ($childClass === $parentClassName) {
                         continue;
@@ -185,8 +190,8 @@ class Querier
     public static function makeRelations(Model $model, array $project = [])
     {
         $model = self::oneOne($model, $project);
-        $model = self::oneMany($model, $project);        
-        $model = self::pointBackToDom($model, $project);        
+        $model = self::oneMany($model, $project);
+        $model = self::pointBackToDom($model, $project);
         return $model;
     }
 
@@ -284,12 +289,18 @@ class Querier
         $pdo = self::$connection;
 
         $stmt = $pdo->prepare($sql);
-        $pdo->beginTransaction();
-        try {            
+
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+        }
+
+        try {
             $stmt->execute($v);
             $pdo->commit();
         } catch (\PDOException $e) {
-            $pdo->rollback();            
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
         }
 
         $stmt = null;
@@ -313,14 +324,20 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        $pdo->beginTransaction();
-        try {            
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+        }
+
+
+        try {
             foreach ($assocs as $asc) {
                 $stmt->execute(array_values($asc));
             }
             $pdo->commit();
         } catch (\PDOException $e) {
-            $pdo->rollback();            
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
         }
         $stmt = null;
         return $pdo->lastInsertId();
@@ -352,12 +369,17 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        $pdo->beginTransaction();
-        try {            
+        if(!$pdo->inTransaction()){
+            $pdo->beginTransaction();    
+        }
+        
+        try {
             $stmt->execute($final_placeholders);
             $pdo->commit();
         } catch (\PDOException $e) {
-            $pdo->rollback();            
+            if($pdo->inTransaction()){
+                $pdo->rollBack();
+            }            
         }
         $stmt = null;
     }
@@ -382,12 +404,17 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        $pdo->beginTransaction();
-        try {            
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+        }
+
+        try {
             $stmt->execute($placeholders);
             $pdo->commit();
         } catch (\PDOException $e) {
-            $pdo->rollback();            
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
         }
 
         $stmt = null;

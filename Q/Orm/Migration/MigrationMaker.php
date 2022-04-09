@@ -6,6 +6,7 @@ use Q\Orm\Cli\BG;
 use Q\Orm\Cli\Bin;
 use Q\Orm\Cli\FG;
 use Q\Orm\Engines\CrossEngine;
+use Q\Orm\Helpers;
 use Q\Orm\SetUp;
 use Q\Orm\Migration\Models\Q_Migration;
 
@@ -79,7 +80,7 @@ class MigrationMaker
         if ($query == false) {
             die('Unable to create migrations table');
         }
-        self::$pdo->query($query);
+        self::$pdo->query($query);        
     }
 
 
@@ -204,9 +205,6 @@ class MigrationMaker
     public static function migrate($name = null)
     {
         if ($name === null) {
-
-            //$unapplied = self::$pdo->query("SELECT * FROM q_migration WHERE applied IS NULL ORDER BY id DESC LIMIT 1")->fetch(\PDO::FETCH_OBJ);
-            //Migrate LAST(NOT LAST UNAPPLIED) migration
 
             $last = Q_Migration::items()->order_by('id DESC')->one();
             if ($last && $last->applied == false) {
