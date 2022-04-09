@@ -46,8 +46,8 @@ class Operation
 
         $queries = explode(';', trim($this->sql));
 
-        try {
-            $pdo->beginTransaction();
+        $pdo->beginTransaction();
+        try {            
             foreach ($queries as $query) {
                 if ($query != false) {
                                         
