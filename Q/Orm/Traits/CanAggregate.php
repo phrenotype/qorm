@@ -16,10 +16,10 @@ trait CanAggregate
 
     /**
      * Prime a Handler to be used for aggregating.
-     * 
+     *
      * @param string $function The aggregate function to apply.
      * @param string $field The field to call the aggregate function on.
-     * 
+     *
      * @return Handler
      */
     public function aggregate(string $function, string $field): Handler
@@ -35,7 +35,7 @@ trait CanAggregate
 
     /**
      * Build aggregate query.
-     * 
+     *
      * @return array
      */
     public function buildAggregateQuery(): array
@@ -70,11 +70,11 @@ trait CanAggregate
 
     /**
      * Builds immediately executes an aggregate query.
-     * 
+     *
      * @param string $function
      * @param string $field
-     * 
-     * @return mixed | null 
+     *
+     * @return mixed | null
      */
     private function buildAndExecuteAggregateQuery(string $function, string $field)
     {
@@ -91,9 +91,9 @@ trait CanAggregate
 
     /**
      * Get the total count of objects in a Handler.
-     * 
+     *
      * @param string $field The field to count based on.
-     * 
+     *
      * @return int
      */
     public function count($field = '*'): int
@@ -105,15 +105,15 @@ trait CanAggregate
             $this->__count__ = $count;
             return $this->__count__;
         } else {
-            return 0;
+            return $this->__count__;
         }
     }
 
     /**
      * Get the maximum value in a field for all objects in a Handler.
-     * 
+     *
      * @param mixed $field The field to get max on.
-     * 
+     *
      * @return mixed
      */
     public function max($field): mixed
@@ -131,9 +131,9 @@ trait CanAggregate
 
     /**
      * Get the miniimum value in a field for all objects in a Handler.
-     * 
+     *
      * @param mixed $field The field to get min on.
-     * 
+     *
      * @return mixed
      */
     public function min($field): mixed
@@ -151,9 +151,9 @@ trait CanAggregate
 
     /**
      * Get the average value in a field for all objects in a Handler.
-     * 
+     *
      * @param mixed $field The field to calculate average based on.
-     * 
+     *
      * @return mixed
      */
     public function avg($field): mixed
@@ -171,9 +171,9 @@ trait CanAggregate
 
     /**
      * Get the sum of values in a field for all objects in a Handler.
-     * 
+     *
      * @param mixed $field The field to calculate sum based on.
-     * 
+     *
      * @return mixed
      */
     public function sum($field): mixed
