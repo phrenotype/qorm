@@ -19,9 +19,11 @@ $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
 
 ```sql
 SELECT ... FROM user WHERE id IN ( SELECT user_id FROM comment ) ORDER BY id DESC LIMIT 10
-```  
+```
 
 This is a simple orm that makes quering and generating migrations extremely easy. It **auto detects** changes in models when the user decides to make migrations, hence **removing the need to manually write migrations**.
+
+Your data can also be moved to any other system and be fully distributed without risk of primary key collisions.
 
 It provides all the basic pieces need to craft almost any SQL query. You end up with one query all written in SQL without having to do in PHP tasks that would have otherwise been done by SQL.
 
@@ -43,8 +45,9 @@ If you've used the django framework, you'll notice that when you `makemigrations
 
 Unfortunately, no major php orm has anything of that sorts. One has to manually define migrations based on their changes. Well, we offer that as well, but for *most* of your migrations, we'll **correctly** detect the change and let you apply the migration at your own time.
 
-With this, you can zip your migrations folder and send it to another developer and with a single command, they will have an exact replica of your database. So, migration files are **auto-generate once, run everywhere**.  
+With this, you can zip your migrations folder and send it to another developer and with a single command, they will have an exact replica of your database. So, migration files are **auto-generate once, run everywhere**.
 
+1. You can move your data anywhere because of the globally unique integer ids.
 1. You don't have to write migrations by hand.
 1. Model definition and schema are all in one class.
 1. A powerful and smooth query api.
@@ -59,7 +62,7 @@ With this, you can zip your migrations folder and send it to another developer a
 1. All changes to model classes are automatically detected. With this, you will hardly ever need to write your own migrations. And if you do, you have the ability to do so, even in raw sql.
 
 ## Why .env For Setup ?
-This orm uses the .env file for configuration. This is for two reasons:  
+This orm uses the .env file for configuration. This is for two reasons:
 
 1. Convention.
 1. So that the cli tool can access the database credentials.
@@ -73,7 +76,7 @@ TLDR; Just create a file called .env in the root of your project if you do not a
 `composer require qorm/qorm`
 
 ## Tutorials And Setup
-For the complete **setup** and **tutorials** visit [this page](docs/setup.md).  
+For the complete **setup** and **tutorials** visit [this page](docs/setup.md).
 
 ## Database Support
 For now, this project only supports `MYSQL` (`MariaDB`), and `SQLITE`. Work is in progress to add support for `POSTGRESQL`.
@@ -82,7 +85,7 @@ For now, this project only supports `MYSQL` (`MariaDB`), and `SQLITE`. Work is i
 To contribute, contact the email below.
 
 ## Contact
-**Twitter** : [@phrenotyper](https://twitter.com/phrenotyper)  
+**Twitter** : [@phrenotyper](https://twitter.com/phrenotyper)
 
-**Email** : paul.contrib@gmail.com  
+**Email** : paul.contrib@gmail.com
 
