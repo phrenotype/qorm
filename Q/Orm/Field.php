@@ -270,14 +270,14 @@ class Field
 
     /**
      * Insert current date.
-     * 
+     *
      * @param bool $isNull
      *
      * @return Field
      */
     public static function DateNow(bool $isNull = false){
         return self::DateField(function(Column $c) use ($isNull){
-            $c->default = function(){ return  (new \DateTime())->format('Y-m-d H:i:s'); };
+            $c->default = function(){ return  (new \DateTime())->format('Y-m-d'); };
             $c->null = $isNull;
         });
     }
