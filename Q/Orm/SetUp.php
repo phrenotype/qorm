@@ -5,8 +5,7 @@ namespace Q\Orm;
 use Q\Orm\Engines\CrossEngine;
 use Q\Orm\Migration\MigrationMaker;
 use Q\Orm\Migration\Operation;
-
-
+use Q\Orm\Peculiar\Peculiar;
 
 /**
  * An Injector for different classes
@@ -43,6 +42,18 @@ class SetUp
 
             /* Model Integrity Checks */
             Integrity::refuseDuplicateAttributes();
+
+            /* Set the epoch and customId for Peculiar */
+            $epoch = (int)self::env('Q_PECULIAR_EPOCH');
+            $customId = (int)self::env('Q_PECULIAR_CUSTOM_ID');
+
+            if ($epoch) {
+                Peculiar::setEpoch($epoch);
+            }
+
+            if ($customId) {
+                Peculiar::setCustomId($customId);
+            }
         }
 
         MigrationMaker::setUpForMigrations($modelsPath, $migrationsFolder);
@@ -50,9 +61,9 @@ class SetUp
 
     /**
      * Get and environment variable.
-     * 
+     *
      * @param string $key
-     * 
+     *
      * @return string
      */
     public static function env(string $key): string
@@ -86,16 +97,16 @@ class SetUp
             }
             return $value;
         }
-        return '';
+        return null;
     }
 
 
     /**
      * Wire up everthing.
-     * 
+     *
      * @param bool $hit
      * @param string|null $env Path to env file, if none exists in root folder.
-     * 
+     *
      * @return void
      */
     public static function main($hit = true, string $env = null): void
