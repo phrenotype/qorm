@@ -4,10 +4,6 @@
 ![contributors](https://img.shields.io/github/contributors/phrenotype/qorm)
 ![contributors](https://img.shields.io/github/languages/code-size/phrenotype/qorm)
 
-<p align="center">
-    <img src="docs/q.png">
-</p>
-
 ```php
 <?php
 $users = User::items()->filter(['id.in' => Comment::items()->project('user')])
