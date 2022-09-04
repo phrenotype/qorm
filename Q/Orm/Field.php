@@ -59,7 +59,7 @@ class Field
 
     /**
      * Checks if a field has a key defined on it.
-     * 
+     *
      * @return bool
      */
     public function isKey(): bool
@@ -78,13 +78,13 @@ class Field
 
     /**
      * Creates a new Field object.
-     * 
+     *
      * @param string $type
      * @param callable|null $mutator
      * @param string|null $model
      * @param string|null $index
      * @param string|null $onDelete
-     * 
+     *
      * @return Field
      */
     private static function generic(string $type, callable $mutator = null, string $model = null, string $index = null, string $onDelete = null): Field
@@ -150,7 +150,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function BooleanField(callable $mutator = null, $index = null): Field
@@ -161,7 +161,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function CharField(callable $mutator = null, $index = null): Field
@@ -172,7 +172,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function TextField(callable $mutator = null, $index = null): Field
@@ -183,7 +183,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function IntegerField(callable $mutator = null, $index = null): Field
@@ -194,7 +194,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function FloatField(callable $mutator = null, $index = null): Field
@@ -205,7 +205,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function DoubleField(callable $mutator = null, $index = null): Field
@@ -216,7 +216,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function DecimalField(callable $mutator = null, $index = null): Field
@@ -227,7 +227,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function NumericField(callable $mutator = null, $index = null): Field
@@ -238,7 +238,7 @@ class Field
     /**
      * @param callable $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function EnumField(callable $mutator, $index = null): Field
@@ -249,7 +249,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function DateField(callable $mutator = null, $index = null): Field
@@ -260,7 +260,7 @@ class Field
     /**
      * @param callable|null $mutator
      * @param string|null $index
-     * 
+     *
      * @return Field
      */
     public static function DateTimeField(callable $mutator = null, $index = null): Field
@@ -268,14 +268,40 @@ class Field
         return self::generic(self::DATETIME, $mutator, null, $index);
     }
 
+    /**
+     * Insert current date.
+     * 
+     * @param bool $isNull
+     *
+     * @return Field
+     */
+    public static function DateNow(bool $isNull = false){
+        return self::DateField(function(Column $c) use ($isNull){
+            $c->default = function(){ return  (new \DateTime())->format('Y-m-d H:i:s'); };
+            $c->null = $isNull;
+        });
+    }
 
+    /**
+     * Insert current date and time.
+     *
+     * @param bool $isNull
+     *
+     * @return Field
+     */
+    public static function DateTimeNow(bool $isNull = false){
+        return self::DateTimeField(function(Column $c) use ($isNull){
+            $c->default = function(){ return  (new \DateTime())->format('Y-m-d H:i:s'); };
+            $c->null = $isNull;
+        });
+    }
 
     /**
      * @param string $model
      * @param callable $mutator
      * @param string $index
      * @param string $onDelete
-     * 
+     *
      * @return Field
      */
     public static function ManyToOneField(string $model, callable $mutator, string $index, string $onDelete = ForeignKey::RESTRICT): Field
@@ -288,7 +314,7 @@ class Field
      * @param callable $mutator
      * @param string $index
      * @param string $onDelete
-     * 
+     *
      * @return Field
      */
     public static function OneToOneField(string $model, callable $mutator, string $index, string $onDelete = ForeignKey::RESTRICT): Field
@@ -298,7 +324,7 @@ class Field
 
     /**
      * @param string $text
-     * 
+     *
      * @return string
      */
     public static function textToCode(string $text): string
