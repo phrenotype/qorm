@@ -4,7 +4,8 @@ namespace Q\Orm;
 
 use Q\Orm\Migration\Column;
 use Q\Orm\Migration\ForeignKey;
-
+use Q\Orm\Migration\Index;
+use Q\Orm\Peculiar\Peculiar;
 
 /**
  * Represents a model field.
@@ -147,6 +148,25 @@ class Field
         return $field;
     }
 
+
+    /**
+     * Insert a 64-bit unique integer.
+     *
+     * @param string $index
+     * @param bool $isNull
+     *
+     * @return Field
+     */
+    public static function Peculiar(string $index = Index::PRIMARY_KEY, bool $isNull = false)
+    {
+        return self::IntegerField(function (Column $c) {
+            $c->default = function () {
+                return Peculiar::nextId();
+            };
+            $c->null = false;
+        }, $index);
+    }
+
     /**
      * @param callable|null $mutator
      * @param string|null $index
@@ -275,9 +295,12 @@ class Field
      *
      * @return Field
      */
-    public static function DateNow(bool $isNull = false){
-        return self::DateField(function(Column $c) use ($isNull){
-            $c->default = function(){ return  (new \DateTime())->format('Y-m-d'); };
+    public static function DateNow(bool $isNull = false)
+    {
+        return self::DateField(function (Column $c) use ($isNull) {
+            $c->default = function () {
+                return (new \DateTime())->format('Y-m-d');
+            };
             $c->null = $isNull;
         });
     }
@@ -289,9 +312,12 @@ class Field
      *
      * @return Field
      */
-    public static function DateTimeNow(bool $isNull = false){
-        return self::DateTimeField(function(Column $c) use ($isNull){
-            $c->default = function(){ return  (new \DateTime())->format('Y-m-d H:i:s'); };
+    public static function DateTimeNow(bool $isNull = false)
+    {
+        return self::DateTimeField(function (Column $c) use ($isNull) {
+            $c->default = function () {
+                return (new \DateTime())->format('Y-m-d H:i:s');
+            };
             $c->null = $isNull;
         });
     }
