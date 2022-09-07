@@ -22,12 +22,29 @@ class Peculiar
 
     private static $customId;
 
+    private $pdo;
+
     private function __construct(int $customId = null)
     {
         if ($customId && !self::$customId) {
             self::setCustomId($customId);
         } else if (!$customId && !self::$customId) {
             self::setCustomId(0);
+        }
+
+        $pdo = new \PDO('sqlite:' . __DIR__ . '/peculiar.sqlite3', null, null, [
+            \PDO::ATTR_EMULATE_PREPARES => false,
+            \PDO::ATTR_PERSISTENT => true,
+        ]);
+
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 10);
+        $this->pdo = $pdo;
+
+        $pdo->query('CREATE TABLE IF NOT EXISTS peculiar(sequence INTEGER)');
+
+        if ($this->getSequence() === null) {
+            $pdo->query('INSERT INTO peculiar VALUES(0)');
         }
     }
 
@@ -36,8 +53,30 @@ class Peculiar
         return floor(microtime(true) * 1000) - self::$customEpoch;
     }
 
+
+    private function getSequence()
+    {
+        $query = 'SELECT sequence FROM peculiar';
+        $obj = $this->pdo->query($query)->fetch(\PDO::FETCH_OBJ);
+
+        if ($obj) {
+            return $obj->sequence;
+        }
+
+        return null;
+    }
+
+    private function setSequence(int $value)
+    {
+        $this->pdo->query('UPDATE peculiar SET sequence=' . (int)$value);
+    }
+
     public function generate()
     {
+        if (!$this->pdo->inTransaction()) {
+            $this->pdo->beginTransaction();
+        }
+
         $currentTimestamp = $this->timestampDiff();
 
         if (self::$lastTimestamp > $currentTimestamp) {
@@ -47,7 +86,7 @@ class Peculiar
         if (self::$lastTimestamp == $currentTimestamp) {
 
             // Identity law + bit field size :)
-            self::$sequence = (self::$sequence + 1) & self::MAX_SEQUENCE;
+            self::$sequence = (($this->getSequence() ?? 0) + 1) & self::MAX_SEQUENCE;
 
             if (self::$sequence == 0) {
                 $currentTimestamp = $this->waitTillNextMs(self::$lastTimestamp);
@@ -55,6 +94,12 @@ class Peculiar
         } else {
             self::$sequence = 0;
         }
+
+        // Save new sequence number
+        $this->setSequence(self::$sequence);
+        $this->pdo->commit();
+        usleep(2000);
+
 
         self::$lastTimestamp = $currentTimestamp;
 
@@ -96,4 +141,3 @@ class Peculiar
         return self::$instance->generate();
     }
 }
-
