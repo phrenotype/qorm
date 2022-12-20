@@ -4,7 +4,6 @@ vendor/
 /models/
 *.code-workspace
 *.sqlite3
-.gitignore
 composer.lock
 qorm
 main.php
