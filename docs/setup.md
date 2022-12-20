@@ -12,6 +12,9 @@ Q_DB_USER=user
 Q_DB_PASS=secret
 Q_MODELS=models
 Q_MIGRATIONS=migrations
+
+Q_PECULIAR_EPOCH=1640991600000
+Q_PECULIAR_CUSTOM_ID=3
 ```
 
 **Q_ENGINE** : This is the database engine you are using. For now only the values **MYSQL** and  **SQLITE** are supported
@@ -28,6 +31,8 @@ Q_MIGRATIONS=migrations
 
 **Q_MIGRATIONS** : **Relative path** from project root to the ***folder*** where your generated migration files will be kept.
 
+**Q_PECULIAR_EPOCH** : Epoch in milliseconds for the peculiar id generator. Don't change this once you have launched your project.
+**Q_PECULIAR_CUSTOM_ID** : Any number from 0 to 511 (inclusive) that will be used to uniquely create ids for this server.
 
 ## Step 2
 Then, setup your workspace like this :
