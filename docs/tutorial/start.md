@@ -51,7 +51,9 @@ public static function schema() : array {
 
 To find out about other types of schema fields, please refer to [ this page ](./../parts/creating_models.md).
 
-If you use a `uuid` as primary key, look at [ this page ](./../parts/uuid.md) to see how to setup the model.
+If you use a `uuid` as primary key, look at [ this page ](./../parts/uuid.md) to see how to setup the model.  
+
+If you would like to use a more robust primary key generator, like the twitter snowflake, look at [ this page ](./../parts/peculiar.md) to see how to setup the model.
 
 
 
