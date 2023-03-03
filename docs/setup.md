@@ -69,8 +69,7 @@ After this you can proceed to make queries anywhere with your project.
 
 ### For Non Framework Users
 
-Use the code below as a template. The Q orm autoloads all the models. Assuming here that the `User` model has been defined.
-
+Use the code below as a template. The Q orm autoloads all the models.
 ```php
 <?php
 require "vendor/autoload.php";
