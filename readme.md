@@ -29,8 +29,6 @@ So all you ever do is modify your models, ask the orm to detect the changes, and
 
 This way, you can focus on modelling your data without ever having to convert it to a relational schema yourself.
 
-A .env parser is included, so you don't need any external libraries to parse the .env file.
-
 Also, the models are **autoloaded**. You don't need to include the folders in your autoloader.
 
 As long as you point to the correct file(s) or folders for models and migrations, you can leave the rest to the orm.
