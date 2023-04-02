@@ -66,38 +66,16 @@ class SetUp
      *
      * @return string
      */
-    public static function env(string $key): string
+    public static function env(string $key): string|null
     {
-        static $qAssoc;
+        static $QConfig;
 
-        $env = self::$env;
-        if (!$env) {
-            $env = '.env';
-        }
-
-        if (($_ENV[$key] ?? false)) {
-
-            return $_ENV[$key];
-        } else if (($_SERVER[$key] ?? false)) {
-            return $_SERVER[$key];
-        } else if (getenv($key)) {
-
-            return getenv($key);
-        } else if (is_readable($env)) {
-
-            if (is_null($qAssoc)) {
-                $qAssoc = parse_ini_file($env, false, INI_SCANNER_RAW);
-            }
-
-            $value = $qAssoc[$key] ?? '';
-            if ($value) {
-                putenv("$key=$value");
-                $_ENV[$key] = $value;
-                $_SERVER[$key] = $value;
-            }
-            return $value;
-        }
-        return null;
+        if(is_array($QConfig)){
+            return $QConfig[$key] ?: null;
+        }else {
+            $QConfig = require self::$env;
+            return $QConfig[$key] ?: null;
+        }        
     }
 
 
@@ -109,9 +87,15 @@ class SetUp
      *
      * @return void
      */
-    public static function main($hit = true, string $env = null): void
+    public static function main(string $env = null, $hit = true): void
     {
-        self::$env = $env;
+        self::$env = $env ?: 'qorm.config.php';
+
+        if(basename(self::$env) !== "qorm.config.php"){
+            throw new \Exception(sprintf("The valid configuration file is qorm.config.php"));
+            die;
+        }
+
 
         $models = self::env('Q_MODELS');
         $migrations = self::env('Q_MIGRATIONS');

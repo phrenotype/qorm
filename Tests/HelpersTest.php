@@ -11,7 +11,7 @@ class HelpersTest extends TestCase
 
     protected function setUp(): void
     {
-        SetUp::main(false, __DIR__ . '/Database/.env');
+        SetUp::main(__DIR__ . '/Database/qorm.config.php', false);
     }
 
     protected function tearDown(): void
