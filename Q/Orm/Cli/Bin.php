@@ -29,12 +29,12 @@ class Bin
     private function commands()
     {        
         $usage = self::color("Usage", FG::BROWN, BG::BLACK) . PHP_EOL;
-        $usage .= "command [arguments]" . PHP_EOL . PHP_EOL;
+        $usage .= "\tphp vendor/bin/qorm [command] [...arguments]" . PHP_EOL . PHP_EOL;
 
-        $commands = self::color("Available commands", FG::BROWN, BG::BLACK) . PHP_EOL;
+        $commands = self::color("Available Commands", FG::BROWN, BG::BLACK) . PHP_EOL;
 
         $formatCommand = function ($command) {
-            return self::color(sprintf("%-30s", $command), FG::GREEN, BG::BLACK);
+            return self::color(sprintf("%-30s", "\t" . $command), FG::GREEN, BG::BLACK);
         };
 
         $formatDesc = function ($text) {
@@ -55,7 +55,7 @@ class Bin
 
         $commandString .= $formatCommand("create [ModelName]") . $formatDesc("Generates a new model.");
 
-        $commands .= $commandString . PHP_EOL;
+        $commands .= $commandString . PHP_EOL . PHP_EOL;
 
         return ($usage . $commands);
     }

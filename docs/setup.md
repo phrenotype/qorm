@@ -2,19 +2,47 @@
 There are three short steps here.
 
 ## Step 1
-Open ( or create ) the **.env** and add the following content to it:
+Open ( or create ) the **qorm.config.php** in your document root (or anywhere you like) and add the following content to it:
 
-```
-Q_ENGINE=MYSQL
-Q_DB_NAME=q
-Q_DB_HOST=127.0.0.1
-Q_DB_USER=user
-Q_DB_PASS=secret
-Q_MODELS=models
-Q_MIGRATIONS=migrations
+```php
+<?php
 
-Q_PECULIAR_EPOCH=1640991600000
-Q_PECULIAR_CUSTOM_ID=3
+/**
+ * Configuration information for QOrm.
+ */
+$QOrmConfig = [
+
+    // SQL dialect. SQLITE and MYSQL are supported for now.
+    "Q_ENGINE"=>"SQLITE",
+
+    // Database Name. For sqlite, this will be the name of the database file.
+    "Q_DB_NAME"=>"qorm",
+
+    // Database Host. Leave blank if using sqlite.
+    "Q_DB_HOST"=>"",
+
+    // Database User. Leave blank if using sqlite.
+    "Q_DB_USER"=>"",
+
+    // Database Password. Leave blank if using sqlite.
+    "Q_DB_PASS"=>"",
+
+    // Models Folder.
+    "Q_MODELS"=>"models",
+
+    // Migrations Folder.
+    "Q_MIGRATIONS"=>"migrations",
+    
+    // Epoch for unique id (64-bit integer) generation.
+    "Q_PECULIAR_EPOCH"=>"1640991600000",
+
+    // Custom server id (0 - 511).
+    "Q_PECULIAR_CUSTOM_ID"=>"3",
+
+];
+
+return $QOrmConfig;
+
 ```
 
 **Q_ENGINE** : This is the database engine you are using. For now only the values **MYSQL** and  **SQLITE** are supported
@@ -40,9 +68,9 @@ Then, setup your workspace like this :
 - index.php
 - models ( or models.php, if you are using a single file to store the model classes )
 - migrations
-- .env
+- qorm.config.php
 
-Note though, that the names above are arbitrary and you can keep your models and migrations anywhere in your project as far as you specify that path in the .env file.
+Note though, that the names above are arbitrary and you can keep your models and migrations anywhere in your project as far as you specify that path in the **qorm.config.php** file.
 
 If you are using a framework, then create these folders wherever you please.
 
@@ -53,6 +81,8 @@ If you are using a framework, then create these folders wherever you please.
 
 The last step is to find where to call the method `\Q\Orm\SetUp::main()` that will initialize the orm.
 
+You need to pass only one required argument, the path to your configuration file. It can be anywhere in your filesystem. The file must always be called **qorm.config.php**.
+
 ### For Framework Users
 If you use a framework, find the bootstrap file, or create a middleware and call `\Q\Orm\SetUp::main()` method within it.
 
@@ -61,7 +91,9 @@ If you use a framework, find the bootstrap file, or create a middleware and call
 
 use Q\Orm\SetUp;
 
-Setup::main();
+SetUp::main(__DIR__ . "/qorm.config.php");
+
+// The rest of your code goes here
 
 ```
 
@@ -76,7 +108,7 @@ require "vendor/autoload.php";
 
 use Q\Orm\SetUp;
 
-Setup::main();
+SetUp::main(__DIR__ . "/qorm.config.php");
 
 // The rest of your code goes here
 ```

@@ -95,7 +95,8 @@ class Field
         if (!is_null($mutator)) {
             $mutator($column);
         } else {
-            //Set default size for char fields
+            // Set default size for char fields.
+            // This is specifically for when No mutator is passed. Just and set some defaults for the user.
             if ($type === 'varchar') {
                 $column->size = 255;
             }
@@ -114,8 +115,14 @@ class Field
         $field->index = $index;
         $field->onDelete = $onDelete;
 
+        // This should only be left if we are on an sqlite database.
+        // Here, a mutator was defined, a varchar was created but size was not specified.
         if (($column->type == 'varchar') && ($column->size == null)) {
-            throw new \Error(sprintf("Please ensure all 'CharField' attributes have a size specified.", $column->name));
+            if(SetUp::$engine === SetUp::SQLITE){
+                // Check if this is cli and then echo an error ?
+            }else{
+                throw new \Error(sprintf("Please ensure all 'CharField' attributes have a size specified.", $column->name));
+            }            
         }
 
         if ($column->type === 'enum' && ($column->size == null || !is_array($column->size))) {

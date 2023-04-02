@@ -57,15 +57,10 @@ With this, you can zip your migrations folder and send it to another developer a
 1. You will end up with a well modelled data and properly designed database without feeling forced to do so.
 1. All changes to model classes are automatically detected. With this, you will hardly ever need to write your own migrations. And if you do, you have the ability to do so, even in raw sql.
 
-## Why .env For Setup ?
-This orm uses the .env file for configuration. This is for two reasons:
+## Why 'qorm.config.php' For Setup ?
+In earlier versions, this orm used **.env** file for configuration. For security reasons, and mistakes that can occur during deployment, this has been dropped in favor of using a php file for configuration. The risk of leaking credentials is gone, irrespective of who the developer is. This orm assumes whoever using it has no knowledge of security and takes proactive measures to ensure data is kept secure.
 
-1. Convention.
-1. So that the cli tool can access the database credentials.
-
-The benefits more than out weight whatever minimalist risks there may be. Also, this orm does not have any dependencies, the .env file is parsed by the library.
-
-TLDR; Just create a file called .env in the root of your project if you do not already have one.
+TLDR; Just create a file called **qorm.config.php** in the root of your project if you do not already have one.
 
 ## Install
 
