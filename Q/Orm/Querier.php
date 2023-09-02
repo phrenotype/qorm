@@ -200,7 +200,7 @@ class Querier
         //This actually removes ref cols but does not remove undefined cols.
         //This is done so that join fields can come back
         $properties = Helpers::getModelProperties(Helpers::getClassName($model));
-        $onObject = get_object_vars($model);
+        $onObject = $model->getProps();
 
         foreach ($onObject as $k => $v) {
             if (!in_array($k, $properties) && Helpers::isRefField($k, Helpers::getClassName($model)) && $k !== 'id' && !preg_match("#_set$#", $k)) {
@@ -232,7 +232,7 @@ class Querier
             queryOne and queryAll will put the objects in cache.
             */
             $object = self::removeRefCols(self::makeRelations($item, $project));
-            $object->prevState(get_object_vars($object));
+            $object->prevState($object->getProps());
             return $object;
         }
         return null;
@@ -262,7 +262,7 @@ class Querier
                 queryOne and queryAll will put the objects in cache.
                 */
                 $object = self::removeRefCols(self::makeRelations($row, $project));
-                $object->prevState(get_object_vars($object));
+                $object->prevState($object->getProps());
                 yield $object;
             }
         };

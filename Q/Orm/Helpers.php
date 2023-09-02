@@ -76,10 +76,13 @@ class Helpers
         $empty = true;
 
         $pk = $object->pk();
+        
+        $hasPrimaryKey = $object->$pk ?? null;
 
-        if ($object->$pk ?? false) {
+        //If primary key is set, a model is not empty
+        if (isset($hasPrimaryKey)) {            
             return false;
-        } else {
+        } else {            
             foreach ($props as $p) {
                 if (!is_null($object->$p)) {
                     $empty = false;

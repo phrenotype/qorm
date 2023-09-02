@@ -9,6 +9,7 @@ use Q\Orm\Migration\TableModelFinder;
  */
 abstract class Model
 {
+    protected $__properties = [];
 
     /**
      * Construct a new model. This does not persist the object.
@@ -46,13 +47,16 @@ abstract class Model
 
     public function __get($name)
     {
-        return null;
+        return $this->__properties[$name] ?? null;
     }
 
     public function __set($name, $value)
     {
-        //This is for columns from a join
-        $this->$name = $value;
+        $this->__properties[$name] = $value;
+    }
+
+    public function getProps(){
+        return $this->__properties;
     }
 
     public function __toString()
@@ -80,7 +84,7 @@ abstract class Model
     public function save()
     {
         $pk = $this->pk();
-        $object_props = get_object_vars($this);
+        $object_props = $this->getProps();
         if (array_key_exists($pk, $object_props)) {
 
             return static::items()->filter([$pk => $this->$pk])->update($object_props, $this->prevState())->one();
@@ -133,11 +137,11 @@ abstract class Model
         if ($isDirty) {
             $pk = $this->pk();
             $obj = static::items()->filter([$pk => $this->$pk])->one(true);
-            foreach (get_object_vars($obj) as $k => $v) {
+            foreach ($obj->getProps() as $k => $v) {
                 $this->$k = $v;
             }
 
-            $this->prevState(get_object_vars($obj));
+            $this->prevState($obj->getProps());
         }
         return $this;
     }
@@ -151,7 +155,7 @@ abstract class Model
      */
     public function json($expandLists = false)
     {
-        $vars = get_object_vars($this);
+        $vars = $this->getProps();
         foreach ($vars as $k => $v) {
             if ($v instanceof \Closure) {
                 $vars[$k] = call_user_func($v);

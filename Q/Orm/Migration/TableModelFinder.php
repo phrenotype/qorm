@@ -67,8 +67,8 @@ class TableModelFinder
     }
 
     public static function findModelFK(string $model, callable $predicate)
-    {        
-        $table = CrossEngine::tableFromModels(Helpers::modelNameToTableName(Helpers::getShortName($model)));        
+    {
+        $table = CrossEngine::tableFromModels(Helpers::modelNameToTableName(Helpers::getShortName($model)));
         if (is_object($table)) {
             foreach ($table->foreignKeys as $fk) {
                 if ($predicate($table, $fk) === true) {
