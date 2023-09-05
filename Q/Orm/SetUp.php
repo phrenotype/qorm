@@ -92,7 +92,7 @@ class SetUp
         self::$env = $env ?: 'qorm.config.php';
 
         if(basename(self::$env) !== "qorm.config.php"){
-            throw new \Exception(sprintf("The valid configuration file is qorm.config.php"));
+            throw new \Exception(sprintf("Invalid configuration file supplied."));
             die;
         }
 
