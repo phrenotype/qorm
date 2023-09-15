@@ -3,7 +3,7 @@
 /**
  * Configuration information for QOrm.
  */
-$QOrmConfig = [
+return  [
 
     // SQL dialect. SQLITE and MYSQL are supported for now.
     "Q_ENGINE"=>"SQLITE",
@@ -21,7 +21,7 @@ $QOrmConfig = [
     "Q_DB_PASS"=>"",
 
     // Models Folder.
-    "Q_MODELS"=>"models",
+    "Q_MODELS"=>"models/StudyModels",
 
     // Migrations Folder.
     "Q_MIGRATIONS"=>"migrations",
@@ -34,4 +34,3 @@ $QOrmConfig = [
 
 ];
 
-return $QOrmConfig;
