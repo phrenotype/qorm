@@ -76,5 +76,5 @@ To contribute, contact the email below.
 ## Contact
 **Twitter** : [@phrenotyper](https://twitter.com/phrenotyper)
 
-**Email** : paul.contrib@gmail.com
+**Email** : dev@paulrobert.xyz
 

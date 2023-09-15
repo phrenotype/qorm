@@ -1,5 +1,7 @@
 vendor/
 .env
+qorm*
+qorm.config.php
 /migrations/
 /models/
 *.code-workspace

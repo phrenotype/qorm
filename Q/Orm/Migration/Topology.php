@@ -8,29 +8,52 @@ class Topology
     public static function sortTablesToCreate(array $tablesToCreate): array
     {
 
-        $newTables = [];
-
-        //First add those without parents
-        foreach ($tablesToCreate as $table) {
-            $parents = self::parents($table->name, $tablesToCreate);
-            if (empty($parents)) {
-                $newTables[] = $table->name;
+        $allParents = array_filter($tablesToCreate, function ($table) use ($tablesToCreate) {
+            if (!empty(static::children($table->name, $tablesToCreate))) {
+                return true;
+            } else {
+                return false;
             }
-        }
+        });
+
+
+        $topLevelParents = array_filter($allParents, function ($table) use ($allParents) {
+            if (!empty(static::parents($table->name, $allParents))) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+
+        $lowLevelParents = array_filter($allParents, function ($table) use ($allParents) {
+            if (!empty(static::parents($table->name, $allParents))) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+
+
+        $newTables = array_map(function ($table) {
+            return $table->name;
+        }, $topLevelParents);
+
+        $newTables = [...$newTables, ...array_map(function ($table) {
+            return $table->name;
+        }, $lowLevelParents)];
+
 
         foreach ($tablesToCreate as $table) {
 
             $parents = self::parents($table->name, $tablesToCreate);
 
-            if (!empty($parents) && !in_array($table->name, $newTables)) {
+            if (!in_array($table->name, $newTables)) {
 
 
                 $key = array_search($table->name, $newTables);
-                if ($key !== false) {
-                    unset($newTables[$key]);
-                }
 
-
+                //Add the parents first
                 foreach ($parents as $parent) {
                     if (!in_array($parent, $newTables)) {
                         if ($key === false) {
@@ -47,12 +70,6 @@ class Topology
                     array_push($newTables, $table->name);
                 } else {
                     $newTables[$key] = $table->name;
-                }
-            } else {
-
-                if (!in_array($table->name, $newTables)) {
-
-                    array_push($newTables, $table->name);
                 }
             }
         }
@@ -77,6 +94,7 @@ class Topology
             if ($tableName === $table->name) {
                 if (!empty($table->foreignKeys)) {
                     foreach ($table->foreignKeys as $fk) {
+                        // Referring to your self will not count against you.
                         if ($fk->refTable !== $table->name) {
                             $parents[] = $fk->refTable;
                         }
@@ -92,6 +110,7 @@ class Topology
     {
         $dependencies = [];
         foreach ($tablesToCreate as $table) {
+            //If you point to your self, you do not have children
             if ($table->name === $tableName) {
                 continue;
             } else {
