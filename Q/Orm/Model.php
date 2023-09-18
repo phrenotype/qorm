@@ -28,14 +28,23 @@ abstract class Model
 
     public function __call($name, $args)
     {
-        if (isset($this->$name)) {
-            if ($this->$name instanceof \Closure) {
-                $this->$name = ($this->$name)();
+        $value = method_exists($this, $name);
+        if($value){
+            $value = $this->$value;
+        }else{
+            $value = $this->__properties[$name];
+        }
+
+        if ($value) {
+
+            if ($value instanceof \Closure) {
+                $this->$name = ($value)();
+                $this->__properties[$name] = ($value)();
                 //Reset prevState, since we just opened up a closure
                 $prevState = $this->prevState();
                 foreach ($prevState as $k => $v) {
                     if ($k === $name) {
-                        $prevState[$k] = $this->$name;
+                        $prevState[$k] = $value;
                     }
                 }
                 $this->prevState($prevState);
