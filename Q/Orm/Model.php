@@ -56,7 +56,14 @@ abstract class Model
 
     public function __get($name)
     {
-        return $this->__properties[$name] ?? null;
+        $inProps = $this->__properties[$name] ?? null;
+        if($inProps){
+            if($inProps instanceof \Closure){
+                return $this->__call($name, ...[]);
+            }else{
+                return $inProps;
+            }
+        }        
     }
 
     public function __set($name, $value)
