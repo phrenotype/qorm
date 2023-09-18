@@ -59,7 +59,7 @@ abstract class Model
         $inProps = $this->__properties[$name] ?? null;
         if($inProps){
             if($inProps instanceof \Closure){
-                return $this->__call($name, ...[]);
+                return $this->$name();
             }else{
                 return $inProps;
             }
