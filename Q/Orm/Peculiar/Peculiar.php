@@ -95,10 +95,9 @@ class Peculiar
             self::$sequence = 0;
         }
 
-        // Save new sequence number
+
         $this->setSequence(self::$sequence);
         $this->pdo->commit();
-        usleep(1);
 
 
         self::$lastTimestamp = $currentTimestamp;
@@ -134,7 +133,6 @@ class Peculiar
 
     public static function nextId(int $customId = null)
     {
-        usleep(1);
         if (!self::$instance) {
             $instance = new static($customId);
             self::$instance = $instance;
