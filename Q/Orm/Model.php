@@ -38,8 +38,7 @@ abstract class Model
         if ($value) {
 
             if ($value instanceof \Closure) {
-                $this->$name = ($value)();
-                $this->__properties[$name] = ($value)();
+
                 //Reset prevState, since we just opened up a closure
                 $prevState = $this->prevState();
                 foreach ($prevState as $k => $v) {
@@ -49,7 +48,7 @@ abstract class Model
                 }
                 $this->prevState($prevState);
             }
-            return $this->__properties[$name];
+            return ($value)();
         }
         return null;
     }
