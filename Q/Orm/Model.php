@@ -47,8 +47,10 @@ abstract class Model
                     }
                 }
                 $this->prevState($prevState);
+                
+                return ($value)();
             }
-            return ($value)();
+            return $value;
         }
         return null;
     }
