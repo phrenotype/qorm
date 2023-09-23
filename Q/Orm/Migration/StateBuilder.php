@@ -32,7 +32,9 @@ class StateBuilder
                 $tc_field_names = array_map(function ($t) {
                     return $t->name;
                 }, $tc->fields);
-                if ((count($fs_field_names) == count($tc_field_names)) && (sort($fs_field_names) == sort($tc_field_names))) {
+                sort($fs_field_names);
+                sort($tc_field_names);
+                if ($fs_field_names === $tc_field_names) {
                     unset($tablesToCreate[$j]);
                 }
             }
