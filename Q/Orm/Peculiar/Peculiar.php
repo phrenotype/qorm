@@ -120,12 +120,15 @@ class Peculiar
 
     public static function setEpoch(int $timestamp)
     {
+        if ($timestamp < 0 || $timestamp > self::MAX_TIMESTAMP) {
+            throw new \Error("Epoch timestamp out of bounds. Must be between 0 and " . self::MAX_TIMESTAMP);
+        }
         self::$customEpoch = $timestamp;
     }
 
     public static function setCustomId(int $customId)
     {
-        if (self::$customId < 0 || self::$customId > self::MAX_CUSTOM_ID) {
+        if ($customId < 0 || $customId > self::MAX_CUSTOM_ID) {
             throw new \Error("Custom Id out of bounds. Must be between 0 and " . self::MAX_CUSTOM_ID);
         }
         self::$customId = $customId;
