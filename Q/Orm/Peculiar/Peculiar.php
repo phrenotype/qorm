@@ -2,49 +2,23 @@
 
 namespace Q\Orm\Peculiar;
 
-class Peculiar
+class Perculiar
 {
     const TIMESTAMP_BITS = 42;
     const CUSTOM_BITS = 10;
     const SEQUENCE_BITS = 12;
 
-    const MAX_TIMESTAMP = -1 ^ (-1 << self::TIMESTAMP_BITS);
-    const MAX_CUSTOM_ID = -1 ^ (-1 << self::CUSTOM_BITS);
-    const MAX_SEQUENCE = -1 ^ (-1 << self::SEQUENCE_BITS);
+    const MAX_TS = -1 ^ (-1 << self::TIMESTAMP_BITS);
+    const MAX_CID = -1 ^ (-1 << self::CUSTOM_BITS);
+    const MAX_SEQ = -1 ^ (-1 << self::SEQUENCE_BITS);
 
-    private static $instance = null;
-
-    private static $sequence = 0;
-    private static $lastTimestamp = null;
-
-    // Jan, 1 2022
     private static $customEpoch = 1640991600000;
+    private static $customId = 0;
 
-    private static $customId;
-
-    private $pdo;
-
-    private function __construct(int $customId = null)
+    public function __construct(int $customId = null)
     {
-        if ($customId && !self::$customId) {
+        if ($customId !== null) {
             self::setCustomId($customId);
-        } else if (!$customId && !self::$customId) {
-            self::setCustomId(0);
-        }
-
-        $pdo = new \PDO('sqlite:' . __DIR__ . '/peculiar.sqlite3', null, null, [
-            \PDO::ATTR_EMULATE_PREPARES => false,
-            \PDO::ATTR_PERSISTENT => true,
-        ]);
-
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 10);
-        $this->pdo = $pdo;
-
-        $pdo->query('CREATE TABLE IF NOT EXISTS peculiar(sequence INTEGER)');
-
-        if ($this->getSequence() === null) {
-            $pdo->query('INSERT INTO peculiar VALUES(0)');
         }
     }
 
@@ -53,93 +27,58 @@ class Peculiar
         return floor(microtime(true) * 1000) - self::$customEpoch;
     }
 
-
-    private function getSequence()
-    {
-        $query = 'SELECT sequence FROM peculiar';
-        $obj = $this->pdo->query($query)->fetch(\PDO::FETCH_OBJ);
-
-        if ($obj) {
-            return $obj->sequence;
-        }
-
-        return null;
-    }
-
-    private function setSequence(int $value)
-    {
-        $this->pdo->query('UPDATE peculiar SET sequence=' . (int)$value);
-    }
-
     public function generate()
     {
-        if (!$this->pdo->inTransaction()) {
-            $this->pdo->beginTransaction();
-        }
-
         $currentTimestamp = $this->timestampDiff();
+        $lastTimestamp = \apcu_fetch('lastTimestamp', $success);
 
-        if (self::$lastTimestamp > $currentTimestamp) {
-            throw new \Error("Clock has moved backwards. Please try again.");
-        }
-
-        if (self::$lastTimestamp == $currentTimestamp) {
-
-            // Identity law + bit field size :)
-            self::$sequence = (($this->getSequence() ?? 0) + 1) & self::MAX_SEQUENCE;
-
-            if (self::$sequence == 0) {
-                $currentTimestamp = $this->waitTillNextMs(self::$lastTimestamp);
-            }
+        if (!$success || $lastTimestamp < $currentTimestamp) {
+            \apcu_store('lastTimestamp', $currentTimestamp);
+            \apcu_store('sequence', 0);
+            $sequence = 0;
         } else {
-            self::$sequence = 0;
+            $sequence = \apcu_inc('sequence');
+            if ($sequence > self::MAX_SEQ) {
+                while ($currentTimestamp <= $lastTimestamp) {
+                    $currentTimestamp = $this->timestampDiff();
+                }
+                \apcu_store('lastTimestamp', $currentTimestamp);
+                \apcu_store('sequence', 0);
+                $sequence = 0;
+            }
         }
 
-
-        $this->setSequence(self::$sequence);
-        $this->pdo->commit();
-
-
-        self::$lastTimestamp = $currentTimestamp;
-
-        $finalNumber = $currentTimestamp << (self::CUSTOM_BITS + self::SEQUENCE_BITS);
-        $finalNumber |= (self::$customId << self::SEQUENCE_BITS);
-        $finalNumber |= self::$sequence;
+        $finalNumber = ($currentTimestamp << (self::CUSTOM_BITS + self::SEQUENCE_BITS))
+                       | (self::$customId << self::SEQUENCE_BITS)
+                       | $sequence;
 
         return (string)$finalNumber;
     }
 
-    public function waitTillNextMs(int $lastTimestamp)
-    {
-        $currentTimestamp = $this->timestampDiff();
-        while ($currentTimestamp <= $lastTimestamp) {
-            $currentTimestamp = $this->timestampDiff();
-        }
-        return $currentTimestamp;
-    }
-
     public static function setEpoch(int $timestamp)
     {
-        if ($timestamp < 0 || $timestamp > self::MAX_TIMESTAMP) {
-            throw new \Error("Epoch timestamp out of bounds. Must be between 0 and " . self::MAX_TIMESTAMP);
+        if ($timestamp <= 0 || $timestamp > self::MAX_TS) {
+            throw new \Error("Set epoch out of bounds. Must be between 0 and " . self::MAX_TS);
         }
         self::$customEpoch = $timestamp;
     }
 
+    public static function getEpoch()
+    {
+        return self::$customEpoch;
+    }
+
     public static function setCustomId(int $customId)
     {
-        if ($customId < 0 || $customId > self::MAX_CUSTOM_ID) {
-            throw new \Error("Custom Id out of bounds. Must be between 0 and " . self::MAX_CUSTOM_ID);
+        if ($customId < 0 || $customId > self::MAX_CID) {
+            throw new \Error("Set custom Id out of bounds. Must be between 0 and " . self::MAX_CID);
         }
         self::$customId = $customId;
     }
 
     public static function nextId(int $customId = null)
     {
-        if (!self::$instance) {
-            $instance = new static($customId);
-            self::$instance = $instance;
-        }
-        return self::$instance->generate();
+        $generator = new static($customId);
+        return $generator->generate();
     }
 }
