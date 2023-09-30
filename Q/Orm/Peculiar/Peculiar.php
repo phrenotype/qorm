@@ -2,7 +2,7 @@
 
 namespace Q\Orm\Peculiar;
 
-class Perculiar
+class Peculiar
 {
     const TIMESTAMP_BITS = 42;
     const CUSTOM_BITS = 10;
