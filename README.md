@@ -71,7 +71,7 @@ For the complete **setup** and **tutorials** visit [this page](docs/setup.md).
 For now, this project only supports `MYSQL` (`MariaDB`), and `SQLITE`. Work is in progress to add support for `POSTGRESQL`.
 
 ## Dependencies
-QOrm requires acpu php extension installed and included in the php.ini file.
+APCU is required for perculiar Id's to work.
 
 ## Contribution
 To contribute, contact the email below.
