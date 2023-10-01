@@ -4,7 +4,7 @@ namespace Q\Orm\Peculiar;
 
 class Peculiar
 {
-    const TIMESTAMP_BITS = 42;
+    const TIMESTAMP_BITS = 41;
     const CUSTOM_BITS = 10;
     const SEQUENCE_BITS = 12;
 
