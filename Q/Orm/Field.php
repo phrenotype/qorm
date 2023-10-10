@@ -369,6 +369,6 @@ class Field
                 return $c;
             }
         }
-        return null;
+        return '';
     }
 }
