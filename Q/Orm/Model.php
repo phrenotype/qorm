@@ -60,6 +60,7 @@ abstract class Model
         $inProps = $this->__properties[$name] ?? null;
         if($inProps){
             if($inProps instanceof \Closure){
+                $evaluated = $this->$name();
                 return $this->$name();
             }else{
                 return $inProps;
