@@ -29,9 +29,9 @@ abstract class Model
     public function __call($name, $args)
     {
         $value = method_exists($this, $name);
-        if($value){
+        if ($value) {
             $value = $this->$value;
-        }else{
+        } else {
             $value = $this->__properties[$name];
         }
 
@@ -39,7 +39,7 @@ abstract class Model
 
             if ($value instanceof \Closure) {
 
-                //Reset prevState, since we just opened up a closure
+                //Get prevState for restoring later, since we just opened up a closure
                 $prevState = $this->prevState();
                 foreach ($prevState as $k => $v) {
                     if ($k === $name) {
@@ -47,7 +47,7 @@ abstract class Model
                     }
                 }
                 $this->prevState($prevState);
-                
+
                 return ($value)();
             }
             return $value;
@@ -58,14 +58,14 @@ abstract class Model
     public function __get($name)
     {
         $inProps = $this->__properties[$name] ?? null;
-        if($inProps){
-            if($inProps instanceof \Closure){
+        if ($inProps) {
+            if ($inProps instanceof \Closure) {
                 $evaluated = $this->$name();
-                return $this->$name();
-            }else{
+                return $evaluated;
+            } else {
                 return $inProps;
             }
-        }        
+        }
     }
 
     public function __set($name, $value)
@@ -73,7 +73,8 @@ abstract class Model
         $this->__properties[$name] = $value;
     }
 
-    public function getProps(){
+    public function getProps()
+    {
         return $this->__properties;
     }
 
