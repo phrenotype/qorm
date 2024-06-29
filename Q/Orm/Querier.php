@@ -32,7 +32,9 @@ class Querier
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $stmt = null;
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
             /* Stack the query */
             QueryStack::stack($sql, $params);
         } catch (\PDOException $e) {
@@ -297,7 +299,9 @@ class Querier
 
         try {
             $stmt->execute($v);
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (\PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -334,7 +338,9 @@ class Querier
             foreach ($assocs as $asc) {
                 $stmt->execute(array_values($asc));
             }
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (\PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -377,7 +383,9 @@ class Querier
 
         try {
             $stmt->execute($final_placeholders);
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (\PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -413,7 +421,9 @@ class Querier
 
         try {
             $stmt->execute($placeholders);
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (\PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();

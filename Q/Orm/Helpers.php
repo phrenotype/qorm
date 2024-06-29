@@ -76,13 +76,13 @@ class Helpers
         $empty = true;
 
         $pk = $object->pk();
-        
+
         $hasPrimaryKey = $object->$pk ?? null;
 
         //If primary key is set, a model is not empty
-        if (isset($hasPrimaryKey)) {            
+        if (isset($hasPrimaryKey)) {
             return false;
-        } else {            
+        } else {
             foreach ($props as $p) {
                 if (!is_null($object->$p)) {
                     $empty = false;
@@ -303,18 +303,21 @@ class Helpers
     public static function runAsTransaction(string $largeQuery): void
     {
         $pdo = Connection::getInstance();
-        if(!$pdo->inTransaction()){
+        if (!$pdo->inTransaction()) {
             $pdo->beginTransaction();
         }
         try {
 
-            fwrite(STDOUT, $largeQuery . PHP_EOL);            
+            fwrite(STDOUT, $largeQuery . PHP_EOL);
+
             $pdo->exec($largeQuery);
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (\PDOException $e) {
-            if($pdo->inTransaction()){
-                $pdo->rollback();            
-            }            
+            if ($pdo->inTransaction()) {
+                $pdo->rollback();
+            }
         }
     }
 

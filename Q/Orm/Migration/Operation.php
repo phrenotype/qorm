@@ -59,12 +59,16 @@ class Operation
                     $stmt = null;
                 }
             }
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (\PDOException $e) {
 
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+
+            throw new \Error($e);
         }
     }
 
