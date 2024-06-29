@@ -39,6 +39,7 @@ class Querier
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+            throw new \Error($e);
         }
     }
 
@@ -301,8 +302,8 @@ class Querier
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+            throw new \Error($e);
         }
-
         $stmt = null;
         return $pdo->lastInsertId();
     }
@@ -338,6 +339,7 @@ class Querier
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+            throw new \Error($e);
         }
         $stmt = null;
         return $pdo->lastInsertId();
@@ -369,17 +371,18 @@ class Querier
 
         $stmt = $pdo->prepare($sql);
 
-        if(!$pdo->inTransaction()){
-            $pdo->beginTransaction();    
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
         }
-        
+
         try {
             $stmt->execute($final_placeholders);
             $pdo->commit();
         } catch (\PDOException $e) {
-            if($pdo->inTransaction()){
+            if ($pdo->inTransaction()) {
                 $pdo->rollBack();
-            }            
+            }
+            throw new \Error($e);
         }
         $stmt = null;
     }
@@ -415,6 +418,7 @@ class Querier
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+            throw new \Error($e);
         }
 
         $stmt = null;
