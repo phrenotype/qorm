@@ -103,15 +103,58 @@ abstract class Model
     public function save()
     {
         $pk = $this->pk();
-        $object_props = $this->getProps();
-        if (array_key_exists($pk, $object_props)) {
+        $schema_props = Helpers::getModelProperties(static::class);
 
-            return static::items()->filter([$pk => $this->$pk])->update($object_props, $this->prevState())->one();
+        // Collect ALL properties: both public (on object) and dynamic (__properties)
+        $all_props = [];
+
+        // First, get schema-defined properties directly from the object (public properties)
+        foreach ($schema_props as $prop) {
+            if (isset($this->$prop)) {
+                $all_props[$prop] = $this->$prop;
+            }
+        }
+
+        // Then merge with __properties (may override or add dynamic props)
+        $dynamic_props = $this->getProps();
+        $all_props = array_merge($all_props, $dynamic_props);
+
+        // Filter to schema-defined properties only (excludes _set handlers, closures, typos)
+        $valid_keys = array_merge($schema_props, [$pk]);
+
+        $filtered_props = [];
+        $ignored = [];
+
+        foreach ($all_props as $k => $v) {
+            if (in_array($k, $valid_keys)) {
+                $filtered_props[$k] = $v;
+            } else {
+                // Only warn about real typos, not relationship accessors
+                $is_set_accessor = str_ends_with($k, '_set');
+                $is_closure = $v instanceof \Closure;
+                $is_handler = $v instanceof Handler;
+
+                if (!$is_set_accessor && !$is_closure && !$is_handler) {
+                    $ignored[] = $k;
+                }
+            }
+        }
+
+        // Warn about potential typos
+        if (!empty($ignored)) {
+            trigger_error(
+                sprintf("QORM: Ignored unknown properties on %s: %s", static::class, implode(', ', $ignored)),
+                E_USER_NOTICE
+            );
+        }
+
+        if (array_key_exists($pk, $filtered_props)) {
+            return static::items()->filter([$pk => $this->$pk])->update($filtered_props, $this->prevState())->one();
         } else {
             if ($pk === 'id') {
-                return static::items()->create($object_props)->order_by('id DESC')->one();
+                return static::items()->create($filtered_props)->order_by('id DESC')->one();
             } else {
-                return static::items()->create($object_props)->order_by("$pk DESC")->one();
+                return static::items()->create($filtered_props)->order_by("$pk DESC")->one();
             }
         }
     }
@@ -145,22 +188,56 @@ abstract class Model
     {
         $prevState = $this->prevState();
         $isDirty = false;
+
         if ($prevState) {
+            // Collect current state from both public properties and __properties
+            $schema_props = Helpers::getModelProperties(static::class);
+            $current = [];
+
+            foreach ($schema_props as $prop) {
+                if (isset($this->$prop)) {
+                    $current[$prop] = $this->$prop;
+                }
+            }
+
+            // Check if any schema property has changed
             foreach ($prevState as $k => $v) {
-                if ($this->$k !== $v) {
+                $currentVal = $current[$k] ?? $this->__properties[$k] ?? null;
+                if ($currentVal !== $v) {
                     $isDirty = true;
+                    break;
                 }
             }
         }
 
         if ($isDirty) {
             $pk = $this->pk();
-            $obj = static::items()->filter([$pk => $this->$pk])->one(true);
-            foreach ($obj->getProps() as $k => $v) {
-                $this->$k = $v;
-            }
+            $obj = static::items()->filter([$pk => $this->$pk])->one();
 
-            $this->prevState($obj->getProps());
+            if ($obj) {
+                // Restore both public properties and __properties
+                $schema_props = Helpers::getModelProperties(static::class);
+
+                foreach ($schema_props as $prop) {
+                    if (isset($obj->$prop)) {
+                        $this->$prop = $obj->$prop;
+                    }
+                }
+
+                // Also restore dynamic properties
+                foreach ($obj->getProps() as $k => $v) {
+                    $this->$k = $v;
+                }
+
+                // Update prevState with schema properties
+                $newState = [];
+                foreach ($schema_props as $prop) {
+                    if (isset($this->$prop)) {
+                        $newState[$prop] = $this->$prop;
+                    }
+                }
+                $this->prevState(array_merge($newState, $obj->getProps()));
+            }
         }
         return $this;
     }
