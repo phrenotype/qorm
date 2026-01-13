@@ -33,6 +33,7 @@ class User extends Model
 				$column->default = 0;
 			}),
 			'sponsor' => Field::OneToOneField(self::class, function (Column $column) {
+				$column->name = 'sponsor_id';
 				$column->null = true;
 			}, Index::INDEX),
 			'created' => Field::DateTimeField(function (Column $column) {

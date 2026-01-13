@@ -21,6 +21,26 @@ class Querier
         return self::$connection;
     }
 
+    private static function bindParams($stmt, array $params)
+    {
+        foreach ($params as $k => $v) {
+            $type = \PDO::PARAM_STR;
+            if (is_int($v)) {
+                $type = \PDO::PARAM_INT;
+            } elseif (is_bool($v)) {
+                $type = \PDO::PARAM_BOOL;
+            } elseif (is_null($v)) {
+                $type = \PDO::PARAM_NULL;
+            }
+
+            if (is_int($k)) {
+                $stmt->bindValue($k + 1, $v, $type);
+            } else {
+                $stmt->bindValue($k, $v, $type);
+            }
+        }
+    }
+
     public static function raw($sql, array $params = [])
     {
         $pdo = self::$connection;
@@ -30,7 +50,12 @@ class Querier
 
         try {
             $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
+            if (!empty($params)) {
+                self::bindParams($stmt, $params);
+                $stmt->execute();
+            } else {
+                $stmt->execute();
+            }
             $stmt = null;
             if ($pdo->inTransaction()) {
                 $pdo->commit();
@@ -168,7 +193,7 @@ class Querier
 
                     $childTableName = Helpers::modelNameToTableName(Helpers::getShortName($childClass));
                     if (strtolower($fieldName) === $parentTableName) {
-                        $attr =  $childTableName . '_set';
+                        $attr = $childTableName . '_set';
                     } else {
                         $attr = strtolower($fieldName) . '_set';
                     }
@@ -223,7 +248,8 @@ class Querier
         if (empty($params)) {
             $statement->execute();
         } else {
-            $statement->execute($params);
+            self::bindParams($statement, $params);
+            $statement->execute();
         }
 
         $statement->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, $class);
@@ -251,7 +277,8 @@ class Querier
         if (empty($params)) {
             $statement->execute();
         } else {
-            $statement->execute($params);
+            self::bindParams($statement, $params);
+            $statement->execute();
         }
 
         $statement->setFetchMode(\PDO::FETCH_CLASS, $class);

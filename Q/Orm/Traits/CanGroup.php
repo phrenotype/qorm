@@ -69,6 +69,8 @@ trait CanGroup
                     $filter
                 );
                 $newAssoc[$newKey] = $value;
+            } else {
+                $newAssoc[$filter] = $value;
             }
         }
 
