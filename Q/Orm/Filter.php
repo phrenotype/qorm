@@ -21,7 +21,7 @@ class Filter
 
     private function isDotted(string $path)
     {
-        return preg_match("/^(\w+\.)+\w+$/", $path);
+        return preg_match("/^.+\.\w+$/", $path);
     }
 
     public function parse($prefixWith = null)
@@ -49,6 +49,8 @@ class Filter
 
                     if ($prefixWith) {
                         $field = Helpers::ticks($prefixWith) . '.' . Helpers::ticks($exploded[0]);
+                    } elseif (preg_match('/^\w+$/', $exploded[0])) {
+                        $field = Helpers::ticks($exploded[0]);
                     }
                     $methods = array_slice($exploded, 1);
 
@@ -321,8 +323,8 @@ class Filter
             }
         }
         foreach ($keys as $k) {
-            if (!preg_match("/^(\w+)\((\*|\w+)\)\.\w+$/i", $k)) {
-                throw new \Error(sprintf("'%s' has to be an aggregate function without ticks/escaping.", $k));
+            if (!preg_match("/^(\w+)\((\*|\w+)\)\.\w+$/i", $k) && !preg_match("/^\w+\.\w+$/", $k)) {
+                throw new \Error(sprintf("'%s' has to be an aggregate function without ticks/escaping or a valid alias.", $k));
             }
             if (preg_match("#^(?:[\w()]+\.)+\w+$#", $k)) {
                 $ploded = explode(".", $k);

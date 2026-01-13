@@ -205,9 +205,9 @@ trait CanSelect
                         $dot = Helpers::ticks($dot);
                     }
                     if ($alias !== '') {
-                        $alias =  Helpers::ticks($alias);
+                        $alias = Helpers::ticks($alias);
                     } else {
-                        $alias  = null;
+                        $alias = null;
                     }
 
                     return Helpers::ticks($fld) . '.' . $dot . ($alias ? ' AS ' . $alias : '');
@@ -228,24 +228,19 @@ trait CanSelect
         }
     }
 
-    private function makeExceptions(string $value, array $newProjected)
+    private function isException(string $value): bool
     {
-        $newProjected = [];
-        $copy = $newProjected;
-
         //Making an exception for join fields with alias
         if (!empty($this->__joined__) && Project::plainAliased($value)) {
-            $newProjected[] = $value;
+            return true;
         }
 
         //Making an exception for group by
         if (!empty($this->__group_by__) && Project::aggregateWithAsAndTicks($value)) {
-            $newProjected[] = $value;
+            return true;
         }
-        if ($copy != $newProjected) {
-            return false;
-        }
-        return $newProjected;
+
+        return false;
     }
 
     /**
@@ -278,11 +273,9 @@ trait CanSelect
                 $inBoth = $inProps && $inCols;
 
                 //Making special exceptions to bypass validation
-                $na = $this->makeExceptions($p, $newProjected);
-                if($na === false){
+                if ($this->isException($p)) {
+                    $newProjected[] = $p;
                     continue;
-                }else{
-                    $newProjected = $na;
                 }
 
                 //So that id may or may not come back

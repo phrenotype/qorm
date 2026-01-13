@@ -41,11 +41,11 @@ class SetUp
             CrossEngine::setPDO($pdo);
 
             /* Model Integrity Checks */
-            Integrity::refuseDuplicateAttributes();
+            Integrity::refuseAmbiguousModels();
 
             /* Set the epoch and customId for Peculiar */
-            $epoch = (int)self::env('Q_PECULIAR_EPOCH');
-            $customId = (int)self::env('Q_PECULIAR_CUSTOM_ID');
+            $epoch = (int) self::env('Q_PECULIAR_EPOCH');
+            $customId = (int) self::env('Q_PECULIAR_CUSTOM_ID');
 
             if ($epoch) {
                 Peculiar::setEpoch($epoch);
@@ -70,12 +70,12 @@ class SetUp
     {
         static $QConfig;
 
-        if(is_array($QConfig)){
+        if (is_array($QConfig)) {
             return $QConfig[$key] ?: null;
-        }else {
+        } else {
             $QConfig = require self::$env;
             return $QConfig[$key] ?: null;
-        }        
+        }
     }
 
 
@@ -91,7 +91,7 @@ class SetUp
     {
         self::$env = $env ?: 'qorm.config.php';
 
-        if(basename(self::$env) !== "qorm.config.php"){
+        if (basename(self::$env) !== "qorm.config.php") {
             throw new \Exception(sprintf("Invalid configuration file supplied."));
             die;
         }

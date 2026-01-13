@@ -244,7 +244,8 @@ trait CanCud
         $nf = [];
         if ($prevState) {
             foreach ($assoc as $k => $v) {
-                if ($v != $prevState[$k] && $k !== 'id') {
+                $prev = $prevState[$k] ?? null;
+                if ($v != $prev && $k !== 'id') {
                     $nf[$k] = $v;
                 }
             }
