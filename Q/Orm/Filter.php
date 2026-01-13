@@ -286,6 +286,44 @@ class Filter
                 throw new \Error('Filters cannot end with a conjunction');
             }
         }
+
+        // Validate conjunction placement between operators
+        // For 2+ operators, we need proper conjunctions between them
+        if ($count > 1) {
+            $operatorCount = 0;
+            $conjunctionCount = 0;
+            $lastWasOperator = false;
+
+            foreach ($filters as $key => $value) {
+                $isConjunction = is_int($key) && in_array(strtolower($value), self::CONJUNCTIONS);
+
+                if ($isConjunction) {
+                    $conjunctionCount++;
+                    $lastWasOperator = false;
+                } else {
+                    $operatorCount++;
+                    if ($lastWasOperator) {
+                        // Two consecutive operators without conjunction
+                        throw new \Error(
+                            'Missing conjunction between filter operators. ' .
+                            'You must place \'and\' or \'or\' between every two operators. ' .
+                            'Example: [\'a\' => 1, \'and\', \'b\' => 2]'
+                        );
+                    }
+                    $lastWasOperator = true;
+                }
+            }
+
+            // Final check: with N operators, we need exactly (N-1) conjunctions
+            if ($operatorCount > 1 && $conjunctionCount < $operatorCount - 1) {
+                throw new \Error(
+                    'Missing conjunction between filter operators. ' .
+                    'You must place \'and\' or \'or\' between every two operators. ' .
+                    'Example: [\'a\' => 1, \'and\', \'b\' => 2]'
+                );
+            }
+        }
+
         foreach ($keys as $k) {
             if (preg_match("#^(?:\w+\.)+\w+$#", $k)) {
                 $ploded = explode(".", $k);

@@ -194,14 +194,13 @@ class FilterTest extends QormTestCase
         $this->assertCount(2, $users);
     }
 
-    public function testImplicitAndConjunction()
+    public function testChainedFiltersImplicitAnd()
     {
-        // QORM requires explicit 'and' between filters in the same array
-        $users = User::items()->filter([
-            'salary.gte' => 50000,
-            'and',
-            'email.endswith' => '.com'
-        ])->array();
+        // Chained filter() calls are the correct way to combine filters without explicit conjunction
+        $users = User::items()
+            ->filter(['salary.gte' => 50000])
+            ->filter(['email.endswith' => '.com'])
+            ->array();
 
         $this->assertCount(2, $users); // Alice, Bob (.com and >= 50000)
     }
@@ -236,5 +235,104 @@ class FilterTest extends QormTestCase
         $user = User::items()->filter(['name' => 'NonExistent'])->one();
 
         $this->assertNull($user);
+    }
+
+    // =========================================================================
+    // CONJUNCTION VALIDATION TESTS
+    // =========================================================================
+
+    public function testSingleOperatorValid()
+    {
+        // Should not throw
+        $users = User::items()->filter(['name' => 'Alice'])->array();
+        $this->assertCount(1, $users);
+    }
+
+    public function testTwoOperatorsWithoutConjunctionThrows()
+    {
+        $this->expectException(\Error::class);
+        $this->expectExceptionMessage('Missing conjunction between filter operators');
+
+        // Two operators without explicit conjunction should throw
+        User::items()->filter([
+            'salary.gte' => 50000,
+            'email.endswith' => '.com'
+        ])->array();
+    }
+
+    public function testTwoOperatorsExplicitAndValid()
+    {
+        $users = User::items()->filter([
+            'salary.gte' => 50000,
+            'and',
+            'salary.lte' => 70000
+        ])->array();
+        $this->assertCount(2, $users);
+    }
+
+    public function testThreeOperatorsAllConjunctionsValid()
+    {
+        $users = User::items()->filter([
+            'salary.gte' => 40000,
+            'and',
+            'salary.lte' => 70000,
+            'and',
+            'email.endswith' => '.com'
+        ])->array();
+        $this->assertCount(2, $users);
+    }
+
+    public function testThreeOperatorsMissingConjunctionThrows()
+    {
+        $this->expectException(\Error::class);
+        $this->expectExceptionMessage('Missing conjunction between filter operators');
+
+        // This should throw - 3 operators with only 1 conjunction
+        User::items()->filter([
+            'salary.gte' => 40000,
+            'and',
+            'salary.lte' => 70000,
+            'email.endswith' => '.com'  // Missing conjunction before this
+        ])->array();
+    }
+
+    public function testThreeOperatorsNoConjunctionsThrows()
+    {
+        $this->expectException(\Error::class);
+        $this->expectExceptionMessage('Missing conjunction between filter operators');
+
+        // This should throw - 3 operators with no conjunctions
+        User::items()->filter([
+            'name' => 'Alice',
+            'salary.gte' => 40000,
+            'email.endswith' => '.com'
+        ])->array();
+    }
+
+    public function testFourOperatorsProperConjunctionsValid()
+    {
+        $users = User::items()->filter([
+            'salary.gte' => 40000,
+            'and',
+            'salary.lte' => 80000,
+            'and',
+            'email.contains' => '@',
+            'and',
+            'name.startswith' => 'A'
+        ])->array();
+        $this->assertCount(1, $users); // Only Alice
+    }
+
+    public function testMixedAndOrConjunctionsValid()
+    {
+        // Use different fields to avoid PHP array key collision
+        $users = User::items()->filter([
+            'name' => 'Alice',
+            'or',
+            'email' => 'bob@example.com',
+            'or',
+            'salary.eq' => 75000
+        ])->array();
+        $this->assertCount(3, $users); // Alice, Bob (by email), Charlie (by salary)
     }
 }
