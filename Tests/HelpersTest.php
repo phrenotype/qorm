@@ -1,17 +1,18 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Tests;
+
 use Q\Orm\Helpers;
 use Q\Orm\SetUp;
 use Tests\Models\Comment;
 use Tests\Models\User;
 
-class HelpersTest extends TestCase
+class HelpersTest extends QormTestCase
 {
 
     protected function setUp(): void
     {
-        SetUp::main(__DIR__ . '/Database/qorm.config.php', false);
+        parent::setUp();
     }
 
     protected function tearDown(): void
@@ -72,7 +73,7 @@ class HelpersTest extends TestCase
         $r2 = Helpers::ticks('`example`');
         $r3 = Helpers::ticks('"example"');
 
-        $bool = (bool)preg_match('/(`|")example\1/', $r1);
+        $bool = (bool) preg_match('/(`|")example\1/', $r1);
 
         $this->assertEquals($bool, true);
         $this->assertEquals($r2, "`example`");
@@ -99,7 +100,7 @@ class HelpersTest extends TestCase
     public function testGetDeclaredModels()
     {
         $models = Helpers::getDeclaredModels();
-        $this->assertEquals(count($models), 4);
+        $this->assertEquals(9, count($models));
     }
 
     public function testModelNameToTableName()

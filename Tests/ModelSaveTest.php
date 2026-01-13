@@ -1,15 +1,16 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Tests;
+
 use Q\Orm\Helpers;
 use Q\Orm\SetUp;
 use Tests\Models\User;
 
-class ModelSaveTest extends TestCase
+class ModelSaveTest extends QormTestCase
 {
     protected function setUp(): void
     {
-        SetUp::main(__DIR__ . '/Database/qorm.config.php', false);
+        parent::setUp();
     }
 
     protected function tearDown(): void
@@ -230,5 +231,21 @@ class ModelSaveTest extends TestCase
         }
 
         $this->assertFalse($isDirty, "Model should not be dirty when properties match prevState");
+    }
+
+    /**
+     * Test that prevState is isolated per instance (regression test for static variable bug).
+     */
+    public function testPrevStateIsIsolatedPerInstance()
+    {
+        $user1 = new User();
+        $user1->prevState(['name' => 'User1', 'email' => 'user1@test.com']);
+
+        $user2 = new User();
+        $user2->prevState(['name' => 'User2', 'email' => 'user2@test.com']);
+
+        // Each instance should have its own state
+        $this->assertEquals('User1', $user1->prevState()['name'], "User1 should have its own prevState");
+        $this->assertEquals('User2', $user2->prevState()['name'], "User2 should have its own prevState");
     }
 }
