@@ -66,7 +66,7 @@ class Mysql implements IEngine
 
         $sql .= array_reduce($table->fields, function ($c, $i) use ($isPrimaryKey) {
             $r = '';
-            if ($i->auto_increment === true  && !$isPrimaryKey($i->name)) {
+            if ($i->auto_increment === true && !$isPrimaryKey($i->name)) {
                 //This was done for 'id' as in above
                 //$r .= $c . $i->toSql() . ' UNIQUE';
             } else if ($isPrimaryKey($i->name)) {
@@ -129,7 +129,7 @@ class Mysql implements IEngine
             }
         }
 
-        $snippet .=  (($column->unsigned === true) ? ' UNSIGNED' : (($column->unsigned === false) ? ' SIGNED' : ''));
+        $snippet .= (($column->unsigned === true) ? ' UNSIGNED' : (($column->unsigned === false) ? ' SIGNED' : ''));
 
         if ($column->null === true) {
             $snippet .= ' NULL';
@@ -294,15 +294,18 @@ class Mysql implements IEngine
             /* Clone and Modify the parent pk column */
             if ($fieldObject->isFk()) {
 
-                $newCol = TableModelFinder::findModelColumn($parentClass, function ($fieldName, $fieldObject) use ($parentPk) {
-                    return ($fieldName === $parentPk);
-                });
-
                 if ($parentPk !== 'id') {
+                    /* Clone parent PK column and preserve user's null setting */
+                    $userNull = $fieldObject->column->null;
+                    $newCol = clone TableModelFinder::findModelColumn($parentClass, function ($fieldName, $fieldObject) use ($parentPk) {
+                        return ($fieldName === $parentPk);
+                    });
+
                     /* Remove auto_increment, default, and reset name */
                     $newCol->name = $fieldObject->column->name;
                     $newCol->auto_increment = false;
                     $newCol->default = null;
+                    $newCol->null = $userNull;
 
                     $fieldObject->column = $newCol;
                 } else if ($parentPk === 'id') {
@@ -401,7 +404,7 @@ class Mysql implements IEngine
             $tableTable = self::tableFromModels($table);
         }
 
-        $currentPkField  = TableModelFinder::findTableIndex($tableTable, function ($tableTable, Index $inx) {
+        $currentPkField = TableModelFinder::findTableIndex($tableTable, function ($tableTable, Index $inx) {
             return ($inx->type === Index::PRIMARY_KEY);
         }) ?? new Index('', '');
 
@@ -423,7 +426,7 @@ class Mysql implements IEngine
             $tableTable = self::tableFromModels($table);
         }
 
-        $currentPkField  = TableModelFinder::findTableIndex($tableTable, function ($tableTable, Index $inx) {
+        $currentPkField = TableModelFinder::findTableIndex($tableTable, function ($tableTable, Index $inx) {
             return ($inx->type === Index::PRIMARY_KEY);
         }) ?? new Index('', '');
 
