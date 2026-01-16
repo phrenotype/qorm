@@ -100,7 +100,7 @@ class HelpersTest extends QormTestCase
     public function testGetDeclaredModels()
     {
         $models = Helpers::getDeclaredModels();
-        $this->assertEquals(9, count($models));
+        $this->assertEquals(10, count($models));
     }
 
     public function testModelNameToTableName()

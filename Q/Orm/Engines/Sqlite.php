@@ -262,9 +262,9 @@ class Sqlite implements IEngine
             foreach ($idx as $ind) {
                 //Sqlite treats foreign keys as unique indexes
                 if ($ind->column_name === $col->name && !$column->pk) {
-                    if ((int)$ind->is_unique === 1) {
+                    if ((int) $ind->is_unique === 1) {
                         $indexes[] = new Index($ind->column_name, Index::UNIQUE);
-                    } else if ((int)$ind->is_unique === 0) {
+                    } else if ((int) $ind->is_unique === 0) {
                         $indexes[] = new Index($ind->column_name, Index::INDEX);
                     }
                 }
@@ -322,15 +322,18 @@ class Sqlite implements IEngine
             /* Clone and Modify the parent pk column */
             if ($fieldObject->isFk()) {
 
-                $newCol = TableModelFinder::findModelColumn($parentClass, function ($fieldName, $fieldObject) use ($parentPk) {
-                    return ($fieldName === $parentPk);
-                });
-
                 if ($parentPk !== 'id') {
+                    /* Clone parent PK column and preserve user's null setting */
+                    $userNull = $fieldObject->column->null;
+                    $newCol = clone TableModelFinder::findModelColumn($parentClass, function ($fieldName, $fieldObject) use ($parentPk) {
+                        return ($fieldName === $parentPk);
+                    });
+
                     /* Remove auto_increment, default, and reset name. */
                     $newCol->name = $fieldObject->column->name;
                     $newCol->auto_increment = null;
                     $newCol->default = null;
+                    $newCol->null = $userNull;
 
                     $fieldObject->column = $newCol;
                 } else if ($parentPk === 'id') {
@@ -658,7 +661,7 @@ class Sqlite implements IEngine
 
 
         // If the current pk is 'id', drop the entire column. Else, just drop the pk index
-        $currentPkField  = TableModelFinder::findTableIndex($tableTable, function ($tableTable, Index $inx) {
+        $currentPkField = TableModelFinder::findTableIndex($tableTable, function ($tableTable, Index $inx) {
             return ($inx->type === Index::PRIMARY_KEY);
         }) ?? new Index('', '');
 
