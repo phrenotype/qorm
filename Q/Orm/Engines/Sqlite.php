@@ -36,6 +36,14 @@ class Sqlite implements IEngine
     {
         $sql = '';
 
+        /*
+         * DROP TABLE before CREATE is intentional:
+         * The migration detector (makemigrations) never generates CREATE TABLE
+         * for existing tables. If CREATE TABLE appears in a migration file,
+         * it means the developer explicitly wants a fresh table.
+         * This prevents "table already exists" errors during iterative development.
+         */
+        $sql .= 'DROP TABLE IF EXISTS ' . Helpers::ticks($table->name) . ';' . PHP_EOL;
         /* check indexes if primary key exists, if not create one */
         $primary_key_set = null;
         foreach ($table->indexes as $index) {
@@ -75,7 +83,7 @@ class Sqlite implements IEngine
             return $yes;
         };
 
-        $sql .= 'CREATE TABLE IF NOT EXISTS ' . Helpers::ticks($table->name) . '(';
+        $sql .= 'CREATE TABLE ' . Helpers::ticks($table->name) . '(';
 
         $sql .= array_reduce($table->fields, function ($c, $i) use ($isPrimaryKey, $isForeignKey) {
             $r = '';
@@ -415,7 +423,7 @@ class Sqlite implements IEngine
         $field = Helpers::ticks($field);
         $indexName = Helpers::ticks($indexName);
         $query = "DROP INDEX IF EXISTS $indexName;" . PHP_EOL;
-        $query .= "CREATE UNIQUE INDEX IF NOT EXISTS " . $indexName . " ON $table($field);";
+        $query .= "CREATE UNIQUE INDEX " . $indexName . " ON $table($field);";
         return $query;
     }
 
@@ -427,7 +435,7 @@ class Sqlite implements IEngine
 
         //Drop Index First, Then Add
         $query = "DROP INDEX IF EXISTS $indexName;" . PHP_EOL;
-        $query .= "CREATE INDEX IF NOT EXISTS " . $indexName . " ON $table($field);";
+        $query .= "CREATE INDEX " . $indexName . " ON $table($field);";
         return $query;
     }
 
