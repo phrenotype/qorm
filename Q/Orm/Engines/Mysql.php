@@ -33,6 +33,18 @@ class Mysql implements IEngine
 
         $sql = '';
 
+        /* Disable FK checks to allow table replacement */
+        $sql .= 'SET FOREIGN_KEY_CHECKS=0;' . PHP_EOL;
+
+        /*
+         * DROP TABLE before CREATE is intentional:
+         * The migration detector (makemigrations) never generates CREATE TABLE
+         * for existing tables. If CREATE TABLE appears in a migration file,
+         * it means the developer explicitly wants a fresh table.
+         * This prevents "table already exists" errors during iterative development.
+         */
+        $sql .= 'DROP TABLE IF EXISTS ' . Helpers::ticks($table->name) . ';' . PHP_EOL;
+
         /* check indexes if primary key exists, if not create one */
         $primary_key_set = null;
         foreach ($table->indexes as $index) {
@@ -62,7 +74,7 @@ class Mysql implements IEngine
             return $yes;
         };
 
-        $sql .= 'CREATE TABLE IF NOT EXISTS ' . Helpers::ticks($table->name) . '(';
+        $sql .= 'CREATE TABLE ' . Helpers::ticks($table->name) . '(';
 
         $sql .= array_reduce($table->fields, function ($c, $i) use ($isPrimaryKey) {
             $r = '';
@@ -100,6 +112,9 @@ class Mysql implements IEngine
         foreach ($table->foreignKeys as $fk) {
             $sql .= Schema::addForeignKey($table->name, $fk->field, $fk->refTable, $fk->refField, $fk->onDelete)->sql . PHP_EOL;
         }
+
+        /* Re-enable FK checks */
+        $sql .= 'SET FOREIGN_KEY_CHECKS=1;' . PHP_EOL;
 
         $sql .= PHP_EOL;
 
@@ -349,16 +364,24 @@ class Mysql implements IEngine
 
     public static function addUniqueIndexQuery($table, $field, $indexName)
     {
-        $table = Helpers::ticks($table);
-        $field = Helpers::ticks($field);
-        return "CREATE UNIQUE INDEX " . Helpers::ticks($indexName) . " ON $table($field);";
+        $tickedTable = Helpers::ticks($table);
+        $tickedField = Helpers::ticks($field);
+        $tickedIndex = Helpers::ticks($indexName);
+        // Drop index first - error 1091 (index doesn't exist) is suppressed by the migration runner
+        $drop = "DROP INDEX $tickedIndex ON $tickedTable;";
+        $create = "CREATE UNIQUE INDEX $tickedIndex ON $tickedTable($tickedField);";
+        return $drop . PHP_EOL . $create;
     }
 
     public static function addIndexQuery(string $table, string $field, string $indexName)
     {
-        $table = Helpers::ticks($table);
-        $field = Helpers::ticks($field);
-        return "CREATE INDEX " . Helpers::ticks($indexName) . " ON $table($field);";
+        $tickedTable = Helpers::ticks($table);
+        $tickedField = Helpers::ticks($field);
+        $tickedIndex = Helpers::ticks($indexName);
+        // Drop index first - error 1091 (index doesn't exist) is suppressed by the migration runner
+        $drop = "DROP INDEX $tickedIndex ON $tickedTable;";
+        $create = "CREATE INDEX $tickedIndex ON $tickedTable($tickedField);";
+        return $drop . PHP_EOL . $create;
     }
 
     public static function dropIndexQuery($table, $indexName)

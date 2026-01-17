@@ -105,7 +105,7 @@ class Helpers
         foreach ($schema as $prop => $field) {
             $name = $prop;
             if (!empty($field->column->name)) {
-                $name =  ($prop === $field->column->name) ? $prop : $field->column->name;
+                $name = ($prop === $field->column->name) ? $prop : $field->column->name;
             }
             if (Helpers::isRefField($name, $model)) {
                 $r[] = [
@@ -303,6 +303,18 @@ class Helpers
     public static function runAsTransaction(string $largeQuery): void
     {
         $pdo = Connection::getInstance();
+
+        // SQLite: Foreign keys must be disabled OUTSIDE the transaction for DROP TABLE to work comfortably
+        // safely ignoring constraints during migration rebuilds.
+        $isSqlite = (SetUp::$engine === SetUp::SQLITE);
+        $sqliteFkState = false;
+
+        if ($isSqlite) {
+            // Save current state (returns '0' or '1' string/int)
+            $sqliteFkState = (bool) $pdo->query("PRAGMA foreign_keys")->fetchColumn();
+            $pdo->exec("PRAGMA foreign_keys = OFF");
+        }
+
         if (!$pdo->inTransaction()) {
             $pdo->beginTransaction();
         }
@@ -310,13 +322,139 @@ class Helpers
 
             fwrite(STDOUT, $largeQuery . PHP_EOL);
 
-            $pdo->exec($largeQuery);
+            // Robust SQL Splitter
+            $statements = [];
+            $len = strlen($largeQuery);
+            $current = '';
+            $i = 0;
+
+            // States
+            $inString = false;
+            $quoteChar = '';
+            $inLineComment = false;
+            $inBlockComment = false;
+
+            while ($i < $len) {
+                $char = $largeQuery[$i];
+                $next = ($i + 1 < $len) ? $largeQuery[$i + 1] : '';
+
+                if ($inLineComment) {
+                    if ($char === "\n") {
+                        $inLineComment = false;
+                    }
+                    $current .= $char;
+                    $i++;
+                    continue;
+                }
+
+                if ($inBlockComment) {
+                    if ($char === '*' && $next === '/') {
+                        $inBlockComment = false;
+                        $current .= "*/";
+                        $i += 2;
+                        continue;
+                    }
+                    $current .= $char;
+                    $i++;
+                    continue;
+                }
+
+                if ($inString) {
+                    $current .= $char;
+                    // Backticks (MySQL identifiers) and standard quotes
+                    // MySQL strings support backslash. Standard strings use double-quote escape.
+                    // We try to support both styles generally.
+                    if ($char === '\\' && $quoteChar !== '`') {
+                        if ($next !== '') {
+                            $current .= $next;
+                            $i++;
+                        }
+                    } else if ($char === $quoteChar) {
+                        if ($next === $quoteChar) { // Double escape
+                            $current .= $next;
+                            $i++;
+                        } else {
+                            $inString = false;
+                        }
+                    }
+                    $i++;
+                    continue;
+                }
+
+                // Normal State
+                if ($char === "'" || $char === '"' || $char === '`') {
+                    $inString = true;
+                    $quoteChar = $char;
+                    $current .= $char;
+                    $i++;
+                    continue;
+                }
+
+                // Comments
+                // SQL standard: -- must be followed by whitespace to be a comment
+                $isLineComment = ($char === '#') ||
+                    ($char === '-' && $next === '-' && isset($largeQuery[$i + 2]) && ctype_space($largeQuery[$i + 2]));
+                if ($isLineComment) {
+                    $inLineComment = true;
+                    $current .= $char;
+                    if ($char === '-') {
+                        $current .= $next;
+                        $i++;
+                    }
+                    $i++;
+                    continue;
+                }
+                if ($char === '/' && $next === '*') {
+                    $inBlockComment = true;
+                    $current .= "/*";
+                    $i += 2;
+                    continue;
+                }
+
+                if ($char === ';') {
+                    if (trim($current) !== '') {
+                        $statements[] = trim($current);
+                    }
+                    $current = '';
+                    $i++;
+                    continue;
+                }
+
+                $current .= $char;
+                $i++;
+            }
+            if (trim($current) !== '') {
+                $statements[] = trim($current);
+            }
+
+            foreach ($statements as $stmt) {
+                try {
+                    $pdo->exec($stmt);
+                } catch (\PDOException $e) {
+                    // MySQL error 1091: Can't DROP '...'; check that column/key exists
+                    $errorCode = $e->errorInfo[1] ?? null;
+                    if ($errorCode === 1091) {
+                        continue;
+                    }
+                    throw $e;
+                }
+            }
+
             if ($pdo->inTransaction()) {
                 $pdo->commit();
             }
         } catch (\PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollback();
+            }
+            throw $e;
+        } finally {
+            if ($isSqlite) {
+                if (!$pdo->inTransaction()) {
+                    // Restore original state
+                    $state = $sqliteFkState ? 'ON' : 'OFF';
+                    $pdo->exec("PRAGMA foreign_keys = $state");
+                }
             }
         }
     }
