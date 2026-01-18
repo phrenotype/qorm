@@ -32,12 +32,14 @@ class Operation
     public $name;
     public $params;
     public $sql;
+    public $deferredSql;
 
-    public function __construct($name, $params, $sql)
+    public function __construct($name, $params, $sql, $deferredSql = '')
     {
         $this->name = $name;
         $this->params = $params;
         $this->sql = $sql;
+        $this->deferredSql = $deferredSql;
     }
 
     public function runSql()

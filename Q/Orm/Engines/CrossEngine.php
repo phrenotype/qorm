@@ -30,9 +30,9 @@ class CrossEngine
 
     public static function createMigrationsTableQuery($engine)
     {
-        return Decider::decide($engine,  function () {
+        return Decider::decide($engine, function () {
             return Mysql::createMigrationsTableQuery();
-        },  function () {
+        }, function () {
             return Sqlite::createMigrationsTableQuery();
         });
     }
@@ -73,6 +73,27 @@ class CrossEngine
             function () use ($table) {
                 return Sqlite::tableToSql($table);
             }
+        );
+    }
+
+    /**
+     * Generate SQL for adding foreign key constraints to a table.
+     * Called in a second pass after all tables are created.
+     *
+     * @param Table $table
+     * @return string
+     */
+    public static function tableToFkSql(Table $table): string
+    {
+        return Decider::decide(
+            Setup::$engine,
+            function () use ($table) {
+                return Mysql::tableToFkSql($table);
+            },
+            function () use ($table) {
+                return Sqlite::tableToFkSql($table);
+            },
+            ''
         );
     }
 

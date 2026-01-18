@@ -10,11 +10,20 @@ abstract class Migration
     public $reverse = [];
 
     public function up()
-    {        
+    {
+        // Collect main SQL (CREATE TABLE, indexes, etc.)
         $ops = array_map(function (\Closure $o) {
             return $o()->sql;
         }, $this->operations);
-        $largeQuery = join("", $ops);
+
+        // Collect deferred SQL (FK constraints that must run after all tables exist)
+        $deferredOps = array_filter(array_map(function (\Closure $o) {
+            return $o()->deferredSql ?? '';
+        }, $this->operations));
+
+        // Combine: main SQL first, then deferred FK SQL
+        $largeQuery = join("", $ops) . join("", $deferredOps);
+
         if (!empty($largeQuery)) {
             Helpers::runAsTransaction($largeQuery);
         } else {

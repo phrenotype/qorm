@@ -307,10 +307,21 @@ class Helpers
             $pdo->beginTransaction();
         }
         try {
-
             fwrite(STDOUT, $largeQuery . PHP_EOL);
 
-            $pdo->exec($largeQuery);
+            // Split into individual statements and execute one-by-one
+            // This ensures we stop on the first error instead of continuing
+            $statements = array_filter(
+                array_map('trim', explode(';', $largeQuery)),
+                function ($stmt) {
+                    return !empty($stmt);
+                }
+            );
+
+            foreach ($statements as $stmt) {
+                $pdo->exec($stmt . ';');
+            }
+
             if ($pdo->inTransaction()) {
                 $pdo->commit();
             }
