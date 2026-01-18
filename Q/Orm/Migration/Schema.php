@@ -58,7 +58,15 @@ class Schema
     {
         $table = new SchemaBuilder($table);
         $mutator($table);
-        return new Operation(Operation::CREATE_TABLE, ['table' => $table->toTable()], $table->toTable()->toSql());
+        $tableObj = $table->toTable();
+
+        // Main SQL: CREATE TABLE + indexes (no FKs)
+        $sql = $tableObj->toSql();
+
+        // Deferred SQL: FK constraints (run after ALL tables are created)
+        $deferredSql = CrossEngine::tableToFkSql($tableObj);
+
+        return new Operation(Operation::CREATE_TABLE, ['table' => $tableObj], $sql, $deferredSql);
     }
 
     /**

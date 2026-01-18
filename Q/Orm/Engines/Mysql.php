@@ -97,12 +97,27 @@ class Mysql implements IEngine
             }
         }
 
-        foreach ($table->foreignKeys as $fk) {
-            $sql .= Schema::addForeignKey($table->name, $fk->field, $fk->refTable, $fk->refField, $fk->onDelete)->sql . PHP_EOL;
-        }
+        // FK constraints are now generated separately via tableToFkSql()
+        // to ensure all tables exist before constraints are added
 
         $sql .= PHP_EOL;
 
+        return $sql;
+    }
+
+    /**
+     * Generate SQL for adding foreign key constraints to a table.
+     * Called in a second pass after all tables are created.
+     *
+     * @param Table $table
+     * @return string
+     */
+    public static function tableToFkSql(Table $table): string
+    {
+        $sql = '';
+        foreach ($table->foreignKeys as $fk) {
+            $sql .= Schema::addForeignKey($table->name, $fk->field, $fk->refTable, $fk->refField, $fk->onDelete)->sql . PHP_EOL;
+        }
         return $sql;
     }
 

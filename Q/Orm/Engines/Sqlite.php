@@ -121,6 +121,20 @@ class Sqlite implements IEngine
         return $sql;
     }
 
+    /**
+     * Generate SQL for adding foreign key constraints to a table.
+     * Note: SQLite embeds FK constraints inline in CREATE TABLE, so this returns empty.
+     * FKs are handled in tableToSql() via the REFERENCES clause.
+     *
+     * @param Table $table
+     * @return string
+     */
+    public static function tableToFkSql(Table $table): string
+    {
+        // SQLite uses inline FK constraints in CREATE TABLE, not separate ALTER statements
+        return '';
+    }
+
 
     public static function columnToSql(Column $column)
     {
