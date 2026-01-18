@@ -7,84 +7,52 @@ class Topology
 
     public static function sortTablesToCreate(array $tablesToCreate): array
     {
+        $sorted = [];
+        $visited = [];
+        $visiting = [];
 
-        $allParents = array_filter($tablesToCreate, function ($table) use ($tablesToCreate) {
-            if (!empty(static::children($table->name, $tablesToCreate))) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-
-        $topLevelParents = array_filter($allParents, function ($table) use ($allParents) {
-            if (!empty(static::parents($table->name, $allParents))) {
-                return false;
-            } else {
-                return true;
-            }
-        });
-
-        $lowLevelParents = array_filter($allParents, function ($table) use ($allParents) {
-            if (!empty(static::parents($table->name, $allParents))) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-
-
-        $newTables = array_map(function ($table) {
-            return $table->name;
-        }, $topLevelParents);
-
-        $newTables = [...$newTables, ...array_map(function ($table) {
-            return $table->name;
-        }, $lowLevelParents)];
-
+        // Map names to objects for quick lookup
+        $tableMap = [];
+        foreach ($tablesToCreate as $table) {
+            $tableMap[$table->name] = $table;
+        }
 
         foreach ($tablesToCreate as $table) {
+            self::visit($table, $tableMap, $sorted, $visited, $visiting);
+        }
 
-            $parents = self::parents($table->name, $tablesToCreate);
+        return $sorted;
+    }
 
-            if (!in_array($table->name, $newTables)) {
+    private static function visit($table, array $tableMap, array &$sorted, array &$visited, array &$visiting)
+    {
+        if (isset($visited[$table->name])) {
+            return;
+        }
 
+        if (isset($visiting[$table->name])) {
+            throw new \RuntimeException("Circular dependency detected involving table: " . $table->name);
+        }
 
-                $key = array_search($table->name, $newTables);
+        $visiting[$table->name] = true;
 
-                //Add the parents first
-                foreach ($parents as $parent) {
-                    if (!in_array($parent, $newTables)) {
-                        if ($key === false) {
-                            $newTables[] = $parent;
-                        } else {
-                            //array_splice($newTables, $offset, 0, $parent);
-                            $newTables[$key] = $parent;
-                            $key++;
-                        }
-                    }
+        if (!empty($table->foreignKeys)) {
+            foreach ($table->foreignKeys as $fk) {
+                // Ignore self-references
+                if ($fk->refTable === $table->name) {
+                    continue;
                 }
 
-                if ($key === false) {
-                    array_push($newTables, $table->name);
-                } else {
-                    $newTables[$key] = $table->name;
+                // Only visit if the parent is in the list of tables we are creating
+                if (isset($tableMap[$fk->refTable])) {
+                    self::visit($tableMap[$fk->refTable], $tableMap, $sorted, $visited, $visiting);
                 }
             }
         }
 
-        $finalTables = [];
-
-        foreach ($newTables as $t) {
-            foreach ($tablesToCreate as $tc) {
-                if ($t === $tc->name) {
-                    $finalTables[] = $tc;
-                }
-            }
-        }
-
-        return $finalTables;
+        unset($visiting[$table->name]);
+        $visited[$table->name] = true;
+        $sorted[] = $table;
     }
 
     public static function parents(string $tableName, array $tablesToCreate): array

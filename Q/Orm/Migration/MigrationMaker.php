@@ -27,7 +27,7 @@ class MigrationMaker
             $file = $folder . DIRECTORY_SEPARATOR . $file;
             $namespaced = str_replace("/", "\\", dirname($file)) . "\\" . basename($file, '.php');
             if (!class_exists($namespaced)) {
-                (is_dir($file)) && (self::requireModels($file)()) || (require($file));
+                (is_dir($file)) && (self::requireModels($file)) || (require($file));
             }
         }
         return true;
@@ -80,7 +80,7 @@ class MigrationMaker
         if ($query == false) {
             die('Unable to create migrations table');
         }
-        self::$pdo->query($query);        
+        self::$pdo->query($query);
     }
 
 
@@ -171,12 +171,12 @@ class MigrationMaker
 
 
         $migrationName = 'Migration' . $fileNumber;
-        if ((int)$fileNumber === 1) {
+        if ((int) $fileNumber === 1) {
             file_put_contents(Setup::$migrationsFolder . DIRECTORY_SEPARATOR . $migrationName . '.php', $code);
             Q_Migration::items()->create(['name' => "Migration{$fileNumber}", 'applied' => null]);
             Bin::line('Migration ' . $migrationName . ' successfully created', FG::GREEN, BG::BLACK);
-        } else if ((int)$fileNumber > 1) {
-            $prevIdFormatted = sprintf("%04d", (int)$fileNumber - 1);
+        } else if ((int) $fileNumber > 1) {
+            $prevIdFormatted = sprintf("%04d", (int) $fileNumber - 1);
             $prev_contents = file_get_contents(Setup::$migrationsFolder . DIRECTORY_SEPARATOR . 'Migration' . $prevIdFormatted . '.php');
             $prev_contents = str_replace('Migration' . $prevIdFormatted, $migrationName, $prev_contents);
 
@@ -208,8 +208,15 @@ class MigrationMaker
 
             $last = Q_Migration::items()->order_by('id DESC')->one();
             if ($last && $last->applied == false) {
-                self::upMigration($last->name);
-                Bin::line('Applied Migration ' . $last->name, FG::GREEN, BG::BLACK);
+                try {
+                    self::upMigration($last->name);
+                    Bin::line('Applied Migration ' . $last->name, FG::GREEN, BG::BLACK);
+                } catch (\Throwable $e) {
+                    Bin::line("Migration {$last->name} Failed", FG::RED, BG::BLACK);
+                    Bin::line($e->getMessage(), FG::RED, BG::BLACK);
+                    Bin::line("In " . $e->getFile() . " on line " . $e->getLine(), FG::RED, BG::BLACK);
+                    die;
+                }
             } else {
                 Bin::line('No unapplied migration found', FG::RED, BG::BLACK);
             }
@@ -220,7 +227,14 @@ class MigrationMaker
             if ($unapplied) {
                 $beforeAndUnapplied = Q_Migration::items()->filter(['id.lte' => $unapplied->id, 'and', 'applied.is_null' => true])->order_by('id ASC')->all();
                 foreach ($beforeAndUnapplied as $migration) {
-                    self::upMigration($migration->name);
+                    try {
+                        self::upMigration($migration->name);
+                    } catch (\Throwable $e) {
+                        Bin::line("Migration {$migration->name} Failed", FG::RED, BG::BLACK);
+                        Bin::line($e->getMessage(), FG::RED, BG::BLACK);
+                        Bin::line("In " . $e->getFile() . " on line " . $e->getLine(), FG::RED, BG::BLACK);
+                        die;
+                    }
                 }
                 Bin::line('Applied all migrations down to ' . $unapplied->name, FG::GREEN, BG::BLACK);
             } else {
@@ -241,13 +255,18 @@ class MigrationMaker
     public static function rollback($name = null)
     {
         if ($name === null) {
-                                
+
             $last = Q_Migration::items()->order_by('id DESC')->one();
             if ($last && $last->applied != false) {
-
-                self::downMigration($last->name);
-
-                Bin::line('Rolled back ' . $name, FG::GREEN, BG::BLACK);
+                try {
+                    self::downMigration($last->name);
+                    Bin::line('Rolled back ' . $last->name, FG::GREEN, BG::BLACK);
+                } catch (\Throwable $e) {
+                    Bin::line("Rollback {$last->name} Failed", FG::RED, BG::BLACK);
+                    Bin::line($e->getMessage(), FG::RED, BG::BLACK);
+                    Bin::line("In " . $e->getFile() . " on line " . $e->getLine(), FG::RED, BG::BLACK);
+                    die;
+                }
             } else {
                 Bin::line('No applied migration found', FG::RED, BG::BLACK);
             }
@@ -258,7 +277,14 @@ class MigrationMaker
                 $after = Q_Migration::items()->filter(['id' => $last->id, 'and', 'applied.is_null' => false])->order_by('id DESC')->all();
                 if ($after) {
                     foreach ($after as $migration) {
-                        self::downMigration($migration->name);
+                        try {
+                            self::downMigration($migration->name);
+                        } catch (\Throwable $e) {
+                            Bin::line("Rollback {$migration->name} Failed", FG::RED, BG::BLACK);
+                            Bin::line($e->getMessage(), FG::RED, BG::BLACK);
+                            Bin::line("In " . $e->getFile() . " on line " . $e->getLine(), FG::RED, BG::BLACK);
+                            die;
+                        }
                     }
                 }
                 Bin::line('Rolled back all migrations to ' . $name, FG::GREEN, BG::BLACK);

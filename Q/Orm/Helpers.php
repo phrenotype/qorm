@@ -105,7 +105,7 @@ class Helpers
         foreach ($schema as $prop => $field) {
             $name = $prop;
             if (!empty($field->column->name)) {
-                $name =  ($prop === $field->column->name) ? $prop : $field->column->name;
+                $name = ($prop === $field->column->name) ? $prop : $field->column->name;
             }
             if (Helpers::isRefField($name, $model)) {
                 $r[] = [
@@ -318,6 +318,7 @@ class Helpers
             if ($pdo->inTransaction()) {
                 $pdo->rollback();
             }
+            throw $e;
         }
     }
 
