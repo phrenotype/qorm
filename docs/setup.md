@@ -39,6 +39,9 @@ $QOrmConfig = [
     // Custom server id (0 - 511).
     "Q_PECULIAR_CUSTOM_ID"=>"3",
 
+    // Optional: Path for the peculiar id lock file (useful for shared hosting).
+    "Q_PECULIAR_LOCK_PATH"=>"peculiar.lock",
+
 ];
 
 return $QOrmConfig;
@@ -61,6 +64,7 @@ return $QOrmConfig;
 
 **Q_PECULIAR_EPOCH** : Epoch in milliseconds for the peculiar id generator. Don't change this once you have launched your project.
 **Q_PECULIAR_CUSTOM_ID** : Any number from 0 to 511 (inclusive) that will be used to uniquely create ids for this server.
+**Q_PECULIAR_LOCK_PATH** : Optional. The absolute path for the lock file used by the Peculiar ID generator when APCu is unavailable. If blank, a project-isolated file in the system temp directory is used.
 
 ## Step 2
 Then, setup your workspace like this :

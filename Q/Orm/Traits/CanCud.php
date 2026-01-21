@@ -148,6 +148,14 @@ trait CanCud
         if (count($args) === 1 && is_array($args[0])) {
             $assoc = $this->addFiltersToCreate($args[0]);
             $assoc = $this->renameCols($assoc);
+
+            $peculiarField = TableModelFinder::findPeculiarField($this->__model__);
+            $peculiarCol = $peculiarField ? TableModelFinder::findModelColumnName($this->__model__, $peculiarField) : null;
+
+            if ($peculiarCol && isset($assoc[$peculiarCol])) {
+                unset($assoc[$peculiarCol]);
+            }
+
             $this->checkNotNullWithoutDefault($assoc);
             $assoc = $this->addDefaults($assoc);
 
@@ -158,14 +166,37 @@ trait CanCud
             return null;
         } else {
             //Bulk create
-            $a = [];
-            foreach ($args as $arg) {
+            $processed = [];
+
+            $peculiarField = TableModelFinder::findPeculiarField($this->__model__);
+            $peculiarCol = $peculiarField ? TableModelFinder::findModelColumnName($this->__model__, $peculiarField) : null;
+
+            foreach ($args as $i => $arg) {
                 $assoc = $this->addFiltersToCreate($arg);
                 $assoc = $this->renameCols($assoc);
+
+                // Remove any user-provided Peculiar ID (users cannot set these)
+                if ($peculiarCol && isset($assoc[$peculiarCol])) {
+                    unset($assoc[$peculiarCol]);
+                }
+                $processed[$i] = $assoc;
+            }
+
+            // Always generate Peculiar IDs for all records if model uses Peculiar
+            if ($peculiarCol) {
+                $ids = \Q\Orm\Peculiar\Peculiar::nextIds(count($args));
+                foreach ($processed as $idx => $assoc) {
+                    $processed[$idx][$peculiarCol] = $ids[$idx];
+                }
+            }
+
+            $a = [];
+            foreach ($processed as $assoc) {
                 $this->checkNotNullWithoutDefault($assoc);
                 $assoc = $this->addDefaults($assoc);
                 $a[] = $assoc;
             }
+
             $insert = Querier::insertMany($a, $this->__table_name__);
             return $this;
         }
@@ -215,6 +246,13 @@ trait CanCud
 
 
         $pk = TableModelFinder::findModelPk($this->__model__);
+        $peculiarField = TableModelFinder::findPeculiarField($this->__model__);
+        $peculiarCol = $peculiarField ? TableModelFinder::findModelColumnName($this->__model__, $peculiarField) : null;
+
+        if ($peculiarCol && isset($assoc[$peculiarCol])) {
+            unset($assoc[$peculiarCol]);
+        }
+
         $new_assoc = [];
         foreach ($assoc as $field => $value) {
 

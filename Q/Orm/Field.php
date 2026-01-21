@@ -59,6 +59,11 @@ class Field
     private $isFk = false;
 
     /**
+     * @var bool
+     */
+    private $isPeculiarField = false;
+
+    /**
      * Checks if a field has a key defined on it.
      *
      * @return bool
@@ -75,6 +80,15 @@ class Field
     public function isFk(): bool
     {
         return $this->isFk;
+    }
+
+    /**
+     * Checks if a field is a Peculiar ID field.
+     * @return bool
+     */
+    public function isPeculiar(): bool
+    {
+        return $this->isPeculiarField;
     }
 
     /**
@@ -118,11 +132,11 @@ class Field
         // This should only be left if we are on an sqlite database.
         // Here, a mutator was defined, a varchar was created but size was not specified.
         if (($column->type == 'varchar') && ($column->size == null)) {
-            if(SetUp::$engine === SetUp::SQLITE){
+            if (SetUp::$engine === SetUp::SQLITE) {
                 // Check if this is cli and then echo an error ?
-            }else{
+            } else {
                 throw new \Error(sprintf("Please ensure all 'CharField' attributes have a size specified.", $column->name));
-            }            
+            }
         }
 
         if ($column->type === 'enum' && ($column->size == null || !is_array($column->size))) {
@@ -166,12 +180,14 @@ class Field
      */
     public static function Peculiar(string $index = Index::PRIMARY_KEY, bool $isNull = false)
     {
-        return self::IntegerField(function (Column $c) {
+        $field = self::IntegerField(function (Column $c) {
             $c->default = function () {
                 return Peculiar::nextId();
             };
             $c->null = false;
         }, $index);
+        $field->isPeculiarField = true;
+        return $field;
     }
 
     /**
@@ -270,7 +286,7 @@ class Field
      */
     public static function EnumField(callable $mutator, $index = null): Field
     {
-        return self::generic(self::ENUM, $mutator, null, $index);
+        return self::generic(self::ENUM , $mutator, null, $index);
     }
 
     /**

@@ -11,3 +11,5 @@ qorm
 main.php
 seed.php
 /.claude/
+/.agent/
+/artifacts/
