@@ -71,10 +71,10 @@ class SetUp
         static $QConfig;
 
         if (is_array($QConfig)) {
-            return $QConfig[$key] ?: null;
+            return $QConfig[$key] ?? null;
         } else {
             $QConfig = require self::$env;
-            return $QConfig[$key] ?: null;
+            return $QConfig[$key] ?? null;
         }
     }
 

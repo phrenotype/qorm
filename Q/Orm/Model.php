@@ -19,6 +19,12 @@ abstract class Model
      */
     public function __construct($fields = [])
     {
+        // Unset Peculiar ID if provided; users cannot manually set these.
+        $peculiarField = TableModelFinder::findPeculiarField(static::class);
+        if ($peculiarField && isset($fields[$peculiarField])) {
+            unset($fields[$peculiarField]);
+        }
+
         $properties = Helpers::getModelProperties(static::class);
         foreach ($fields as $k => $v) {
             if (in_array($k, $properties)) {

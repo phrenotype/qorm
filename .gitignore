@@ -10,3 +10,5 @@ composer.lock
 qorm
 main.php
 seed.php
+/.agent/
+/artifacts/

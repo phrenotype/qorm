@@ -114,4 +114,15 @@ class TableModelFinder
         }
         return $fk;
     }
+
+    public static function findPeculiarField(string $model): ?string
+    {
+        $schema = $model::schema();
+        foreach ($schema as $fieldName => $fieldObject) {
+            if ($fieldObject->isPeculiar()) {
+                return $fieldName;
+            }
+        }
+        return null;
+    }
 }

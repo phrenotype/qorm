@@ -62,6 +62,13 @@ class User extends Model {
 
 **An auto-incrementing integer field called `id` is automatically added. So, except your primary is of a different type, don't bother defining one.**
 
+> [!IMPORTANT]
+> **Project Standard: Peculiar IDs**
+> While auto-incrementing IDs are supported, it is strongly recommended to use **Peculiar IDs** (64-bit sortable unique integers) for all primary keys. They provide better performance in distributed systems and increased security by avoiding predictable IDs.
+> ```php
+> 'peculiar' => Field::Peculiar()
+> ```
+
 **Note that in php 8, the above schema could be shortened to :**
 ```php
 public static function schema(): array {

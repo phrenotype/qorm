@@ -60,6 +60,8 @@ For enum fields, the `size` attribute should be an array of acceptable values, n
 
 `Field::DateTimeField`  
 
+`Field::Peculiar`
+
 ## Relationship Fields
 These are used to define foreign keys and establish relationship with other models. There are two types.
 
