@@ -151,13 +151,6 @@ trait CanSelect
             $this->__filters__[] = Filter::filter($assoc, $alias);
         }
 
-
-        //Reset aggregates
-        $this->__count__ = null;
-        $this->__avg__ = null;
-        $this->__min__ = null;
-        $this->__max__ = null;
-        $this->__sum__ = null;
         return $this;
     }
 

@@ -40,32 +40,30 @@ trait CanAggregate
      */
     public function buildAggregateQuery(): array
     {
-        if ($this->__count__ == null) {
-            $assoc = $this->buildQuery();
-            $query = $assoc['query'] ?? '';
-            $placeholders = $assoc['placeholders'] ?? [];
+        $assoc = $this->buildQuery();
+        $query = $assoc['query'] ?? '';
+        $placeholders = $assoc['placeholders'] ?? [];
 
-            $field = $this->__primed_field;
-            $function = $this->__primed_function;
+        $field = $this->__primed_field;
+        $function = $this->__primed_function;
 
-            if (!($field && $function)) {
-                throw new \Error(sprintf("Model Handler must be primed with the %s::%s method before aggregate query can be built.", Handler::class, 'aggregate'));
-            }
-
-            $upperF = strtoupper($function);
-            $lowerF = Helpers::ticks(strtolower($function));
-
-            $tmp = Helpers::ticks($this->randomStr());
-
-            if ($field !== '*') {
-                $field = $tmp . '.' . Helpers::ticks($field);
-            }
-
-
-            $q = "SELECT $upperF($field) AS $lowerF FROM ($query) AS $tmp";
-
-            return [$q, $placeholders];
+        if (!($field && $function)) {
+            throw new \Error(sprintf("Model Handler must be primed with the %s::%s method before aggregate query can be built.", Handler::class, 'aggregate'));
         }
+
+        $upperF = strtoupper($function);
+        $lowerF = Helpers::ticks(strtolower($function));
+
+        $tmp = Helpers::ticks($this->randomStr());
+
+        if ($field !== '*') {
+            $field = $tmp . '.' . Helpers::ticks($field);
+        }
+
+
+        $q = "SELECT $upperF($field) AS $lowerF FROM ($query) AS $tmp";
+
+        return [$q, $placeholders];
     }
 
     /**
@@ -98,15 +96,7 @@ trait CanAggregate
      */
     public function count($field = '*'): int
     {
-        if ($this->__count__ == null) {
-
-            $count = $this->buildAndExecuteAggregateQuery(Aggregate::COUNT, $field);
-
-            $this->__count__ = $count;
-            return $this->__count__;
-        } else {
-            return $this->__count__;
-        }
+        return (int) $this->buildAndExecuteAggregateQuery(Aggregate::COUNT, $field);
     }
 
     /**
@@ -118,15 +108,7 @@ trait CanAggregate
      */
     public function max($field): mixed
     {
-        if ($this->__max__ == null) {
-
-            $max = $this->buildAndExecuteAggregateQuery(Aggregate::MAX, $field);
-
-            $this->__max__ = $max;
-            return $this->__max__;
-        } else {
-            return $this->__max__;
-        }
+        return $this->buildAndExecuteAggregateQuery(Aggregate::MAX, $field);
     }
 
     /**
@@ -138,15 +120,7 @@ trait CanAggregate
      */
     public function min($field): mixed
     {
-        if ($this->__min__ == null) {
-
-            $min = $this->buildAndExecuteAggregateQuery(Aggregate::MIN, $field);
-
-            $this->__min__ = $min;
-            return $this->__min__;
-        } else {
-            return $this->__min__;
-        }
+        return $this->buildAndExecuteAggregateQuery(Aggregate::MIN, $field);
     }
 
     /**
@@ -158,15 +132,7 @@ trait CanAggregate
      */
     public function avg($field): mixed
     {
-        if ($this->__avg__ == null) {
-
-            $avg = $this->buildAndExecuteAggregateQuery(Aggregate::AVG, $field);
-
-            $this->__avg__ = $avg;
-            return $this->__avg__;
-        } else {
-            return $this->__avg__;
-        }
+        return $this->buildAndExecuteAggregateQuery(Aggregate::AVG, $field);
     }
 
     /**
@@ -178,14 +144,6 @@ trait CanAggregate
      */
     public function sum($field): mixed
     {
-        if ($this->__sum__ == null) {
-
-            $sum = $this->buildAndExecuteAggregateQuery(Aggregate::SUM, $field);
-
-            $this->__sum__ = $sum;
-            return $this->__sum__;
-        } else {
-            return $this->__sum__;
-        }
+        return $this->buildAndExecuteAggregateQuery(Aggregate::SUM, $field);
     }
 }
