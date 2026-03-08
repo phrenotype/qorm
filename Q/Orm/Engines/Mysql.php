@@ -157,7 +157,9 @@ class Mysql implements IEngine
         $snippet .= (($column->auto_increment === true) ? ' AUTO_INCREMENT' : '');
 
         if (!is_null($column->default)) {
-            if (!is_string($column->default)) {
+            if (is_bool($column->default)) {
+                $snippet .= ' DEFAULT ' . ($column->default ? '1' : '0');
+            } else if (!is_string($column->default)) {
                 $snippet .= ' DEFAULT ' . $column->default;
             } else if (is_string($column->default)) {
                 $snippet .= " DEFAULT '$column->default'";
@@ -231,7 +233,7 @@ class Mysql implements IEngine
                 $col->null = true;
             }
 
-            if ($column->Default != false) {
+            if ($column->Default !== false && $column->Default !== null) {
                 $col->default = trim($column->Default, "'");
             }
 
