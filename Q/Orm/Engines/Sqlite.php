@@ -168,9 +168,11 @@ class Sqlite implements IEngine
         }
 
         if (!is_null($column->default)) {
-            if (!is_string($column->default)) {
+            if (is_bool($column->default)) {
+                $snippet .= ' DEFAULT ' . ($column->default ? '1' : '0');
+            } else if (!is_string($column->default)) {
                 $snippet .= ' DEFAULT ' . $column->default;
-            } else if (is_string($column->default)) {
+            } else {
                 $snippet .= " DEFAULT '$column->default'";
             }
         }
@@ -258,7 +260,7 @@ class Sqlite implements IEngine
                 $col->null = true;
             }
 
-            if ($column->dflt_value != false) {
+            if ($column->dflt_value !== false && $column->dflt_value !== null) {
                 $col->default = trim($column->dflt_value, "'");
             }
 
