@@ -133,32 +133,6 @@ class Handler
 
 
     /**
-     * @var int Cache for aggregate COUNT.
-     */
-    private $__count__;
-
-    /**
-     * @var mixed Cache for aggregate MIN.
-     */
-    private $__min__;
-
-    /**
-     * @var mixed Cache for aggregate MAX.
-     */
-    private $__max__;
-
-    /**
-     * @var int|float Cache for aggregate SUM.
-     */
-    private $__sum__;
-
-    /**
-     * @var int|float Cache for aggregate AVG.
-     */
-    private $__avg__;
-
-
-    /**
      * @var string Aggregate function to call on Handler.
      */
     private $__primed_function;
