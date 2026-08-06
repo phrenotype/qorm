@@ -62,4 +62,22 @@ class AtomicTest extends QormTestCase
         $user = GroupingUser::items()->filter(['name.eq' => 'Atom'])->one();
         $this->assertEquals(25, $user->salary);
     }
+
+    public function testAppend()
+    {
+        // Append to string field
+        GroupingUser::items()->filter(['name.eq' => 'Atom'])->append(['status' => 'X']);
+
+        $user = GroupingUser::items()->filter(['name.eq' => 'Atom'])->one();
+        $this->assertEquals('activeX', $user->status);
+    }
+
+    public function testPrepend()
+    {
+        // Prepend to string field
+        GroupingUser::items()->filter(['name.eq' => 'Atom'])->prepend(['status' => 'Y']);
+
+        $user = GroupingUser::items()->filter(['name.eq' => 'Atom'])->one();
+        $this->assertEquals('Yactive', $user->status);
+    }
 }

@@ -45,32 +45,42 @@ trait CanRace
         }
 
         $table = $this->__table_name__;
-        $sql = 'UPDATE ' . Helpers::ticks($table) . ' SET ';
+        $assignments = [];
         foreach ($values as $k => $v) {
             if ($numeric) {
-                $v = sprintf("%d", $v);
+                if (!is_numeric($v)) {
+                    throw new \Error("Arithmetic operations require a numeric value for {$this->__model__}.$k, got " . gettype($v) . ".");
+                }
+                $v = (float) $v;
                 $default = 0;
+                if ($v == 0) {
+                    continue; // a zero delta is a no-op; skipping it avoids a dangling comma in SET
+                }
             } else {
                 $v = "'" . sprintf("%s", $v) . "'";
                 $default = "''";
             }
-            if ($v) {
 
-                if ($operator == null) {
-                    if ($append == true) {
-                        $sql .= Helpers::ticks($k) . ' = CONCAT(' . Helpers::ticks($k) . ', ' . $v . ')';
-                    } else if ($append == false) {
-                        $sql .= Helpers::ticks($k) . ' = CONCAT(' . $v . ', ' . Helpers::ticks($k) . ')';
-                    }
-                } else {
-                    if ($append == true) {
-                        $sql .= Helpers::ticks($k) . ' = (COALESCE(' . Helpers::ticks($k) . ', ' . $default . ') ' . $operator . ' ' . $v . ')';
-                    } else if ($append == false) {
-                        $sql .= Helpers::ticks($k) . ' = (' . $v .  ' ' . $operator . ' COALESCE(' . Helpers::ticks($k) . ', ' . $default . '))';
-                    }
+            if ($operator == null) {
+                if ($append == true) {
+                    $assignments[] = Helpers::ticks($k) . ' = CONCAT(' . Helpers::ticks($k) . ', ' . $v . ')';
+                } else if ($append == false) {
+                    $assignments[] = Helpers::ticks($k) . ' = CONCAT(' . $v . ', ' . Helpers::ticks($k) . ')';
+                }
+            } else {
+                if ($append == true) {
+                    $assignments[] = Helpers::ticks($k) . ' = (COALESCE(' . Helpers::ticks($k) . ', ' . $default . ') ' . $operator . ' ' . $v . ')';
+                } else if ($append == false) {
+                    $assignments[] = Helpers::ticks($k) . ' = (' . $v . ' ' . $operator . ' COALESCE(' . Helpers::ticks($k) . ', ' . $default . '))';
                 }
             }
         }
+
+        if (empty($assignments)) {
+            return; // nothing to change (all deltas were zero)
+        }
+
+        $sql = 'UPDATE ' . Helpers::ticks($table) . ' SET ' . implode(', ', $assignments);
 
         $params = [];
         if (!empty($this->__filters__)) {
