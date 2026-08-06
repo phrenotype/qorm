@@ -104,4 +104,26 @@ class DirtyStateBugTest extends QormTestCase
         $reloaded = PeculiarUser::items()->filter(['name.eq' => 'pec1-renamed'])->one();
         $this->assertSame('pec1-renamed', $reloaded->name);
     }
+
+    public function testDeleteWithFalseFilter(): void
+    {
+        NullZeroModel::items()->create(['name' => 'd1', 'active' => false]);
+        NullZeroModel::items()->create(['name' => 'd2', 'active' => false]);
+        NullZeroModel::items()->create(['name' => 'd3', 'active' => true]);
+
+        NullZeroModel::items()->filter(['active.eq' => false])->delete();
+
+        $remaining = NullZeroModel::items()->count();
+        $this->assertEquals(1, $remaining);
+    }
+
+    public function testCountWithFalseFilter(): void
+    {
+        NullZeroModel::items()->create(['name' => 'c1', 'active' => false]);
+        NullZeroModel::items()->create(['name' => 'c2', 'active' => false]);
+        NullZeroModel::items()->create(['name' => 'c3', 'active' => true]);
+
+        $falseCount = NullZeroModel::items()->filter(['active.eq' => false])->count();
+        $this->assertEquals(2, $falseCount);
+    }
 }

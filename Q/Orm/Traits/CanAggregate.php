@@ -7,6 +7,7 @@ use Q\Orm\Connection;
 use Q\Orm\Handler;
 use Q\Orm\Helpers;
 use Q\Orm\QueryStack;
+use Q\Orm\Querier;
 
 /**
  * Confers the ability to aggregate on Handlers and Humans alike.
@@ -79,7 +80,7 @@ trait CanAggregate
         $this->aggregate($function, $field);
         list($q, $placeholders) = $this->buildAggregateQuery();
         $statement = Connection::getInstance()->prepare($q);
-        $statement->execute($placeholders);
+        $statement->execute(Querier::normalizeBindValues($placeholders));
         $f = strtolower($function);
         $value = $statement->fetch(\PDO::FETCH_OBJ)->{$f};
         QueryStack::stack($q, $placeholders);

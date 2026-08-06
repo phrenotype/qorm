@@ -309,7 +309,7 @@ class Querier
      *
      * @return array
      */
-    private static function normalizeBindValues(array $values): array
+    public static function normalizeBindValues(array $values): array
     {
         return array_map(function ($v) {
             return is_bool($v) ? (int) $v : $v;
@@ -463,7 +463,7 @@ class Querier
         }
 
         try {
-            $stmt->execute($placeholders);
+            $stmt->execute(self::normalizeBindValues($placeholders));
             if ($pdo->inTransaction()) {
                 $pdo->commit();
             }
