@@ -88,4 +88,25 @@ class AtomicFractionTest extends QormTestCase
         $this->assertEquals(13.5, $item->qty);
         $this->assertEquals(4.75, $item->cost);
     }
+
+    public function testMultiplyByZeroZeroesField(): void
+    {
+        StockItem::items()->filter(['name.eq' => 'Widget'])->multiply(['qty' => 0]);
+        $item = StockItem::items()->filter(['name.eq' => 'Widget'])->one();
+        $this->assertEquals(0.0, $item->qty);
+    }
+
+    public function testDivideByZeroThrows(): void
+    {
+        $this->expectException(\Error::class);
+        StockItem::items()->filter(['name.eq' => 'Widget'])->divide(['qty' => 0]);
+    }
+
+    public function testExplicitZeroMixedWithNonZeroDeltas(): void
+    {
+        StockItem::items()->filter(['name.eq' => 'Widget'])->increment(['qty' => 0, 'cost' => 0.5]);
+        $item = StockItem::items()->filter(['name.eq' => 'Widget'])->one();
+        $this->assertEquals(10.5, $item->qty);
+        $this->assertEquals(4.75, $item->cost);
+    }
 }

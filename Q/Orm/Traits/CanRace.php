@@ -52,9 +52,15 @@ trait CanRace
                     throw new \Error("Arithmetic operations require a numeric value for {$this->__model__}.$k, got " . gettype($v) . ".");
                 }
                 $v = (float) $v;
+                if (!is_finite($v)) {
+                    throw new \Error("Arithmetic operations require a finite value for {$this->__model__}.$k.");
+                }
                 $default = 0;
-                if ($v == 0) {
-                    continue; // a zero delta is a no-op; skipping it avoids a dangling comma in SET
+                if ($v == 0 && ($operator === '+' || $operator === '-')) {
+                    continue; // a zero delta is a no-op for addition/subtraction
+                }
+                if ($v == 0 && $operator === '/') {
+                    throw new \Error("Cannot divide by zero for {$this->__model__}.$k.");
                 }
             } else {
                 $v = "'" . sprintf("%s", $v) . "'";
