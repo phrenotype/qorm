@@ -117,8 +117,13 @@ abstract class Model
         $all_props = [];
 
         // First, get schema-defined properties directly from the object (public properties)
+        $prevState = $this->prevState();
         foreach ($schema_props as $prop) {
-            if (isset($this->$prop)) {
+            $prev = $prevState[$prop] ?? null;
+            // Include the prop when it holds a value now, or when it held a
+            // non-null value before: a null current value over a non-null
+            // previous one can only mean the user explicitly nulled it.
+            if ($this->$prop !== null || $prev !== null) {
                 $all_props[$prop] = $this->$prop;
             }
         }
@@ -188,14 +193,10 @@ abstract class Model
                 $this->$k = $v;
             }
 
-            // Update prevState
-            $newState = [];
-            foreach ($schema_props as $prop) {
-                if (isset($this->$prop)) {
-                    $newState[$prop] = $this->$prop;
-                }
-            }
-            $this->prevState(array_merge($newState, $result->getProps()));
+            // Update prevState from the freshly loaded result — its raw-row
+            // capture holds every column (NULLs included), so subsequent
+            // saves in null/value/null cycles compare against real values.
+            $this->prevState($result->prevState());
 
             return $this;
         }

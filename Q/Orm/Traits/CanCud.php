@@ -284,7 +284,8 @@ trait CanCud
             $pk = TableModelFinder::findModelPk($this->__model__);
             foreach ($assoc as $k => $v) {
                 $prev = $prevState[$k] ?? null;
-                if ($v !== $prev && $k !== $pk) {
+                $dirty = (is_numeric($v) && is_numeric($prev)) ? ((float) $v != (float) $prev) : ($v !== $prev);
+                if ($dirty && $k !== $pk) {
                     $nf[$k] = $v;
                 }
             }

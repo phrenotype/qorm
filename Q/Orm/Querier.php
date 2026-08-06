@@ -260,8 +260,13 @@ class Querier
             One and all will do the object lookups.
             queryOne and queryAll will put the objects in cache.
             */
+            // Capture the raw row (all selected columns, NULLs included) BEFORE
+            // relation building mutates the object. Declared props hydrate
+            // directly and never enter __properties, so getProps() would only
+            // yield dynamic props — losing NULLs and every declared scalar.
+            $prevState = get_object_vars($item);
             $object = self::removeRefCols(self::makeRelations($item, $project));
-            $object->prevState($object->getProps());
+            $object->prevState($prevState);
             return $object;
         }
         return null;
@@ -291,8 +296,9 @@ class Querier
                 One and all will do the object lookups.
                 queryOne and queryAll will put the objects in cache.
                 */
+                $prevState = get_object_vars($row);
                 $object = self::removeRefCols(self::makeRelations($row, $project));
-                $object->prevState($object->getProps());
+                $object->prevState($prevState);
                 yield $object;
             }
         };

@@ -5,6 +5,7 @@ namespace Tests;
 use Tests\Models\NullZeroModel;
 use Tests\Models\PeculiarUser;
 use Q\Orm\Connection;
+use Q\Orm\QueryStack;
 
 class DirtyStateBugTest extends QormTestCase
 {
@@ -125,5 +126,89 @@ class DirtyStateBugTest extends QormTestCase
 
         $falseCount = NullZeroModel::items()->filter(['active.eq' => false])->count();
         $this->assertEquals(2, $falseCount);
+    }
+
+    public function testZeroToNullUpdate(): void
+    {
+        NullZeroModel::items()->create(['name' => 'z1', 'price' => 0]);
+        $record = NullZeroModel::items()->filter(['name.eq' => 'z1'])->one();
+
+        $record->price = null;
+        $record->save();
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z1'])->one();
+        $this->assertNull($reloaded->price);
+    }
+
+    public function testFiveToNullUpdate(): void
+    {
+        NullZeroModel::items()->create(['name' => 'z2', 'price' => 5]);
+        $record = NullZeroModel::items()->filter(['name.eq' => 'z2'])->one();
+
+        $record->price = null;
+        $record->save();
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z2'])->one();
+        $this->assertNull($reloaded->price);
+    }
+
+    public function testFalseToNullUpdate(): void
+    {
+        NullZeroModel::items()->create(['name' => 'z3', 'active' => false]);
+        $record = NullZeroModel::items()->filter(['name.eq' => 'z3'])->one();
+
+        $record->active = null;
+        $record->save();
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z3'])->one();
+        $this->assertNull($reloaded->active);
+    }
+
+    public function testNullToNullSaveNoChange(): void
+    {
+        NullZeroModel::items()->create(['name' => 'z4']);
+        $record = NullZeroModel::items()->filter(['name.eq' => 'z4'])->one();
+        $this->assertNull($record->price);
+
+        $record->price = null;
+        $result = $record->save();
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z4'])->one();
+        $this->assertNull($reloaded->price);
+        $this->assertNotNull($result);
+    }
+
+    public function testUnchangedValuePersistsWithoutRewrite(): void
+    {
+        NullZeroModel::items()->create(['name' => 'z5', 'price' => 5]);
+        $record = NullZeroModel::items()->filter(['name.eq' => 'z5'])->one();
+
+        $queriesBefore = QueryStack::get();
+        $record->save();
+        $queriesAfter = QueryStack::get();
+
+        $newQueries = array_slice($queriesAfter, count($queriesBefore));
+        foreach ($newQueries as $entry) {
+            $this->assertStringNotContainsString('UPDATE', strtoupper($entry['query']));
+        }
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z5'])->one();
+        $this->assertSame(5, $reloaded->price);
+    }
+
+    public function testNullThenValueThenNullCycle(): void
+    {
+        NullZeroModel::items()->create(['name' => 'z6', 'price' => 5]);
+        $record = NullZeroModel::items()->filter(['name.eq' => 'z6'])->one();
+
+        $record->price = null;
+        $record->save();
+        $record->price = 7;
+        $record->save();
+        $record->price = null;
+        $record->save();
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z6'])->one();
+        $this->assertNull($reloaded->price);
     }
 }
