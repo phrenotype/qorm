@@ -109,4 +109,10 @@ class AtomicFractionTest extends QormTestCase
         $this->assertEquals(10.5, $item->qty);
         $this->assertEquals(4.75, $item->cost);
     }
+
+    public function testNonFiniteDeltaThrows(): void
+    {
+        $this->expectException(\Error::class);
+        StockItem::items()->filter(['name.eq' => 'Widget'])->increment(['qty' => '1e309']);
+    }
 }
