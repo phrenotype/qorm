@@ -245,14 +245,9 @@ abstract class Model
                 $this->$k = $v;
             }
 
-            // Update prevState with schema properties
-            $newState = [];
-            foreach ($schema_props as $prop) {
-                if (isset($this->$prop)) {
-                    $newState[$prop] = $this->$prop;
-                }
-            }
-            $this->prevState(array_merge($newState, $obj->getProps()));
+            // The freshly loaded object carries the raw-row prevState
+            // (all columns, NULLs included) — same source save() now uses.
+            $this->prevState($obj->prevState());
         }
         return $this;
     }

@@ -256,9 +256,7 @@ class Querier
         $item = $statement->fetch();
         if (is_object($item)) {
             /*
-            Insert, update, and delete will clear the cache.        
-            One and all will do the object lookups.
-            queryOne and queryAll will put the objects in cache.
+            Every fetch hydrates a fresh object; there is no query cache.
             */
             // Capture the raw row (all selected columns, NULLs included) BEFORE
             // relation building mutates the object. Declared props hydrate
@@ -292,9 +290,7 @@ class Querier
         $models = function () use ($statement, $project, $query) {
             foreach ($statement as $row) {
                 /*
-                Insert, update, and delete will clear the cache.        
-                One and all will do the object lookups.
-                queryOne and queryAll will put the objects in cache.
+                Every fetch hydrates a fresh object; there is no query cache.
                 */
                 $prevState = get_object_vars($row);
                 $object = self::removeRefCols(self::makeRelations($row, $project));

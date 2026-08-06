@@ -284,7 +284,16 @@ trait CanCud
             $pk = TableModelFinder::findModelPk($this->__model__);
             foreach ($assoc as $k => $v) {
                 $prev = $prevState[$k] ?? null;
-                $dirty = (is_numeric($v) && is_numeric($prev)) ? ((float) $v != (float) $prev) : ($v !== $prev);
+                if (is_numeric($v) && is_numeric($prev)) {
+                    $vInt = (string)(int) $v === (string) $v;
+                    $pInt = (string)(int) $prev === (string) $prev;
+                    // Integer-valued operands compare exactly (float is lossy
+                    // beyond 2^53 and could mask a real BIGINT change);
+                    // decimal/float forms compare numerically.
+                    $dirty = ($vInt && $pInt) ? ((int) $v !== (int) $prev) : ((float) $v != (float) $prev);
+                } else {
+                    $dirty = $v !== $prev;
+                }
                 if ($dirty && $k !== $pk) {
                     $nf[$k] = $v;
                 }
