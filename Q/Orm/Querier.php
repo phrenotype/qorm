@@ -300,12 +300,28 @@ class Querier
         return $models;
     }
 
+    /**
+     * Normalize PHP values before PDO binding. Array-binding casts every
+     * value to string, which corrupts booleans (false becomes '').
+     * Booleans are stored as 0/1 in SQL engines.
+     *
+     * @param array $values
+     *
+     * @return array
+     */
+    private static function normalizeBindValues(array $values): array
+    {
+        return array_map(function ($v) {
+            return is_bool($v) ? (int) $v : $v;
+        }, $values);
+    }
+
     public static function insert(array $fields, $table)
     {
         $fs = implode(', ', array_map(function ($f) {
             return Helpers::ticks($f);
         }, array_keys($fields)));
-        $v = array_values($fields);
+        $v = self::normalizeBindValues(array_values($fields));
 
         $placeholders = implode(",", array_fill(0, count($fields), "?"));
 
@@ -363,7 +379,7 @@ class Querier
 
         try {
             foreach ($assocs as $asc) {
-                $stmt->execute(array_values($asc));
+                $stmt->execute(self::normalizeBindValues(array_values($asc)));
             }
             if ($pdo->inTransaction()) {
                 $pdo->commit();
@@ -409,7 +425,7 @@ class Querier
         }
 
         try {
-            $stmt->execute($final_placeholders);
+            $stmt->execute(self::normalizeBindValues($final_placeholders));
             if ($pdo->inTransaction()) {
                 $pdo->commit();
             }

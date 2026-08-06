@@ -257,7 +257,7 @@ trait CanCud
         foreach ($assoc as $field => $value) {
 
             //Can't modify primary key field during updates                
-            if ($field != $pk) {
+            if ($field !== $pk) {
 
                 $new_assoc[$field] = $value;
             } else {
@@ -281,9 +281,10 @@ trait CanCud
         /* Allow only 'dirty' fields */
         $nf = [];
         if ($prevState) {
+            $pk = TableModelFinder::findModelPk($this->__model__);
             foreach ($assoc as $k => $v) {
                 $prev = $prevState[$k] ?? null;
-                if ($v != $prev && $k !== 'id') {
+                if ($v !== $prev && $k !== $pk) {
                     $nf[$k] = $v;
                 }
             }
