@@ -235,4 +235,33 @@ class DirtyStateBugTest extends QormTestCase
         $this->expectException(\Error::class);
         $user->save();
     }
+
+    public function testPkSameValueDifferentTypeDoesNotThrow(): void
+    {
+        PeculiarUser::items()->create(['name' => 'pk2']);
+        $user = PeculiarUser::items()->filter(['name.eq' => 'pk2'])->one();
+
+        // Same value, different PHP type (MySQL hydrates pks as strings) —
+        // not a mutation, must not throw.
+        $user->peculiar = (string) $user->peculiar;
+        $result = $user->save();
+
+        $this->assertNotNull($result);
+        $this->assertSame('pk2', PeculiarUser::items()->filter(['name.eq' => 'pk2'])->one()->name);
+    }
+
+    public function testFreshManualPkSaveWarnsAndReturnsNull(): void
+    {
+        $warned = false;
+        set_error_handler(function ($s, $msg) use (&$warned) { $warned = (strpos($msg, 'empty previous state') !== false); return true; });
+        $fresh = new NullZeroModel();
+        $fresh->id = 999;
+        $fresh->name = 'manual';
+        $result = $fresh->save();
+        restore_error_handler();
+
+        $this->assertTrue($warned);
+        $this->assertNull($result);
+        $this->assertEquals(0, NullZeroModel::items()->filter(['id.eq' => 999])->count());
+    }
 }

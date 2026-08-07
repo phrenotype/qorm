@@ -172,12 +172,22 @@ abstract class Model
         }
 
         $prevState = $this->prevState();
-        if (array_key_exists($pk, $prevState) && $this->$pk !== $prevState[$pk]) {
+        // String-compare the pk: MySQL may hydrate it as a string ("5") while
+        // the caller reassigns the same value as an int — not a mutation.
+        if (array_key_exists($pk, $prevState) && (string) $this->$pk !== (string) $prevState[$pk]) {
             throw new \Error("Cannot modify " . static::class . ".$pk because it's a primary key.");
         }
 
         $result = null;
         if (array_key_exists($pk, $filtered_props)) {
+            if (empty($prevState)) {
+                // Same guard as CanCud::prepareFieldsForUpdate: an empty
+                // previous state must never write blind. Return null so a
+                // misleading "successful" hydration of an existing row is
+                // impossible.
+                trigger_error("QORM: update() called with an empty previous state; skipping to avoid writing blind.", E_USER_WARNING);
+                return null;
+            }
             $result = static::items()->filter([$pk => $this->$pk])->update($filtered_props, $prevState)->one();
         } else {
             if ($pk === 'id') {
