@@ -11,6 +11,8 @@ class Querier
 
     private static $derivedClasses = [];
 
+    private static $renamedColumnMap = [];
+
     public static function setConnection(\PDO $connection)
     {
         self::$connection = $connection;
@@ -226,18 +228,24 @@ class Querier
     private static function mapRenamedColumns(Model $model): void
     {
         $class = get_class($model);
-        $props = Helpers::getModelProperties($class);
-        if (Helpers::getModelColumns($class) === $props) {
-            return; // no renamed columns
+        if (!array_key_exists($class, self::$renamedColumnMap)) {
+            $map = [];
+            $props = Helpers::getModelProperties($class);
+            if (Helpers::getModelColumns($class) !== $props) {
+                foreach ($props as $prop) {
+                    if (Helpers::isRefField($prop, $class)) {
+                        continue; // relation props are hydrated by makeRelations
+                    }
+                    $col = TableModelFinder::findModelColumnName($class, $prop);
+                    if ($col && $col !== $prop) {
+                        $map[$prop] = $col;
+                    }
+                }
+            }
+            self::$renamedColumnMap[$class] = $map;
         }
-        foreach ($props as $prop) {
-            if (Helpers::isRefField($prop, $class)) {
-                continue; // relation props are hydrated by makeRelations
-            }
-            $col = TableModelFinder::findModelColumnName($class, $prop);
-            if ($col && $col !== $prop) {
-                $model->{$prop} = $model->{$col};
-            }
+        foreach (self::$renamedColumnMap[$class] as $prop => $col) {
+            $model->{$prop} = $model->{$col};
         }
     }
 
@@ -287,7 +295,9 @@ class Querier
             self::mapRenamedColumns($item);
             // Declared props hydrate via PDO directly; magic-hydrated models
             // (no declared props) hold every column in the __properties
-            // store. Merge both for a complete raw-row prevState.
+            // store. Merge both for a complete raw-row prevState. Prop-named
+            // and column-named keys coexist deliberately so the dirty check
+            // works for both key styles.
             $prevState = array_merge(get_object_vars($item), $item->getProps());
             $object = self::removeRefCols(self::makeRelations($item, $project));
             $object->prevState($prevState);

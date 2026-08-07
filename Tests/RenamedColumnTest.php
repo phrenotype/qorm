@@ -32,7 +32,15 @@ class RenamedColumnTest extends QormTestCase
 
     public function testLoadReadsRenamedColumnThroughProp(): void
     {
+        $queriesBefore = QueryStack::get();
         $post = Post::items()->filter(['title.eq' => 'Hello'])->one();
+        $queriesAfter = QueryStack::get();
+
+        // The load must hit the real renamed column, not a prop-named one
+        $newQueries = array_slice($queriesAfter, count($queriesBefore));
+        $this->assertNotEmpty($newQueries);
+        $this->assertStringContainsString('realtitle', strtolower($newQueries[0]['query']));
+
         $this->assertSame('Hello', $post->title);
         $this->assertSame('Hello', $post->prevState()['title']);
     }

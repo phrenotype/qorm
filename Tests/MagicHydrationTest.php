@@ -101,8 +101,16 @@ class MagicHydrationTest extends QormTestCase
 
     public function testEmptyPrevStateUpdateWarnsAndSkips(): void
     {
-        $this->expectWarning();
+        // PHPUnit's expectWarning() is deprecated in 9.6 and removed in 10 —
+        // capture the E_USER_WARNING with a handler instead.
+        $warned = false;
+        set_error_handler(function ($severity, $message) use (&$warned) {
+            $warned = (strpos($message, 'empty previous state') !== false);
+            return true;
+        });
         MagicItem::items()->filter(['name.eq' => 'm1'])->update(['price' => 9], []);
+        restore_error_handler();
+        $this->assertTrue($warned);
 
         $fresh = MagicItem::items()->filter(['name.eq' => 'm1'])->one();
         $this->assertNull($fresh->price);
