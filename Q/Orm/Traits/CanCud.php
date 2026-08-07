@@ -280,7 +280,15 @@ trait CanCud
     {
         /* Allow only 'dirty' fields */
         $nf = [];
-        if ($prevState) {
+        if ($prevState === null) {
+            /* Batch update: the caller deliberately passed no previous
+            state — write everything. */
+            $nf = $assoc;
+        } else if (empty($prevState)) {
+            /* Unknown previous state: writing everything would clobber
+            concurrent writes from stale in-memory values. Refuse loudly. */
+            trigger_error("QORM: update() called with an empty previous state; skipping to avoid clobbering concurrent writes.", E_USER_WARNING);
+        } else {
             $pk = TableModelFinder::findModelPk($this->__model__);
             foreach ($assoc as $k => $v) {
                 $prev = $prevState[$k] ?? null;
@@ -298,8 +306,6 @@ trait CanCud
                     $nf[$k] = $v;
                 }
             }
-        } else {
-            $nf = $assoc;
         }
         if (!empty($nf)) {
             $nf = $this->validateUpdateFields($nf);

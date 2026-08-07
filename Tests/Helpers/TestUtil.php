@@ -4,6 +4,7 @@ namespace Tests\Helpers;
 
 use Q\Orm\Migration\SchemaBuilder;
 use Q\Orm\Migration\Schema;
+use Q\Orm\Migration\TableModelFinder;
 use Q\Orm\Field;
 use Q\Orm\Migration\Column;
 use Q\Orm\Migration\Index;
@@ -25,7 +26,7 @@ class TestUtil
         // Convert PascalCase to snake_case for table name if needed, matching QORM conventions
         $tableName = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $tableName));
 
-        $operation = Schema::create($tableName, function (SchemaBuilder $tb) use ($schema) {
+        $operation = Schema::create($tableName, function (SchemaBuilder $tb) use ($schema, $modelClass) {
 
             // Always add ID if it's the standard QORM model pattern
             // SQLite requires explicit INTEGER PRIMARY KEY AUTOINCREMENT for auto-increment behavior
@@ -44,7 +45,7 @@ class TestUtil
                 $col = $field->column;
 
                 // Determine the correct column name (respect override)
-                $finalColName = $col->name ?? $name;
+                $finalColName = $col->name ?: (TableModelFinder::findModelColumnName($modelClass, $name) ?: $name);
 
                 // If it's a relationship field (Foreign Key), we need to handle it differently
                 if ($field->isFk()) {
@@ -88,33 +89,33 @@ class TestUtil
 
                 switch ($col->type) {
                     case Field::CHAR:
-                        $tb->string($name, $def);
+                        $tb->string($finalColName, $def);
                         break;
                     case Field::INTEGER:
-                        $tb->integer($name, $def);
+                        $tb->integer($finalColName, $def);
                         break;
                     case Field::TEXT:
-                        $tb->text($name, $def);
+                        $tb->text($finalColName, $def);
                         break;
                     case Field::BOOL:
-                        $tb->boolean($name, $def);
+                        $tb->boolean($finalColName, $def);
                         break;
                     case Field::DATETIME:
-                        $tb->datetime($name, $def);
+                        $tb->datetime($finalColName, $def);
                         break;
                     case Field::DATE:
-                        $tb->date($name, $def);
+                        $tb->date($finalColName, $def);
                         break;
                     case Field::FLOAT:
-                        $tb->float($name, $def);
+                        $tb->float($finalColName, $def);
                         break;
                     case Field::DECIMAL:
-                        $tb->decimal($name, $def);
+                        $tb->decimal($finalColName, $def);
                         break;
                     case Field::ENUM:
                         // SQLite doesn't support ENUM natively, map to TEXT or VARCHAR
                         $def['type'] = 'text';
-                        $tb->string($name, $def);
+                        $tb->string($finalColName, $def);
                         break;
                 }
             }

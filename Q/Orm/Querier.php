@@ -215,6 +215,32 @@ class Querier
         return $model;
     }
 
+    /**
+     * Map renamed columns back onto their declared props so reads and
+     * prevState see the property name. Runs before relation building.
+     *
+     * @param Model $model
+     *
+     * @return void
+     */
+    private static function mapRenamedColumns(Model $model): void
+    {
+        $class = get_class($model);
+        $props = Helpers::getModelProperties($class);
+        if (Helpers::getModelColumns($class) === $props) {
+            return; // no renamed columns
+        }
+        foreach ($props as $prop) {
+            if (Helpers::isRefField($prop, $class)) {
+                continue; // relation props are hydrated by makeRelations
+            }
+            $col = TableModelFinder::findModelColumnName($class, $prop);
+            if ($col && $col !== $prop) {
+                $model->{$prop} = $model->{$col};
+            }
+        }
+    }
+
     public static function makeRelations(Model $model, array $project = [])
     {
         $model = self::oneOne($model, $project);
@@ -258,11 +284,11 @@ class Querier
             /*
             Every fetch hydrates a fresh object; there is no query cache.
             */
-            // Capture the raw row (all selected columns, NULLs included) BEFORE
-            // relation building mutates the object. Declared props hydrate
-            // directly and never enter __properties, so getProps() would only
-            // yield dynamic props — losing NULLs and every declared scalar.
-            $prevState = get_object_vars($item);
+            self::mapRenamedColumns($item);
+            // Declared props hydrate via PDO directly; magic-hydrated models
+            // (no declared props) hold every column in the __properties
+            // store. Merge both for a complete raw-row prevState.
+            $prevState = array_merge(get_object_vars($item), $item->getProps());
             $object = self::removeRefCols(self::makeRelations($item, $project));
             $object->prevState($prevState);
             return $object;
@@ -292,7 +318,8 @@ class Querier
                 /*
                 Every fetch hydrates a fresh object; there is no query cache.
                 */
-                $prevState = get_object_vars($row);
+                self::mapRenamedColumns($row);
+                $prevState = array_merge(get_object_vars($row), $row->getProps());
                 $object = self::removeRefCols(self::makeRelations($row, $project));
                 $object->prevState($prevState);
                 yield $object;

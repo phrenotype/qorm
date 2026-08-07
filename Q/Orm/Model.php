@@ -43,7 +43,7 @@ abstract class Model
             $value = $this->__properties[$name] ?? null;
         }
 
-        if ($value) {
+        if ($value !== null) {
 
             if ($value instanceof \Closure) {
 
@@ -66,7 +66,7 @@ abstract class Model
     public function __get($name)
     {
         $inProps = $this->__properties[$name] ?? null;
-        if ($inProps) {
+        if ($inProps !== null) {
             if ($inProps instanceof \Closure) {
                 $evaluated = $this->$name();
                 return $evaluated;
@@ -74,6 +74,7 @@ abstract class Model
                 return $inProps;
             }
         }
+        return null;
     }
 
     public function __set($name, $value)
