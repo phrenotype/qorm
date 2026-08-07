@@ -211,4 +211,28 @@ class DirtyStateBugTest extends QormTestCase
         $reloaded = NullZeroModel::items()->filter(['name.eq' => 'z6'])->one();
         $this->assertNull($reloaded->price);
     }
+
+    public function testNumericStringChangePersists(): void
+    {
+        // '00123' vs '123' are float-equal — a numeric coercion would drop
+        // this legitimate text edit (zip codes, SKUs, invoice refs).
+        NullZeroModel::items()->create(['name' => '00123']);
+        $record = NullZeroModel::items()->filter(['name.eq' => '00123'])->one();
+
+        $record->name = '123';
+        $record->save();
+
+        $reloaded = NullZeroModel::items()->filter(['name.eq' => '123'])->one();
+        $this->assertSame('123', $reloaded->name);
+    }
+
+    public function testPkMutationThrows(): void
+    {
+        PeculiarUser::items()->create(['name' => 'pk1']);
+        $user = PeculiarUser::items()->filter(['name.eq' => 'pk1'])->one();
+
+        $user->peculiar = $user->peculiar + 1;
+        $this->expectException(\Error::class);
+        $user->save();
+    }
 }

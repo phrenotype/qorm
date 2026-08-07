@@ -51,17 +51,21 @@ trait CanRace
                 if (!is_numeric($v)) {
                     throw new \Error("Arithmetic operations require a numeric value for {$this->__model__}.$k, got " . gettype($v) . ".");
                 }
-                $v = (float) $v;
-                if (!is_finite($v)) {
+                $vFloat = (float) $v;
+                if (!is_finite($vFloat)) {
                     throw new \Error("Arithmetic operations require a finite value for {$this->__model__}.$k.");
                 }
                 $default = 0;
-                if ($v == 0 && ($operator === '+' || $operator === '-')) {
+                if ($vFloat == 0 && ($operator === '+' || $operator === '-')) {
                     continue; // a zero delta is a no-op for addition/subtraction
                 }
-                if ($v == 0 && $operator === '/') {
+                if ($vFloat == 0 && $operator === '/') {
                     throw new \Error("Cannot divide by zero for {$this->__model__}.$k.");
                 }
+                // Integer-valued deltas render as exact integer literals
+                // (float rendering loses precision beyond 2^53); all other
+                // values render as locale-safe floats.
+                $v = ((string)(int) $v === (string) $v) ? (string)(int) $v : (string) $vFloat;
             } else {
                 $v = "'" . sprintf("%s", $v) . "'";
                 $default = "''";

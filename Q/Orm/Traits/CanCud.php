@@ -287,21 +287,17 @@ trait CanCud
         } else if (empty($prevState)) {
             /* Unknown previous state: writing everything would clobber
             concurrent writes from stale in-memory values. Refuse loudly. */
-            trigger_error("QORM: update() called with an empty previous state; skipping to avoid clobbering concurrent writes.", E_USER_WARNING);
+            trigger_error("QORM: update() called with an empty previous state; skipping to avoid writing blind.", E_USER_WARNING);
         } else {
             $pk = TableModelFinder::findModelPk($this->__model__);
             foreach ($assoc as $k => $v) {
                 $prev = $prevState[$k] ?? null;
-                if (is_numeric($v) && is_numeric($prev)) {
-                    $vInt = (string)(int) $v === (string) $v;
-                    $pInt = (string)(int) $prev === (string) $prev;
-                    // Integer-valued operands compare exactly (float is lossy
-                    // beyond 2^53 and could mask a real BIGINT change);
-                    // decimal/float forms compare numerically.
-                    $dirty = ($vInt && $pInt) ? ((int) $v !== (int) $prev) : ((float) $v != (float) $prev);
-                } else {
-                    $dirty = $v !== $prev;
-                }
+                // Strict comparison only: numeric coercion would treat
+                // '00123' vs '123' as equal and silently drop a real text
+                // change. Booleans compare against stored 0/1 ints.
+                $dirty = (is_bool($v) && (is_bool($prev) || $prev === 0 || $prev === 1))
+                    ? ((int) $v !== (int) $prev)
+                    : ($v !== $prev);
                 if ($dirty && $k !== $pk) {
                     $nf[$k] = $v;
                 }

@@ -171,9 +171,14 @@ abstract class Model
             );
         }
 
+        $prevState = $this->prevState();
+        if (array_key_exists($pk, $prevState) && $this->$pk !== $prevState[$pk]) {
+            throw new \Error("Cannot modify " . static::class . ".$pk because it's a primary key.");
+        }
+
         $result = null;
         if (array_key_exists($pk, $filtered_props)) {
-            $result = static::items()->filter([$pk => $this->$pk])->update($filtered_props, $this->prevState())->one();
+            $result = static::items()->filter([$pk => $this->$pk])->update($filtered_props, $prevState)->one();
         } else {
             if ($pk === 'id') {
                 $result = static::items()->create($filtered_props)->order_by('id DESC')->one();

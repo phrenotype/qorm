@@ -115,4 +115,17 @@ class AtomicFractionTest extends QormTestCase
         $this->expectException(\Error::class);
         StockItem::items()->filter(['name.eq' => 'Widget'])->increment(['qty' => '1e309']);
     }
+
+    public function testBigIntegerDeltaRenderedExactly(): void
+    {
+        // Integer-valued deltas must render as exact integer literals —
+        // float rendering loses precision beyond 2^53 (9.007199254741E+15).
+        $q = count(\Q\Orm\QueryStack::get());
+        StockItem::items()->filter(['name.eq' => 'Widget'])->increment(['qty' => 9007199254740993]);
+        $new = array_slice(\Q\Orm\QueryStack::get(), $q);
+
+        $this->assertNotEmpty($new);
+        $this->assertStringContainsString('9007199254740993', $new[0]['query']);
+        $this->assertStringNotContainsString('E+', strtoupper($new[0]['query']));
+    }
 }
