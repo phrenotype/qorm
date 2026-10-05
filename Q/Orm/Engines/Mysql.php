@@ -178,12 +178,11 @@ class Mysql implements IEngine
     public static function findSchemaFks($pdo, $table)
     {
         $constraints = [];
-        $query = "SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME =  '$table'";
+        $query = "SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME =  '$table'";
         $cts = $pdo->query($query)->fetchAll(\PDO::FETCH_OBJ);
         foreach ($cts as $ct) {
             if ($ct->REFERENCED_TABLE_NAME && $ct->REFERENCED_COLUMN_NAME) {
-                $fkName = Schema::fkName($table, $ct->COLUMN_NAME);
-                $on_del = $pdo->query("SELECT * FROM INFORMATION_SCHEMA.referential_constraints WHERE CONSTRAINT_NAME='$fkName'")->fetch(\PDO::FETCH_OBJ);
+                $on_del = $pdo->query("SELECT * FROM INFORMATION_SCHEMA.referential_constraints WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME='$ct->CONSTRAINT_NAME'")->fetch(\PDO::FETCH_OBJ);
                 if ($on_del) {
                     $deleteRule = $on_del->DELETE_RULE;
                     $constraints[] = new ForeignKey($ct->COLUMN_NAME, $ct->REFERENCED_TABLE_NAME, $ct->REFERENCED_COLUMN_NAME, $deleteRule);
@@ -208,13 +207,28 @@ class Mysql implements IEngine
 
             //Determine the type, size, and unsigned            
 
-            $full_regex = "/^([a-z]+)(\([0-9,]+\))?( unsigned)?$/i";
-            preg_match($full_regex, $column->Type, $type_parts);
+            $type_parts = [];
+            if (preg_match("/^enum\((.*)\)$/i", $column->Type, $enum_parts)) {
+                //DESCRIBE renders enums as enum('a','b'); keep the value
+                //list so live columns compare equal to model declarations.
+                $col->type = 'enum';
+                $col->size = str_getcsv($enum_parts[1], ',', "'");
+            } else {
+                $full_regex = "/^([a-z]+)(\([0-9,]+\))?( unsigned)?$/i";
+                preg_match($full_regex, $column->Type, $type_parts);
 
-            $col->type = strtolower($type_parts[1] ?? '');
-            $size = $type_parts[2] ?? '';
-            $size = preg_replace('#[()]#', '', $size);
-            $col->size = $size;
+                $col->type = strtolower($type_parts[1] ?? '');
+                $size = $type_parts[2] ?? '';
+                $size = preg_replace('#[()]#', '', $size);
+                $col->size = $size;
+
+                if ($col->type === 'tinyint' && $col->size === '1') {
+                    //BOOLEAN renders as tinyint(1); map it back so live
+                    //columns compare equal to model booleans.
+                    $col->type = 'boolean';
+                    $col->size = null;
+                }
+            }
 
             $unsigned = $type_parts[3] ?? null;
             if ($unsigned) {

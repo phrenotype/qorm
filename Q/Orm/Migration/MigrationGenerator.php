@@ -2,6 +2,7 @@
 
 namespace Q\Orm\Migration;
 
+use Q\Orm\Migration\Models\Q_Migration;
 use Q\Orm\SetUp;
 
 class MigrationGenerator
@@ -18,6 +19,13 @@ class MigrationGenerator
                 $files[] = (int)$base;
             }
             closedir($dh);
+        }
+        /* History rows are never deleted, so registered numbers stay
+         * reserved even when their files are missing. Without this,
+         * make() would reuse a registered number and hit the unique
+         * name constraint on insert. */
+        foreach (Q_Migration::items()->all() as $m) {
+            $files[] = (int)str_replace('Migration', '', $m->name);
         }
         if (empty($files)) return 1;
         else return (int)max($files) + 1;

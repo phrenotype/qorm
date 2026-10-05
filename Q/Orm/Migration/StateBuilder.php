@@ -16,6 +16,12 @@ class StateBuilder
 
         if ($dbMigrations) {
             foreach ($dbMigrations as $migration) {
+                /* Skip migrations whose class cannot be resolved (file
+                 * missing or never loaded). The history row is left
+                 * untouched; see checkIntergrity. */
+                if (!class_exists($migration->name)) {
+                    continue;
+                }
                 $state = self::operationsToTables($migration->name, $state);
             }
         }

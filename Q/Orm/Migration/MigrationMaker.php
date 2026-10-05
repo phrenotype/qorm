@@ -87,18 +87,23 @@ class MigrationMaker
 
     private static function checkIntergrity()
     {
-        /* Remove migrations that do not have corresponding files */
+        /* A registered migration whose file is missing keeps its row (and
+         * its applied stamp): history is never deleted here. The missing
+         * file is reported loudly instead. StateBuilder skips unresolvable
+         * migrations when replaying; migrate() and rollback() fail loud
+         * if asked to run one. */
         $migrations = Q_Migration::items()->all();
         if ($migrations) {
             foreach ($migrations as $migration) {
                 $filePath = Setup::$migrationsFolder . DIRECTORY_SEPARATOR . $migration->name . '.php';
                 if (!file_exists($filePath)) {
-                    Q_Migration::items()->filter(['id' => $migration->id])->delete();
+                    Bin::line('Migration file missing for registered migration ' . $migration->name . ' -- history row preserved', FG::RED, BG::BLACK);
                 }
             }
         }
 
-        /* Re-organise migrations to include files that are not registered */
+        /* Register files that are not yet registered. Insert-only: existing
+         * rows keep their ids and applied stamps. */
         $files = array_values(array_diff(scandir(Setup::$migrationsFolder), array('..', '.')));
         $files = array_filter($files, function ($f) {
             if (preg_match("/^\./", $f)) {
@@ -116,34 +121,11 @@ class MigrationMaker
         }), true);
 
         sort($files);
-        sort($migrations);
 
-
-
-
-        if ($files != $migrations && !empty($files)) {
-
-            $nms = Q_Migration::items()->all();
-            $merged = array_unique(array_merge($migrations, $files));
-            sort($merged);
-
-            $ms = [];
-
-            foreach ($nms as $m) {
-                if (in_array($m->name, $merged)) {
-                    $ms[] = ['name' => $m->name, 'applied' => $m->applied];
-                }
+        foreach ($files as $f) {
+            if (!in_array($f, $migrations)) {
+                Q_Migration::items()->create(['name' => $f, 'applied' => null]);
             }
-
-            foreach ($files as $f) {
-                if (!in_array($f, $migrations)) {
-                    $ms[] = ['name' => $f, 'applied' => null];
-                }
-            }
-
-            /* Wipe out all migrations */
-            Q_Migration::items()->delete();
-            Q_Migration::items()->create(...$ms);
         }
     }
 
@@ -177,10 +159,13 @@ class MigrationMaker
             Bin::line('Migration ' . $migrationName . ' successfully created', FG::GREEN, BG::BLACK);
         } else if ((int) $fileNumber > 1) {
             $prevIdFormatted = sprintf("%04d", (int) $fileNumber - 1);
-            $prev_contents = file_get_contents(Setup::$migrationsFolder . DIRECTORY_SEPARATOR . 'Migration' . $prevIdFormatted . '.php');
-            $prev_contents = str_replace('Migration' . $prevIdFormatted, $migrationName, $prev_contents);
+            $prevPath = Setup::$migrationsFolder . DIRECTORY_SEPARATOR . 'Migration' . $prevIdFormatted . '.php';
+            /* A missing previous file means degraded history (its row is
+             * preserved but the file is gone): there is nothing to dedup
+             * against, so proceed as different. */
+            $prev_contents = file_exists($prevPath) ? str_replace('Migration' . $prevIdFormatted, $migrationName, file_get_contents($prevPath)) : null;
 
-            if (md5($code) != md5($prev_contents)) {
+            if ($prev_contents === null || md5($code) != md5($prev_contents)) {
                 file_put_contents(Setup::$migrationsFolder . DIRECTORY_SEPARATOR . $migrationName . '.php', $code);
                 Q_Migration::items()->create(['name' => "Migration{$fileNumber}", 'applied' => null]);
                 Bin::line('Migration ' . $migrationName . ' successfully created', FG::GREEN, BG::BLACK);

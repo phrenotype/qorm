@@ -78,14 +78,18 @@ class LiveParseTest extends TestCase
         $this->assertSame('bigint', $byName['id']->type);
         $this->assertTrue($byName['id']->unsigned);
         $this->assertTrue($byName['id']->auto_increment);
-        // Wart pinned, not endorsed: the DESCRIBE regex cannot capture enum
-        // value lists, so live enum columns parse to an empty type.
-        $this->assertSame('', $byName['e']->type);
+        // Integer display widths are server-dependent (shown on some
+        // servers, omitted for bigint on MySQL 8.0.19+ and recent MariaDB).
+        $this->assertContains($byName['id']->size, ['', '20']);
+        // Live enums parse to their declared type plus value list.
+        $this->assertSame('enum', $byName['e']->type);
+        $this->assertSame(['a', 'b'], $byName['e']->size);
         $this->assertSame('varchar', $byName['v']->type);
         $this->assertSame('100', $byName['v']->size);
         $this->assertTrue($byName['v']->null);
-        $this->assertSame('tinyint', $byName['b']->type);
-        $this->assertSame('1', $byName['b']->size);
+        // BOOLEAN renders as tinyint(1); the parser maps it back.
+        $this->assertSame('boolean', $byName['b']->type);
+        $this->assertNull($byName['b']->size);
         $this->assertSame('0', $byName['b']->default);
     }
 
@@ -110,6 +114,27 @@ class LiveParseTest extends TestCase
         $this->assertSame('qorm_live_probe', $fks[0]->refTable);
         $this->assertSame('id', $fks[0]->refField);
         $this->assertSame('CASCADE', $fks[0]->onDelete);
+    }
+
+    public function testForeignKeyDiscoveryIgnoresOtherDatabases()
+    {
+        $pdo = Connection::getInstance();
+        $pdo->exec('DROP TABLE IF EXISTS qorm_live_child');
+        $pdo->exec('CREATE TABLE qorm_live_child (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, probe BIGINT UNSIGNED NOT NULL, CONSTRAINT fk_qorm_live_child_probe FOREIGN KEY (probe) REFERENCES qorm_live_probe(id) ON DELETE CASCADE)');
+        $pdo->exec('CREATE DATABASE IF NOT EXISTS qorm_pollution');
+        try {
+            $pdo->exec('CREATE TABLE IF NOT EXISTS qorm_pollution.decoy (id BIGINT UNSIGNED NOT NULL PRIMARY KEY)');
+            $pdo->exec('DROP TABLE IF EXISTS qorm_pollution.qorm_live_child');
+            $pdo->exec('CREATE TABLE qorm_pollution.qorm_live_child (id BIGINT UNSIGNED NOT NULL PRIMARY KEY, probe BIGINT UNSIGNED NULL, CONSTRAINT fk_polluted FOREIGN KEY (probe) REFERENCES qorm_pollution.decoy(id) ON DELETE SET NULL)');
+            $fks = Mysql::findSchemaFks($pdo, 'qorm_live_child');
+            $this->assertCount(1, $fks);
+            $this->assertSame('probe', $fks[0]->field);
+            $this->assertSame('qorm_live_probe', $fks[0]->refTable);
+            $this->assertSame('id', $fks[0]->refField);
+            $this->assertSame('CASCADE', $fks[0]->onDelete);
+        } finally {
+            $pdo->exec('DROP DATABASE IF EXISTS qorm_pollution');
+        }
     }
 
     public function testSchemaToTablesDiscoversProbeTable()

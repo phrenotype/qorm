@@ -264,7 +264,7 @@ class Sqlite implements IEngine
                 $col->default = trim($column->dflt_value, "'");
             }
 
-            if ($col->type === 'INTEGER' && $col->name === 'id') {
+            if ($col->type === 'integer' && $col->name === 'id') {
                 $col->auto_increment = true;
             }
 

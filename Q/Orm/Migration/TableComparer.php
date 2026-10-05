@@ -82,6 +82,10 @@ class TableComparer
                 $code = Field::textToCode($value);
                 if ($code) {
                     $text .= "\t\t\t\t\t{$k} = Field::" . $code . ';' . PHP_EOL;
+                } else {
+                    //Unmapped live types (tinyint, int, ...) are emitted
+                    //verbatim so the operation stays faithful and replayable.
+                    $text .= "\t\t\t\t\t{$k} = " . var_export($value, true) . ';' . PHP_EOL;
                 }
             } else {
                 $text .= "\t\t\t\t\t{$k} = " . $value = var_export($value, true) . ';' . PHP_EOL;
@@ -102,6 +106,10 @@ class TableComparer
                 $code = Field::textToCode($value);
                 if ($code) {
                     $text .= "\t\t\t\t\t{$k} = Field::" . $code . ';' . PHP_EOL;
+                } else {
+                    //Unmapped live types (tinyint, int, ...) are emitted
+                    //verbatim so the operation stays faithful and replayable.
+                    $text .= "\t\t\t\t\t{$k} = " . var_export($value, true) . ';' . PHP_EOL;
                 }
             } else {
                 $text .= "\t\t\t\t\t{$k} = " . $value = var_export($value, true) . ';' . PHP_EOL;
@@ -486,49 +494,106 @@ class TableComparer
                 $found = false;
 
                 foreach ($schemaTable->fields as $sf) {
-
-                    /* This is where we remove unsigned and null for sqlite */
-                    $mf_size = $mf->size;
-                    $mf_unsigned = $mf->unsigned;
-                    $sf_size = $sf->size;
-                    $sf_unsigned = $sf->unsigned;
-
-                    $mf_type = $mf->type;
-                    $sf_type = $sf->type;
-
-                    /* Trying to normalize enum fields */
-                    if (SetUp::$engine === SetUp::SQLITE) {
-                        $mf->size = null;
-                        $mf->unsigned = null;
-                        $sf->size = null;
-                        $sf->unsigned = null;
-                        if (
-                            (strtolower($mf_type) === 'enum' && strtolower($sf_type) === 'text')
-                            || (strtolower($mf_type) === 'text' && strtolower($sf_type) === 'enum')
-                        ) {
-                            $mf->type = null;
-                            $sf->type = null;
-                        }
-                    }
-
-                    if ($mf->name === $sf->name && $mf != $sf) {
+                    if ($mf->name === $sf->name && !self::columnsEqual($mf, $sf)) {
                         $found = true;
                         break;
                     }
                 }
                 /* Ignore fields called 'id' */
                 if ($found === true && $mf->name !== 'id') {
-                    $mf->size = $mf_size;
-                    $mf->unsigned = $mf_unsigned;
-                    $mf->type = $mf_type;
-                    $sf->size = $sf_size;
-                    $sf->unsigned = $sf_unsigned;
-                    $sf->type = $sf_type;
                     $columnsToModify[] = ['table' => $modelTable->name, 'column' => $mf, 'previouscolumn' => $sf];
                 }
             }
         });
         return $columnsToModify;
+    }
+
+
+    /* Pure column equivalence: same-name columns are compared without
+    mutating either side. Names are pre-matched by the caller. */
+    private static function columnsEqual(Column $mf, Column $sf): bool
+    {
+        $mt = strtolower((string)$mf->type);
+        $st = strtolower((string)$sf->type);
+        if ($mt !== $st) {
+            //SQLite stores enums as TEXT; the declaration and the storage
+            //rendering describe the same column.
+            $sqlite = (SetUp::$engine === SetUp::SQLITE);
+            $enumText = $sqlite && (($mt === 'enum' && $st === 'text') || ($mt === 'text' && $st === 'enum'));
+            if (!$enumText) {
+                return false;
+            }
+        }
+        if (!self::sizesEqual($mf, $sf)) {
+            return false;
+        }
+        if (SetUp::$engine !== SetUp::SQLITE && $mf->unsigned != $sf->unsigned) {
+            return false;
+        }
+        if ($mf->null != $sf->null) {
+            return false;
+        }
+        if ($mf->default != $sf->default) {
+            return false;
+        }
+        if ($mf->auto_increment != $sf->auto_increment) {
+            return false;
+        }
+        return true;
+    }
+
+
+    private static function sizesEqual(Column $mf, Column $sf): bool
+    {
+        if (SetUp::$engine === SetUp::SQLITE) {
+            //SQLite drops sizes from DDL, so they carry no meaning here.
+            return true;
+        }
+        if ($mf->size == $sf->size) {
+            return true;
+        }
+        //Integer display widths are server-rendering cosmetics: a missing
+        //width, an empty width, and any integer width all describe the
+        //same column on every server version.
+        $ints = ['bigint', 'int', 'integer', 'smallint', 'mediumint', 'tinyint'];
+        $mt = strtolower((string)$mf->type);
+        $st = strtolower((string)$sf->type);
+        if (in_array($mt, $ints, true) && in_array($st, $ints, true)
+            && self::isWidthShaped($mf->size) && self::isWidthShaped($sf->size)
+        ) {
+            return true;
+        }
+        //Precision pairs compare by value, not by PHP type: [12,3] and
+        //'12,3' describe the same column.
+        $mp = self::precisionPair($mf->size);
+        $sp = self::precisionPair($sf->size);
+        if ($mp !== null && $sp !== null) {
+            return $mp === $sp;
+        }
+        return false;
+    }
+
+
+    private static function isWidthShaped($size): bool
+    {
+        return $size === null || $size === '' || is_int($size)
+            || (is_string($size) && preg_match('/^\d+$/', $size));
+    }
+
+
+    private static function precisionPair($size)
+    {
+        if (is_array($size) && count($size) === 2) {
+            $pair = array_values($size);
+            if (is_numeric($pair[0]) && is_numeric($pair[1])) {
+                return [(int)$pair[0], (int)$pair[1]];
+            }
+            return null;
+        }
+        if (is_string($size) && preg_match('/^(\d+),(\d+)$/', trim($size), $m)) {
+            return [(int)$m[1], (int)$m[2]];
+        }
+        return null;
     }
 
 
