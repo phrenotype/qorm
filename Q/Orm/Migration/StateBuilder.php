@@ -123,10 +123,11 @@ class StateBuilder
                     if ($table->name === $o->params['table']) {
                         $fields = $table->fields;
                         foreach ($table->fields as $index => $column) {
-                            if ($column->name === $o->params['column']->name) {
+                            if ($column->name === $o->params['old_name']) {
                                 $fields[$index] = $o->params['column'];
                             }
                         }
+                        $table->fields = $fields;
                     }
                 }
             } else if ($o->name === Operation::ADD_FOREIGN_KEY) {
@@ -259,8 +260,9 @@ class StateBuilder
     public static function dropTables(array $state, array $tablesToRename): array
     {
         foreach ($tablesToRename as $ttr) {
+            $dropName = ($ttr instanceof Table) ? $ttr->name : $ttr;
             foreach ($state as $i => $table) {
-                if ($table->name === $ttr) {
+                if ($table->name === $dropName) {
                     unset($state[$i]);
                 }
             }
@@ -302,8 +304,9 @@ class StateBuilder
         foreach ($columnsToDrop as $ctd) {
             foreach ($state as $table) {
                 if ($table->name === $ctd['table']) {
+                    $dropName = ($ctd['column'] instanceof Column) ? $ctd['column']->name : $ctd['column'];
                     foreach ($table->fields as $index => $column) {
-                        if ($column->name === $ctd['column']) {
+                        if ($column->name === $dropName) {
                             unset($table->fields[$index]);
                         }
                     }

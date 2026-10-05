@@ -308,13 +308,7 @@ class TableComparer
             $column = $triple['column'];
             $prev_col = $triple['previouscolumn'];
             /* Don't modify column that was scheduled to be added */
-            $wasAdded = false;
-            foreach ($columnsToAdd as $c) {
-                if ($c['column']->name === $column->name) {
-                    $wasAdded = true;
-                }
-            }
-            if ($wasAdded === false) {
+            if (self::isColumnScheduledForAdd($columnsToAdd, $table, $column->name) === false) {
                 $oldTable = self::findTableByName($state, $table);
                 $oldTable = $oldTable->oldName ?? $table;
                 $operationsText[] = self::wrapInClosure(self::modifyColumnToOperationText($table, $column));
@@ -470,6 +464,16 @@ class TableComparer
             }
         });
         return $columnsToDrop;
+    }
+
+    private static function isColumnScheduledForAdd(array $columnsToAdd, string $table, string $column): bool
+    {
+        foreach ($columnsToAdd as $c) {
+            if ($c['table'] === $table && $c['column']->name === $column) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static function columnsToModify(array $fromSchema, array $fromModels)

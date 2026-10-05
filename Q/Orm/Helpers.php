@@ -311,15 +311,21 @@ class Helpers
 
             // Split into individual statements and execute one-by-one
             // This ensures we stop on the first error instead of continuing
-            $statements = array_filter(
+            $statements = array_values(array_filter(
                 array_map('trim', explode(';', $largeQuery)),
                 function ($stmt) {
                     return !empty($stmt);
                 }
-            );
+            ));
 
-            foreach ($statements as $stmt) {
-                $pdo->exec($stmt . ';');
+            $total = count($statements);
+            foreach ($statements as $position => $stmt) {
+                try {
+                    $pdo->exec($stmt . ';');
+                } catch (\PDOException $e) {
+                    $number = $position + 1;
+                    throw new \PDOException("QORM: statement $number of $total failed ($position executed before the failure). " . $e->getMessage(), (int) $e->getCode(), $e);
+                }
             }
 
             if ($pdo->inTransaction()) {
