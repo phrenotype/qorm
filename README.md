@@ -73,9 +73,3 @@ For now, this project only supports `MYSQL` (`MariaDB`), and `SQLITE`. Work is i
 ## Dependencies
 APCU is required for perculiar Id's to work.
 
-## Contribution
-To contribute, contact the email below.
-
-## Contact
-
-
